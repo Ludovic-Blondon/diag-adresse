@@ -1,0 +1,92 @@
+import { Suspense } from "react";
+import type { Metadata } from "next";
+import { autocomplete } from "@/lib/apis/geocode";
+import { slugToQuery } from "@/lib/slug";
+import Link from "next/link";
+import { AddressSearch } from "@/components/address-search";
+import { ShareButton } from "@/components/share-button";
+import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
+import { DashboardSkeleton } from "./loading";
+
+interface Props {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ lon?: string; lat?: string; citycode?: string }>;
+}
+
+async function resolveAddress(slug: string, sp: { lon?: string; lat?: string; citycode?: string }) {
+  if (sp.lon && sp.lat && sp.citycode) {
+    return {
+      label: slugToQuery(slug),
+      lon: parseFloat(sp.lon),
+      lat: parseFloat(sp.lat),
+      citycode: sp.citycode,
+    };
+  }
+  const results = await autocomplete(slugToQuery(slug), 1);
+  if (results.length === 0) return null;
+  const r = results[0];
+  return { label: r.label, lon: r.lon, lat: r.lat, citycode: r.citycode };
+}
+
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const sp = await searchParams;
+  const address = await resolveAddress(slug, sp);
+  const title = address ? `Diagnostic - ${address.label}` : "Diagnostic adresse";
+  return {
+    title,
+    description: address
+      ? `Risques, qualite de l'eau et DPE pour ${address.label}`
+      : "Diagnostic complet de votre adresse",
+  };
+}
+
+export default async function DiagnosticPage({ params, searchParams }: Props) {
+  const { slug } = await params;
+  const sp = await searchParams;
+  const address = await resolveAddress(slug, sp);
+
+  if (!address) {
+    return (
+      <main className="flex flex-1 flex-col items-center justify-center px-4 py-16">
+        <h1 className="text-2xl font-bold mb-4">Adresse introuvable</h1>
+        <p className="text-muted-foreground mb-8">
+          Nous n&apos;avons pas pu identifier cette adresse.
+        </p>
+        <AddressSearch />
+      </main>
+    );
+  }
+
+  return (
+    <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Link
+            href="/"
+            className="text-sm text-muted-foreground hover:underline"
+          >
+            &larr; Retour
+          </Link>
+          <h1 className="text-2xl font-bold mt-1">{address.label}</h1>
+          <p className="text-sm text-muted-foreground">
+            Code INSEE : {address.citycode} — Coordonnees : {address.lat.toFixed(5)},{" "}
+            {address.lon.toFixed(5)}
+          </p>
+        </div>
+        <ShareButton
+          title={`Diagnostic - ${address.label}`}
+          url={`https://diagadresse.fr/adresse/${slug}`}
+        />
+      </div>
+
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DiagnosticDashboard
+          lon={address.lon}
+          lat={address.lat}
+          citycode={address.citycode}
+        />
+      </Suspense>
+    </main>
+  );
+}

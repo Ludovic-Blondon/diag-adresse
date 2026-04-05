@@ -6,7 +6,6 @@ import { DashboardSkeleton } from "@/app/adresse/[slug]/loading";
 import { generateCommuneMetadata } from "@/lib/seo";
 import { TOP_COMMUNES } from "@/lib/communes";
 import { AddressSearch } from "@/components/address-search";
-import { reverseGeocode } from "@/lib/apis/geocode";
 
 export const revalidate = 604800; // 7 days
 

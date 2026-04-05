@@ -15,12 +15,11 @@ interface Props {
 
 async function resolveAddress(slug: string, sp: { lon?: string; lat?: string; citycode?: string }) {
   if (sp.lon && sp.lat && sp.citycode) {
-    return {
-      label: slugToQuery(slug),
-      lon: parseFloat(sp.lon),
-      lat: parseFloat(sp.lat),
-      citycode: sp.citycode,
-    };
+    const lon = parseFloat(sp.lon);
+    const lat = parseFloat(sp.lat);
+    if (!Number.isNaN(lon) && !Number.isNaN(lat) && /^\d{5}$/.test(sp.citycode)) {
+      return { label: slugToQuery(slug), lon, lat, citycode: sp.citycode };
+    }
   }
   const results = await autocomplete(slugToQuery(slug), 1);
   if (results.length === 0) return null;

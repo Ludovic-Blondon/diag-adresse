@@ -12,7 +12,6 @@ export const TOP_COMMUNES: { code: string; name: string }[] = [
   { code: "59350", name: "Lille" },
   { code: "35238", name: "Rennes" },
   { code: "51454", name: "Reims" },
-  { code: "76540", name: "Saint-Etienne" },
   { code: "83137", name: "Toulon" },
   { code: "76351", name: "Le Havre" },
   { code: "38185", name: "Grenoble" },

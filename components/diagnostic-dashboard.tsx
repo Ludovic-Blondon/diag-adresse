@@ -81,12 +81,26 @@ export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps
 
   risks.sort((a, b) => levelOrder[a.level] - levelOrder[b.level]);
 
+  const allRisksFailed =
+    riskReportResult.status === "rejected" &&
+    radonResult.status === "rejected" &&
+    seismicResult.status === "rejected" &&
+    rgaResult.status === "rejected" &&
+    icpeResult.status === "rejected" &&
+    cavitesResult.status === "rejected";
+
   return (
     <div className="space-y-8">
       {/* Risk summary */}
       <section>
         <h2 className="text-lg font-semibold mb-3">Synthese des risques</h2>
-        <RiskSummary risks={risks} />
+        {allRisksFailed ? (
+          <p className="text-sm text-muted-foreground">
+            Les donnees de risques sont temporairement indisponibles. Veuillez reessayer plus tard.
+          </p>
+        ) : (
+          <RiskSummary risks={risks} />
+        )}
       </section>
 
       <Separator />

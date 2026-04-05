@@ -80,21 +80,30 @@ export function scoreRGA(data: RGAData): ScoredRisk {
 
 // --- Inondation (from risk report) ---
 
-export function scoreInondation(report: RiskReport): ScoredRisk {
+/** Returns null if the risk status is unknown/not applicable */
+function levelFromStatus(statut: string | undefined): RiskLevel | null {
+  const s = statut?.toLowerCase() ?? "";
+  if (s.includes("inconnu") || s.includes("non connu") || s.includes("non concerne")) {
+    return null;
+  }
+  if (s.includes("existant") && !s.includes("non") && !s.includes("inex")) {
+    if (s.includes("important") || s.includes("fort")) return "fort";
+    return "moyen";
+  }
+  if (s.includes("concerne")) return "faible";
+  return null;
+}
+
+export function scoreInondation(report: RiskReport): ScoredRisk | null {
   const inondation = report.risquesNaturels.find(
     (r) => r.libelle?.toLowerCase().includes("inondation") && r.present,
   );
-  if (!inondation) {
-    return {
-      id: "inondation",
-      label: "Inondation",
-      level: "negligeable",
-      description: "Aucun risque inondation identifie",
-    };
-  }
-  const adresseStatus = inondation.libelleStatutAdresse?.toLowerCase() ?? "";
-  const isExistant = adresseStatus.includes("existant") && !adresseStatus.includes("non") && !adresseStatus.includes("inex");
-  const level: RiskLevel = isExistant ? "fort" : "moyen";
+  if (!inondation) return null;
+
+  const level = levelFromStatus(inondation.libelleStatutAdresse)
+    ?? levelFromStatus(inondation.libelleStatutCommune);
+  if (!level) return null;
+
   return {
     id: "inondation",
     label: "Inondation",
@@ -167,22 +176,18 @@ export function scoreRiskReport(report: RiskReport): ScoredRisk[] {
   // Skip risks already handled by dedicated endpoints
   const handled = ["inondation", "séisme", "seisme", "radon", "argile", "retrait gonflement"];
 
-  for (const r of naturels) {
+  for (const r of [...naturels, ...technos]) {
     const lbl = r.libelle?.toLowerCase() ?? "";
     if (handled.some((h) => lbl.includes(h))) continue;
-    scored.push({
-      id: r.libelle?.toLowerCase().replace(/\s+/g, "-") ?? "naturel",
-      label: r.libelle ?? "Risque naturel",
-      level: "moyen",
-      description: r.libelleStatutAdresse ?? r.libelleStatutCommune ?? "Risque present",
-    });
-  }
 
-  for (const r of technos) {
+    const level = levelFromStatus(r.libelleStatutAdresse)
+      ?? levelFromStatus(r.libelleStatutCommune);
+    if (!level) continue;
+
     scored.push({
-      id: r.libelle?.toLowerCase().replace(/\s+/g, "-") ?? "techno",
-      label: r.libelle ?? "Risque technologique",
-      level: "moyen",
+      id: lbl.replace(/\s+/g, "-") || "risque",
+      label: r.libelle ?? "Risque",
+      level,
       description: r.libelleStatutAdresse ?? r.libelleStatutCommune ?? "Risque present",
     });
   }

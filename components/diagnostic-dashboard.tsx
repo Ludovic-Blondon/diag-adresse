@@ -68,7 +68,8 @@ export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps
     risks.push(scoreRGA(rgaResult.value));
   }
   if (riskReportResult.status === "fulfilled") {
-    risks.push(scoreInondation(riskReportResult.value));
+    const inondation = scoreInondation(riskReportResult.value);
+    if (inondation) risks.push(inondation);
     risks.push(...scoreRiskReport(riskReportResult.value));
   }
   if (icpeResult.status === "fulfilled") {

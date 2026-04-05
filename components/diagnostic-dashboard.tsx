@@ -55,7 +55,7 @@ export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps
     fetchDPEStats(citycode),
   ]);
 
-  // Score all risks
+  const levelOrder = { fort: 0, moyen: 1, faible: 2, negligeable: 3 };
   const risks: ScoredRisk[] = [];
 
   if (seismicResult.status === "fulfilled") {
@@ -77,6 +77,8 @@ export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps
   if (cavitesResult.status === "fulfilled") {
     risks.push(scoreCavites(cavitesResult.value));
   }
+
+  risks.sort((a, b) => levelOrder[a.level] - levelOrder[b.level]);
 
   return (
     <div className="space-y-8">

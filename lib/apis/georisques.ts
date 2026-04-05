@@ -50,11 +50,16 @@ export async function fetchRiskReport(params: {
     query,
   );
 
+  // The API returns an object keyed by risk type — flatten to array
+  const toArray = (obj: unknown) => {
+    if (Array.isArray(obj)) return obj;
+    if (obj && typeof obj === "object") return Object.values(obj);
+    return [];
+  };
+
   return {
-    risquesNaturels: Array.isArray(raw.risquesNaturels) ? raw.risquesNaturels : [],
-    risquesTechnologiques: Array.isArray(raw.risquesTechnologiques)
-      ? raw.risquesTechnologiques
-      : [],
+    risquesNaturels: toArray(raw.risquesNaturels),
+    risquesTechnologiques: toArray(raw.risquesTechnologiques),
   };
 }
 

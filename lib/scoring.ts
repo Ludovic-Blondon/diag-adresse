@@ -93,7 +93,8 @@ export function scoreInondation(report: RiskReport): ScoredRisk {
     };
   }
   const adresseStatus = inondation.libelleStatutAdresse?.toLowerCase() ?? "";
-  const level: RiskLevel = adresseStatus.includes("existant") ? "fort" : "moyen";
+  const isExistant = adresseStatus.includes("existant") && !adresseStatus.includes("non") && !adresseStatus.includes("inex");
+  const level: RiskLevel = isExistant ? "fort" : "moyen";
   return {
     id: "inondation",
     label: "Inondation",
@@ -163,8 +164,12 @@ export function scoreRiskReport(report: RiskReport): ScoredRisk[] {
   const naturels = report.risquesNaturels.filter((r) => r.present);
   const technos = report.risquesTechnologiques.filter((r) => r.present);
 
+  // Skip risks already handled by dedicated endpoints
+  const handled = ["inondation", "séisme", "seisme", "radon", "argile", "retrait gonflement"];
+
   for (const r of naturels) {
-    if (r.libelle?.toLowerCase().includes("inondation")) continue;
+    const lbl = r.libelle?.toLowerCase() ?? "";
+    if (handled.some((h) => lbl.includes(h))) continue;
     scored.push({
       id: r.libelle?.toLowerCase().replace(/\s+/g, "-") ?? "naturel",
       label: r.libelle ?? "Risque naturel",

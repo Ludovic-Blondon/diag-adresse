@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { GEORISQUES_BASE_URL, API_TIMEOUT_MS } from "../constants";
 import type {
   RiskReport,
@@ -63,9 +64,9 @@ export async function fetchRiskReport(params: {
   };
 }
 
-export async function fetchRadon(codeInsee: string): Promise<RadonData> {
+export const fetchRadon = cache(async (codeInsee: string): Promise<RadonData> => {
   return geoFetch<RadonData>("/radon", { code_insee: codeInsee });
-}
+});
 
 export async function fetchRGA(lon: number, lat: number): Promise<RGAData> {
   try {
@@ -85,9 +86,9 @@ export async function fetchRGA(lon: number, lat: number): Promise<RGAData> {
   }
 }
 
-export async function fetchSeismicZone(codeInsee: string): Promise<SeismicData> {
+export const fetchSeismicZone = cache(async (codeInsee: string): Promise<SeismicData> => {
   return geoFetch<SeismicData>("/zonage_sismique", { code_insee: codeInsee });
-}
+});
 
 export async function fetchICPE(params: {
   codeInsee: string;

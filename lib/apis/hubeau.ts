@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { HUBEAU_BASE_URL, API_TIMEOUT_MS, WATER_PARAMS } from "../constants";
 import type { WaterQualityResult, WaterParam } from "../types/hubeau";
 
@@ -30,9 +31,9 @@ async function fetchLastResult(
   return data.data?.[0] ?? null;
 }
 
-export async function fetchWaterQuality(
+export const fetchWaterQuality = cache(async (
   codeCommune: string,
-): Promise<WaterQualityResult> {
+): Promise<WaterQualityResult> => {
   const results = await Promise.allSettled(
     WATER_PARAMS.map((p) => fetchLastResult(codeCommune, p.code)),
   );
@@ -64,4 +65,4 @@ export async function fetchWaterQuality(
   });
 
   return { params };
-}
+});

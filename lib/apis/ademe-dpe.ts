@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { ADEME_DPE_BASE_URL, API_TIMEOUT_MS, DPE_LABELS } from "../constants";
 import type { DPEStats, DPEDistribution } from "../types/dpe";
 import type { DPELabel } from "../constants";
@@ -28,7 +29,7 @@ async function ademeFetch<T>(path: string, params: Record<string, string>): Prom
   return res.json();
 }
 
-export async function fetchDPEStats(codeInsee: string): Promise<DPEStats> {
+export const fetchDPEStats = cache(async (codeInsee: string): Promise<DPEStats> => {
   const filter = `code_insee_ban:${codeInsee}`;
 
   const [distResult, consoResult, gesResult] = await Promise.allSettled([
@@ -69,4 +70,4 @@ export async function fetchDPEStats(codeInsee: string): Promise<DPEStats> {
     gesResult.status === "fulfilled" ? gesResult.value.metric : null;
 
   return { distribution, avgConso, avgGES, totalDPE };
-}
+});

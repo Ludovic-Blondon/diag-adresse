@@ -116,6 +116,7 @@ export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps
               level={risk.level}
               description={risk.description}
               details={risk.details}
+              communeOnly={risk.source === "commune"}
             />
           ))}
         </div>

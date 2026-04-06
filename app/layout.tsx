@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 const inter = Inter({
@@ -43,10 +44,12 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
-          <header className="flex items-center justify-end px-4 py-2">
-            <ThemeToggle />
-          </header>
-          {children}
+          <TooltipProvider>
+            <header className="flex items-center justify-end px-4 py-2">
+              <ThemeToggle />
+            </header>
+            {children}
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

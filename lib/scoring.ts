@@ -8,18 +8,21 @@ import type {
   CaviteData,
 } from "./types/georisques";
 
+export type RiskSource = "adresse" | "commune";
+
 export interface ScoredRisk {
   id: string;
   label: string;
   level: RiskLevel;
   description: string;
   details?: string;
+  source?: RiskSource;
 }
 
 // --- Seisme ---
 
 export function scoreSeismic(data: SeismicData): ScoredRisk {
-  const zone = data.data?.[0]?.code_zone ?? 1;
+  const zone = Number(data.data?.[0]?.code_zone) || 1;
   const map: Record<number, RiskLevel> = {
     1: "negligeable",
     2: "faible",
@@ -38,7 +41,7 @@ export function scoreSeismic(data: SeismicData): ScoredRisk {
 // --- Radon ---
 
 export function scoreRadon(data: RadonData): ScoredRisk {
-  const classe = data.data?.[0]?.classe_potentiel ?? 1;
+  const classe = Number(data.data?.[0]?.classe_potentiel) || 1;
   const map: Record<number, RiskLevel> = {
     1: "faible",
     2: "moyen",
@@ -94,21 +97,33 @@ function levelFromStatus(statut: string | undefined): RiskLevel | null {
   return null;
 }
 
+/** Resolves level and description from the same status source to keep them consistent */
+function resolveRiskStatus(
+  statutAdresse: string | undefined,
+  statutCommune: string | undefined,
+): { level: RiskLevel; description: string; source: RiskSource } | null {
+  const adresseLevel = levelFromStatus(statutAdresse);
+  if (adresseLevel) return { level: adresseLevel, description: statutAdresse!, source: "adresse" };
+  const communeLevel = levelFromStatus(statutCommune);
+  if (communeLevel) return { level: communeLevel, description: statutCommune!, source: "commune" };
+  return null;
+}
+
 export function scoreInondation(report: RiskReport): ScoredRisk | null {
   const inondation = report.risquesNaturels.find(
     (r) => r.libelle?.toLowerCase().includes("inondation") && r.present,
   );
   if (!inondation) return null;
 
-  const level = levelFromStatus(inondation.libelleStatutAdresse)
-    ?? levelFromStatus(inondation.libelleStatutCommune);
-  if (!level) return null;
+  const resolved = resolveRiskStatus(inondation.libelleStatutAdresse, inondation.libelleStatutCommune);
+  if (!resolved) return null;
 
   return {
     id: "inondation",
     label: "Inondation",
-    level,
-    description: inondation.libelleStatutAdresse ?? inondation.libelleStatutCommune ?? "Risque present",
+    level: resolved.level,
+    description: resolved.description,
+    source: resolved.source,
   };
 }
 
@@ -180,15 +195,15 @@ export function scoreRiskReport(report: RiskReport): ScoredRisk[] {
     const lbl = r.libelle?.toLowerCase() ?? "";
     if (handled.some((h) => lbl.includes(h))) continue;
 
-    const level = levelFromStatus(r.libelleStatutAdresse)
-      ?? levelFromStatus(r.libelleStatutCommune);
-    if (!level) continue;
+    const resolved = resolveRiskStatus(r.libelleStatutAdresse, r.libelleStatutCommune);
+    if (!resolved) continue;
 
     scored.push({
       id: lbl.replace(/\s+/g, "-") || "risque",
       label: r.libelle ?? "Risque",
-      level,
-      description: r.libelleStatutAdresse ?? r.libelleStatutCommune ?? "Risque present",
+      level: resolved.level,
+      description: resolved.description,
+      source: resolved.source,
     });
   }
 

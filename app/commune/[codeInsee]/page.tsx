@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
 import { DashboardSkeleton } from "@/app/adresse/[slug]/loading";
-import { generateCommuneMetadata } from "@/lib/seo";
+import { generateCommuneMetadata, fetchDiagnosticSummary } from "@/lib/seo";
 import { TOP_COMMUNES } from "@/lib/communes";
 import { AddressSearch } from "@/components/address-search";
 
@@ -23,7 +23,8 @@ async function getCommuneInfo(codeInsee: string) {
 export async function generateMetadata({ params }: Props) {
   const { codeInsee } = await params;
   const commune = await getCommuneInfo(codeInsee);
-  return generateCommuneMetadata(codeInsee, commune.name);
+  const summary = await fetchDiagnosticSummary(codeInsee);
+  return generateCommuneMetadata(codeInsee, commune.name, summary);
 }
 
 export default async function CommunePage({ params }: Props) {

@@ -4,6 +4,11 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   RISK_LEVEL_BADGE,
   RISK_LEVEL_LABELS,
   type RiskLevel,
@@ -14,9 +19,10 @@ interface RiskCardProps {
   level: RiskLevel;
   description: string;
   details?: string;
+  communeOnly?: boolean;
 }
 
-export function RiskCard({ title, level, description, details }: RiskCardProps) {
+export function RiskCard({ title, level, description, details, communeOnly }: RiskCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -31,7 +37,19 @@ export function RiskCard({ title, level, description, details }: RiskCardProps) 
         </Badge>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm text-muted-foreground">{description}</p>
+          {communeOnly && (
+            <Tooltip>
+              <TooltipTrigger className="shrink-0 cursor-help text-xs text-muted-foreground/60">
+                &#9432;
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Risque identifie au niveau communal, non confirme a cette adresse</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
         {details && (
           <>
             <button

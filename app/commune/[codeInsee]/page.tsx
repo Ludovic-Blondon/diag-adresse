@@ -8,6 +8,8 @@ import { TOP_COMMUNES } from "@/lib/communes";
 import { AddressSearch } from "@/components/address-search";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placeJsonLd } from "@/lib/json-ld";
+import { BASE_URL } from "@/lib/constants";
+import { RISK_NAV } from "@/lib/navigation";
 
 export const revalidate = 604800; // 7 days
 
@@ -54,7 +56,7 @@ export default async function CommunePage({ params }: Props) {
               description: `Diagnostic complet de ${commune.name} : risques naturels, qualite de l'eau, performance energetique.`,
               latitude: center.lat,
               longitude: center.lon,
-              url: `https://diagadresse.fr/commune/${codeInsee}`,
+              url: `${BASE_URL}/commune/${codeInsee}`,
             }),
           ),
         }}
@@ -89,14 +91,7 @@ export default async function CommunePage({ params }: Props) {
           En savoir plus sur les risques
         </h2>
         <div className="flex flex-wrap gap-2">
-          {[
-            { type: "inondation", label: "Inondation" },
-            { type: "seisme", label: "Seisme" },
-            { type: "argile", label: "Argiles" },
-            { type: "radon", label: "Radon" },
-            { type: "icpe", label: "Sites industriels" },
-            { type: "cavites", label: "Cavites" },
-          ].map((risk) => (
+          {RISK_NAV.map((risk) => (
             <Link
               key={risk.type}
               href={`/risque/${risk.type}`}

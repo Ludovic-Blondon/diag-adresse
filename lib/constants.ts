@@ -1,3 +1,7 @@
+// --- Site URL ---
+
+export const BASE_URL = "https://diagadresse.fr";
+
 // --- API Base URLs ---
 
 export const GEOCODE_URL =

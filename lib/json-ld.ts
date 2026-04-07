@@ -1,4 +1,4 @@
-const BASE_URL = "https://diagadresse.fr";
+import { BASE_URL } from "./constants";
 
 export function organizationJsonLd() {
   return {

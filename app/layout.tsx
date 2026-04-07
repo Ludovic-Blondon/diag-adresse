@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { organizationJsonLd } from "@/lib/json-ld";
+import { BASE_URL } from "@/lib/constants";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
   },
   description:
     "Risques naturels et industriels, qualite de l'eau, performance energetique : le diagnostic complet de votre adresse en France.",
-  metadataBase: new URL("https://diagadresse.fr"),
+  metadataBase: new URL(BASE_URL),
   openGraph: {
     type: "website",
     locale: "fr_FR",
@@ -34,9 +35,13 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
   },
-  other: {
-    "theme-color": "#09090b",
-  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+  ],
 };
 
 export default function RootLayout({

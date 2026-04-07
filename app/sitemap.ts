@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
-import { TOP_COMMUNES } from "@/lib/communes";
-
-const BASE_URL = "https://diagadresse.fr";
+import { BASE_URL } from "@/lib/constants";
+import communeCodes from "@/lib/sitemap-communes.json";
 
 const RISK_TYPES = [
   "inondation",
@@ -12,32 +11,8 @@ const RISK_TYPES = [
   "cavites",
 ];
 
-const MIN_POPULATION = 5000;
-
-interface CommuneAPI {
-  code: string;
-  population?: number;
-}
-
-async function fetchCommunes(): Promise<{ code: string }[]> {
-  try {
-    const res = await fetch(
-      "https://geo.api.gouv.fr/communes?fields=code,population",
-      { next: { revalidate: 86400 * 30 } },
-    );
-    if (!res.ok) return TOP_COMMUNES;
-    const data: CommuneAPI[] = await res.json();
-    return data
-      .filter((c) => (c.population ?? 0) >= MIN_POPULATION)
-      .map((c) => ({ code: c.code }));
-  } catch {
-    return TOP_COMMUNES;
-  }
-}
-
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const communes = await fetchCommunes();
 
   const pages: MetadataRoute.Sitemap = [
     {
@@ -58,10 +33,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // Commune pages (~2000 communes with population >= 5000)
-  for (const commune of communes) {
+  // Commune pages (2280 communes with population >= 5000)
+  for (const code of communeCodes) {
     pages.push({
-      url: `${BASE_URL}/commune/${commune.code}`,
+      url: `${BASE_URL}/commune/${code}`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,

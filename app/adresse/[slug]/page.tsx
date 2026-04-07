@@ -7,6 +7,7 @@ import { ShareButton } from "@/components/share-button";
 import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placeJsonLd } from "@/lib/json-ld";
+import { BASE_URL } from "@/lib/constants";
 import { DashboardSkeleton } from "./loading";
 
 interface Props {
@@ -85,7 +86,7 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
               description: `Diagnostic complet pour ${address.label} : risques, qualite de l'eau, performance energetique.`,
               latitude: address.lat,
               longitude: address.lon,
-              url: `https://diagadresse.fr/adresse/${slug}`,
+              url: `${BASE_URL}/adresse/${slug}`,
             }),
           ),
         }}
@@ -103,7 +104,7 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
         </div>
         <ShareButton
           title={`Diagnostic - ${address.label}`}
-          url={`https://diagadresse.fr/adresse/${slug}`}
+          url={`${BASE_URL}/adresse/${slug}`}
         />
       </div>
 

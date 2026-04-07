@@ -3,7 +3,7 @@ import { fetchSeismicZone, fetchRadon } from "./apis/georisques";
 import { fetchDPEStats } from "./apis/ademe-dpe";
 import { fetchWaterQuality } from "./apis/hubeau";
 import { toHubeauCode } from "./paris";
-import { RISK_LEVEL_LABELS } from "./constants";
+import { BASE_URL, RISK_LEVEL_LABELS } from "./constants";
 import { scoreRadon } from "./scoring";
 
 export interface DiagnosticSummary {
@@ -94,7 +94,7 @@ export function generateCommuneMetadata(
       type: "website",
       locale: "fr_FR",
       siteName: "DiagAdresse",
-      url: `https://diagadresse.fr/commune/${codeInsee}`,
+      url: `${BASE_URL}/commune/${codeInsee}`,
     },
     twitter: {
       card: "summary_large_image",

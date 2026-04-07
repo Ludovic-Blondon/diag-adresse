@@ -6,14 +6,30 @@ export const alt = "Diagnostic commune";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+async function resolveCommuneName(codeInsee: string): Promise<string> {
+  const known = TOP_COMMUNES.find((c) => c.code === codeInsee);
+  if (known) return known.name;
+  try {
+    const res = await fetch(
+      `https://geo.api.gouv.fr/communes/${codeInsee}?fields=nom`,
+    );
+    if (res.ok) {
+      const data: { nom: string } = await res.json();
+      return data.nom;
+    }
+  } catch {
+    // fallback below
+  }
+  return `Commune ${codeInsee}`;
+}
+
 export default async function OGImage({
   params,
 }: {
   params: Promise<{ codeInsee: string }>;
 }) {
   const { codeInsee } = await params;
-  const known = TOP_COMMUNES.find((c) => c.code === codeInsee);
-  const label = known?.name ?? `Commune ${codeInsee}`;
+  const label = await resolveCommuneName(codeInsee);
 
   return new ImageResponse(
     (
@@ -59,7 +75,7 @@ export default async function OGImage({
             color: "#a1a1aa",
           }}
         >
-          Risques &bull; Eau &bull; Energie
+          {"Risques • Eau • Energie"}
         </div>
       </div>
     ),

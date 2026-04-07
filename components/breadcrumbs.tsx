@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { breadcrumbJsonLd } from "@/lib/json-ld";
+import { BASE_URL } from "@/lib/constants";
 
 interface BreadcrumbItem {
   name: string;
@@ -10,7 +11,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   const allItems = [{ name: "Accueil", href: "/" }, ...items];
   const jsonLdItems = allItems.map((item) => ({
     name: item.name,
-    url: `https://diagadresse.fr${item.href}`,
+    url: `${BASE_URL}${item.href}`,
   }));
 
   return (

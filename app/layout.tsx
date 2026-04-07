@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { organizationJsonLd } from "@/lib/json-ld";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,6 +26,17 @@ export const metadata: Metadata = {
   description:
     "Risques naturels et industriels, qualite de l'eau, performance energetique : le diagnostic complet de votre adresse en France.",
   metadataBase: new URL("https://diagadresse.fr"),
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "DiagAdresse",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  other: {
+    "theme-color": "#09090b",
+  },
 };
 
 export default function RootLayout({
@@ -43,6 +55,12 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://georisques.gouv.fr" />
         <link rel="dns-prefetch" href="https://hubeau.eaufrance.fr" />
         <link rel="dns-prefetch" href="https://data.ademe.fr" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd()),
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>

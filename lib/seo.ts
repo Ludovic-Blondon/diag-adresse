@@ -92,6 +92,17 @@ export function generateCommuneMetadata(
       title,
       description,
       type: "website",
+      locale: "fr_FR",
+      siteName: "DiagAdresse",
+      url: `https://diagadresse.fr/commune/${codeInsee}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    alternates: {
+      canonical: `/commune/${codeInsee}`,
     },
   };
 }

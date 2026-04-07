@@ -2,10 +2,11 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { autocomplete } from "@/lib/apis/geocode";
 import { slugToQuery } from "@/lib/slug";
-import Link from "next/link";
 import { AddressSearch } from "@/components/address-search";
 import { ShareButton } from "@/components/share-button";
 import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { placeJsonLd } from "@/lib/json-ld";
 import { DashboardSkeleton } from "./loading";
 
 interface Props {
@@ -32,11 +33,27 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const sp = await searchParams;
   const address = await resolveAddress(slug, sp);
   const title = address ? `Diagnostic - ${address.label}` : "Diagnostic adresse";
+  const description = address
+    ? `Risques, qualite de l'eau et DPE pour ${address.label}`
+    : "Diagnostic complet de votre adresse";
   return {
     title,
-    description: address
-      ? `Risques, qualite de l'eau et DPE pour ${address.label}`
-      : "Diagnostic complet de votre adresse",
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      locale: "fr_FR",
+      siteName: "DiagAdresse",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    alternates: {
+      canonical: `/adresse/${slug}`,
+    },
   };
 }
 
@@ -59,15 +76,26 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            placeJsonLd({
+              name: address.label,
+              description: `Diagnostic complet pour ${address.label} : risques, qualite de l'eau, performance energetique.`,
+              latitude: address.lat,
+              longitude: address.lon,
+              url: `https://diagadresse.fr/adresse/${slug}`,
+            }),
+          ),
+        }}
+      />
+      <Breadcrumbs
+        items={[{ name: address.label, href: `/adresse/${slug}` }]}
+      />
       <div className="flex items-start justify-between gap-4">
         <div>
-          <Link
-            href="/"
-            className="text-sm text-muted-foreground hover:underline"
-          >
-            &larr; Retour
-          </Link>
-          <h1 className="text-2xl font-bold mt-1">{address.label}</h1>
+          <h1 className="text-2xl font-bold">{address.label}</h1>
           <p className="text-sm text-muted-foreground">
             Code INSEE : {address.citycode} — Coordonnees : {address.lat.toFixed(5)},{" "}
             {address.lon.toFixed(5)}

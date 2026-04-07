@@ -6,6 +6,8 @@ import { DashboardSkeleton } from "@/app/adresse/[slug]/loading";
 import { generateCommuneMetadata, fetchDiagnosticSummary } from "@/lib/seo";
 import { TOP_COMMUNES } from "@/lib/communes";
 import { AddressSearch } from "@/components/address-search";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { placeJsonLd } from "@/lib/json-ld";
 
 export const revalidate = 604800; // 7 days
 
@@ -43,13 +45,24 @@ export default async function CommunePage({ params }: Props) {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            placeJsonLd({
+              name: commune.name,
+              description: `Diagnostic complet de ${commune.name} : risques naturels, qualite de l'eau, performance energetique.`,
+              latitude: center.lat,
+              longitude: center.lon,
+              url: `https://diagadresse.fr/commune/${codeInsee}`,
+            }),
+          ),
+        }}
+      />
       <div>
-        <Link
-          href="/"
-          className="text-sm text-muted-foreground hover:underline"
-        >
-          &larr; Retour
-        </Link>
+        <Breadcrumbs
+          items={[{ name: commune.name, href: `/commune/${codeInsee}` }]}
+        />
         <h1 className="text-2xl font-bold mt-2">{commune.name}</h1>
         <p className="text-sm text-muted-foreground">
           Code INSEE : {codeInsee}
@@ -70,6 +83,30 @@ export default async function CommunePage({ params }: Props) {
           citycode={codeInsee}
         />
       </Suspense>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-3">
+          En savoir plus sur les risques
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { type: "inondation", label: "Inondation" },
+            { type: "seisme", label: "Seisme" },
+            { type: "argile", label: "Argiles" },
+            { type: "radon", label: "Radon" },
+            { type: "icpe", label: "Sites industriels" },
+            { type: "cavites", label: "Cavites" },
+          ].map((risk) => (
+            <Link
+              key={risk.type}
+              href={`/risque/${risk.type}`}
+              className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+            >
+              {risk.label}
+            </Link>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }

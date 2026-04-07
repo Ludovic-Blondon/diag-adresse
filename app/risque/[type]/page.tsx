@@ -2,11 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddressSearch } from "@/components/address-search";
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { faqPageJsonLd } from "@/lib/json-ld";
 
-const RISK_GUIDES: Record<
-  string,
-  { title: string; description: string; content: string }
-> = {
+interface RiskGuide {
+  title: string;
+  description: string;
+  content: string;
+  faq: { question: string; answer: string }[];
+}
+
+const RISK_GUIDES: Record<string, RiskGuide> = {
   inondation: {
     title: "Risque inondation en France",
     description:
@@ -21,6 +27,18 @@ Le Plan de Prevention des Risques d'Inondation (PPRi) definit les zones exposees
 - Verifier la cote altimetrique de votre bien
 - Souscrire une assurance incluant la garantie catastrophe naturelle
 - Preparer un kit d'urgence`,
+    faq: [
+      {
+        question: "Comment savoir si mon logement est en zone inondable ?",
+        answer:
+          "Consultez le Plan de Prevention des Risques d'Inondation (PPRi) de votre commune sur Georisques.gouv.fr ou utilisez DiagAdresse pour obtenir un diagnostic complet de votre adresse.",
+      },
+      {
+        question: "L'assurance couvre-t-elle les inondations ?",
+        answer:
+          "Oui, la garantie catastrophe naturelle est incluse dans tous les contrats d'assurance habitation en France. Elle couvre les dommages causes par les inondations apres publication d'un arrete de catastrophe naturelle.",
+      },
+    ],
   },
   seisme: {
     title: "Risque sismique en France",
@@ -37,6 +55,18 @@ Le Plan de Prevention des Risques d'Inondation (PPRi) definit les zones exposees
 
 **Normes de construction :**
 Les regles Eurocode 8 s'appliquent pour les constructions neuves en zones 2 a 5. Elles imposent des dispositions constructives adaptees au niveau de sismicite.`,
+    faq: [
+      {
+        question: "Quelle est la zone sismique de ma commune ?",
+        answer:
+          "La France compte 5 zones de sismicite (1 a 5). Utilisez DiagAdresse pour connaitre la zone sismique de votre adresse. Les zones 3 a 5 imposent des normes parasismiques pour les constructions neuves.",
+      },
+      {
+        question: "Les normes parasismiques sont-elles obligatoires ?",
+        answer:
+          "Les regles Eurocode 8 sont obligatoires pour les constructions neuves en zones 2 a 5. Elles imposent des dispositions constructives adaptees au niveau de sismicite local.",
+      },
+    ],
   },
   argile: {
     title: "Retrait-gonflement des argiles",
@@ -58,6 +88,19 @@ Les sols argileux gonflent en presence d'eau et se retractent lors des secheress
 - Drainage perimetrique
 - Eviter les plantations d'arbres trop pres des fondations
 - Maintenir un taux d'humidite constant autour des fondations`,
+    faq: [
+      {
+        question:
+          "Comment savoir si mon terrain est expose au retrait-gonflement des argiles ?",
+        answer:
+          "Les niveaux d'exposition vont de 0 (non concerne) a 3 (exposition forte). Utilisez DiagAdresse pour connaitre le niveau d'exposition de votre adresse a partir des donnees Georisques.",
+      },
+      {
+        question: "Quelles precautions prendre pour construire sur sol argileux ?",
+        answer:
+          "Il est recommande de realiser des fondations profondes et rigides, d'installer un drainage perimetrique, d'eviter les plantations d'arbres trop pres des fondations, et de maintenir un taux d'humidite constant autour des fondations.",
+      },
+    ],
   },
   radon: {
     title: "Risque radon",
@@ -75,6 +118,18 @@ Les sols argileux gonflent en presence d'eau et se retractent lors des secheress
 - Aerer regulierement
 - Etancheifier les points d'entree (sol, murs en contact avec le sol)
 - En construction neuve : prevoir une membrane anti-radon`,
+    faq: [
+      {
+        question: "Le radon est-il dangereux pour la sante ?",
+        answer:
+          "Oui, le radon est la deuxieme cause de cancer du poumon apres le tabac. C'est un gaz radioactif naturel, inodore et incolore, qui peut s'accumuler dans les batiments. Il est recommande de mesurer le taux de radon dans votre logement.",
+      },
+      {
+        question: "Comment reduire le radon dans ma maison ?",
+        answer:
+          "Aerez regulierement votre logement, etancheifiez les points d'entree (sol, murs en contact avec le sol), et en construction neuve prevoyez une membrane anti-radon. Des detecteurs sont disponibles en pharmacie pour mesurer le taux.",
+      },
+    ],
   },
   icpe: {
     title: "Installations classees (ICPE) et sites Seveso",
@@ -93,6 +148,18 @@ Le Plan de Prevention des Risques Technologiques (PPRT) est obligatoire autour d
 **Vos droits :**
 - Information : tout citoyen peut acceder aux donnees sur les ICPE
 - Consultation : les enquetes publiques sont obligatoires pour les nouvelles installations`,
+    faq: [
+      {
+        question: "Comment savoir s'il y a un site Seveso pres de chez moi ?",
+        answer:
+          "Utilisez DiagAdresse pour identifier les installations classees (ICPE) et sites Seveso a proximite de votre adresse. Les donnees proviennent de la base Georisques du ministere de l'Ecologie.",
+      },
+      {
+        question: "Qu'est-ce que la directive Seveso ?",
+        answer:
+          "La directive Seveso est une reglementation europeenne qui impose des mesures de prevention et de protection aux sites industriels presentant des risques d'accidents majeurs. Les sites sont classes en seuil haut (risque majeur) et seuil bas (risque significatif).",
+      },
+    ],
   },
   cavites: {
     title: "Cavites souterraines",
@@ -115,6 +182,18 @@ Le Plan de Prevention des Risques Technologiques (PPRT) est obligatoire autour d
 - Consulter la base de donnees des cavites (Georisques)
 - Faire realiser une etude geotechnique
 - Verifier le Plan de Prevention des Risques lie aux cavites`,
+    faq: [
+      {
+        question: "Comment verifier la presence de cavites souterraines ?",
+        answer:
+          "Consultez la base de donnees des cavites sur Georisques.gouv.fr ou utilisez DiagAdresse pour obtenir un diagnostic complet. Avant un achat immobilier, faites realiser une etude geotechnique.",
+      },
+      {
+        question: "Quels sont les risques des cavites souterraines ?",
+        answer:
+          "Les cavites souterraines peuvent provoquer un affaissement progressif du terrain, un effondrement brutal (fontis), ou la fissuration des constructions en surface. Le risque depend du type de cavite et de sa profondeur.",
+      },
+    ],
   },
 };
 
@@ -126,7 +205,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { type } = await params;
   const guide = RISK_GUIDES[type];
   if (!guide) return { title: "Risque introuvable" };
-  return { title: guide.title, description: guide.description };
+  return {
+    title: guide.title,
+    description: guide.description,
+    openGraph: {
+      title: guide.title,
+      description: guide.description,
+      type: "article",
+      locale: "fr_FR",
+      siteName: "DiagAdresse",
+      url: `https://diagadresse.fr/risque/${type}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: guide.title,
+      description: guide.description,
+    },
+    alternates: {
+      canonical: `/risque/${type}`,
+    },
+  };
 }
 
 export function generateStaticParams() {
@@ -141,13 +239,19 @@ export default async function RiskGuidePage({ params }: Props) {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-8 space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqPageJsonLd(guide.faq)),
+        }}
+      />
       <div>
-        <Link
-          href="/"
-          className="text-sm text-muted-foreground hover:underline"
-        >
-          &larr; Retour
-        </Link>
+        <Breadcrumbs
+          items={[
+            { name: "Risques", href: "/" },
+            { name: guide.title, href: `/risque/${type}` },
+          ]}
+        />
         <h1 className="text-3xl font-bold mt-2">{guide.title}</h1>
         <p className="text-muted-foreground mt-2">{guide.description}</p>
       </div>
@@ -202,6 +306,49 @@ export default async function RiskGuidePage({ params }: Props) {
         </p>
         <AddressSearch />
       </div>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-3">
+          Consultez le diagnostic d&apos;une grande ville
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { name: "Paris", code: "75056" },
+            { name: "Lyon", code: "69123" },
+            { name: "Marseille", code: "13055" },
+            { name: "Toulouse", code: "31555" },
+            { name: "Bordeaux", code: "33063" },
+            { name: "Nantes", code: "44109" },
+            { name: "Nice", code: "06088" },
+            { name: "Strasbourg", code: "67482" },
+          ].map((city) => (
+            <Link
+              key={city.code}
+              href={`/commune/${city.code}`}
+              className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+            >
+              {city.name}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Autres guides</h2>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(RISK_GUIDES)
+            .filter(([key]) => key !== type)
+            .map(([key, g]) => (
+              <Link
+                key={key}
+                href={`/risque/${key}`}
+                className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+              >
+                {g.title}
+              </Link>
+            ))}
+        </div>
+      </section>
     </main>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AddressSearch } from "@/components/address-search";
 import { websiteJsonLd } from "@/lib/json-ld";
-import { POPULAR_CITIES, RISK_NAV } from "@/lib/navigation";
+import { POPULAR_CITIES } from "@/lib/navigation";
 
 export default function Home() {
   return (
@@ -35,23 +35,6 @@ export default function Home() {
                 className="rounded-full border px-4 py-1.5 text-sm hover:bg-accent transition-colors"
               >
                 {city.name}
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className="pt-4">
-          <h2 className="text-sm font-medium text-muted-foreground mb-4">
-            Guides des risques
-          </h2>
-          <div className="flex flex-wrap justify-center gap-2">
-            {RISK_NAV.map((guide) => (
-              <Link
-                key={guide.type}
-                href={`/risque/${guide.type}`}
-                className="rounded-full border px-4 py-1.5 text-sm hover:bg-accent transition-colors"
-              >
-                {guide.label}
               </Link>
             ))}
           </div>

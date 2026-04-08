@@ -2,11 +2,13 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import Link from "next/link";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { organizationJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
+import { RISK_NAV } from "@/lib/navigation";
 import "./globals.css";
 
 const inter = Inter({
@@ -74,6 +76,19 @@ export default function RootLayout({
               <ThemeToggle />
             </header>
             {children}
+            <footer className="mt-auto border-t px-4 py-6">
+              <nav className="mx-auto max-w-4xl flex flex-wrap justify-center gap-x-4 gap-y-1">
+                {RISK_NAV.map((r) => (
+                  <Link
+                    key={r.type}
+                    href={`/risque/${r.type}`}
+                    className="text-xs text-muted-foreground hover:underline"
+                  >
+                    {r.label}
+                  </Link>
+                ))}
+              </nav>
+            </footer>
           </TooltipProvider>
         </ThemeProvider>
         <Analytics />

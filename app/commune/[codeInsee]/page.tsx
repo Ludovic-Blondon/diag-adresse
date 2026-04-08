@@ -71,12 +71,7 @@ export default async function CommunePage({ params }: Props) {
         </p>
       </div>
 
-      <div className="rounded-lg border bg-muted/50 p-4">
-        <p className="text-sm mb-3">
-          Affiner le diagnostic avec une adresse precise :
-        </p>
-        <AddressSearch />
-      </div>
+      <AddressSearch placeholder="Affiner avec une adresse precise..." />
 
       <Suspense fallback={<DashboardSkeleton />}>
         <DiagnosticDashboard

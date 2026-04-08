@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { slugify } from "@/lib/slug";
 import type { GeocodeSuggestion } from "@/lib/types/geocode";
 
-export function AddressSearch() {
+export function AddressSearch({ placeholder = "Entrez une adresse..." }: { placeholder?: string }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<GeocodeSuggestion[]>([]);
@@ -93,7 +93,7 @@ export function AddressSearch() {
         aria-activedescendant={
           activeIndex >= 0 ? `address-option-${activeIndex}` : undefined
         }
-        placeholder="Entrez une adresse..."
+        placeholder={placeholder}
         className="h-12 text-base"
         value={query}
         onChange={(e) => handleChange(e.target.value)}

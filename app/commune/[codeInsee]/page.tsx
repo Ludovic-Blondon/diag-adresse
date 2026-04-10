@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
 import { generateCommuneMetadata } from "@/lib/seo";
@@ -7,7 +6,6 @@ import { AddressSearch } from "@/components/address-search";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
-import { RISK_NAV } from "@/lib/navigation";
 import { getDepartementCode, DEPARTEMENTS } from "@/lib/departements";
 
 export const revalidate = 604800; // 7 days
@@ -84,23 +82,6 @@ export default async function CommunePage({ params }: Props) {
         lat={center.lat}
         citycode={codeInsee}
       />
-
-      <section>
-        <h2 className="text-lg font-semibold mb-3">
-          En savoir plus sur les risques
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {RISK_NAV.map((risk) => (
-            <Link
-              key={risk.type}
-              href={`/risque/${risk.type}`}
-              className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
-            >
-              {risk.label}
-            </Link>
-          ))}
-        </div>
-      </section>
     </main>
   );
 }

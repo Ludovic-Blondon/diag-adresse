@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { cache } from "react";
 import type { Metadata } from "next";
 import { autocomplete } from "@/lib/apis/geocode";
 import { slugToQuery } from "@/lib/slug";
@@ -8,31 +8,30 @@ import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
-import { DashboardSkeleton } from "./loading";
 
 interface Props {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ lon?: string; lat?: string; citycode?: string }>;
 }
 
-async function resolveAddress(slug: string, sp: { lon?: string; lat?: string; citycode?: string }) {
-  if (sp.lon && sp.lat && sp.citycode) {
-    const lon = parseFloat(sp.lon);
-    const lat = parseFloat(sp.lat);
-    if (!Number.isNaN(lon) && !Number.isNaN(lat) && /^\d{5}$/.test(sp.citycode)) {
-      return { label: slugToQuery(slug), lon, lat, citycode: sp.citycode };
+const resolveAddress = cache(async (slug: string, lon?: string, lat?: string, citycode?: string) => {
+  if (lon && lat && citycode) {
+    const lonN = parseFloat(lon);
+    const latN = parseFloat(lat);
+    if (!Number.isNaN(lonN) && !Number.isNaN(latN) && /^\d{5}$/.test(citycode)) {
+      return { label: slugToQuery(slug), lon: lonN, lat: latN, citycode };
     }
   }
   const results = await autocomplete(slugToQuery(slug), 1);
   if (results.length === 0) return null;
   const r = results[0];
   return { label: r.label, lon: r.lon, lat: r.lat, citycode: r.citycode };
-}
+});
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
   const sp = await searchParams;
-  const address = await resolveAddress(slug, sp);
+  const address = await resolveAddress(slug, sp.lon, sp.lat, sp.citycode);
   const title = address ? `Diagnostic - ${address.label}` : "Diagnostic adresse";
   const description = address
     ? `Risques, qualite de l'eau et DPE pour ${address.label}`
@@ -61,7 +60,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 export default async function DiagnosticPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const sp = await searchParams;
-  const address = await resolveAddress(slug, sp);
+  const address = await resolveAddress(slug, sp.lon, sp.lat, sp.citycode);
 
   if (!address) {
     return (
@@ -108,13 +107,11 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
         />
       </div>
 
-      <Suspense fallback={<DashboardSkeleton />}>
-        <DiagnosticDashboard
-          lon={address.lon}
-          lat={address.lat}
-          citycode={address.citycode}
-        />
-      </Suspense>
+      <DiagnosticDashboard
+        lon={address.lon}
+        lat={address.lat}
+        citycode={address.citycode}
+      />
     </main>
   );
 }

@@ -20,38 +20,14 @@ async function geoFetch<T>(path: string, params: Record<string, string>): Promis
   return res.json();
 }
 
-// --- Rate limiter for resultats_rapport_risque (1 req/s) ---
-
-let lastRiskReportCall = 0;
-
-async function rateLimitedFetch<T>(path: string, params: Record<string, string>): Promise<T> {
-  const now = Date.now();
-  const wait = Math.max(0, 1000 - (now - lastRiskReportCall));
-  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-  lastRiskReportCall = Date.now();
-  return geoFetch<T>(path, params);
-}
-
 // --- Public API ---
 
-export async function fetchRiskReport(params: {
-  codeInsee?: string;
-  lon?: number;
-  lat?: number;
-}): Promise<RiskReport> {
-  const query: Record<string, string> = {};
-  if (params.lon != null && params.lat != null) {
-    query.latlon = `${params.lon},${params.lat}`;
-  } else if (params.codeInsee) {
-    query.code_insee = params.codeInsee;
-  }
-
-  const raw = await rateLimitedFetch<Record<string, unknown>>(
+export const fetchRiskReport = cache(async (lon: number, lat: number): Promise<RiskReport> => {
+  const raw = await geoFetch<Record<string, unknown>>(
     "/resultats_rapport_risque",
-    query,
+    { latlon: `${lon},${lat}` },
   );
 
-  // The API returns an object keyed by risk type — flatten to array
   const toArray = (obj: unknown) => {
     if (Array.isArray(obj)) return obj;
     if (obj && typeof obj === "object") return Object.values(obj);
@@ -62,13 +38,13 @@ export async function fetchRiskReport(params: {
     risquesNaturels: toArray(raw.risquesNaturels),
     risquesTechnologiques: toArray(raw.risquesTechnologiques),
   };
-}
+});
 
 export const fetchRadon = cache(async (codeInsee: string): Promise<RadonData> => {
   return geoFetch<RadonData>("/radon", { code_insee: codeInsee });
 });
 
-export async function fetchRGA(lon: number, lat: number): Promise<RGAData> {
+export const fetchRGA = cache(async (lon: number, lat: number): Promise<RGAData> => {
   try {
     const res = await fetch(
       `${GEORISQUES_BASE_URL}/rga?latlon=${lon},${lat}`,
@@ -84,36 +60,36 @@ export async function fetchRGA(lon: number, lat: number): Promise<RGAData> {
   } catch {
     return { data: [] };
   }
-}
+});
 
 export const fetchSeismicZone = cache(async (codeInsee: string): Promise<SeismicData> => {
   return geoFetch<SeismicData>("/zonage_sismique", { code_insee: codeInsee });
 });
 
-export async function fetchICPE(params: {
-  codeInsee: string;
-  rayon?: number;
-  lon?: number;
-  lat?: number;
-}): Promise<ICPEData> {
-  const query: Record<string, string> = { code_insee: params.codeInsee };
-  if (params.lon != null && params.lat != null) {
-    query.latlon = `${params.lon},${params.lat}`;
-    query.rayon = String(params.rayon ?? 5000);
+export const fetchICPE = cache(async (
+  codeInsee: string,
+  lon?: number,
+  lat?: number,
+  rayon?: number,
+): Promise<ICPEData> => {
+  const query: Record<string, string> = { code_insee: codeInsee };
+  if (lon != null && lat != null) {
+    query.latlon = `${lon},${lat}`;
+    query.rayon = String(rayon ?? 5000);
   }
   return geoFetch<ICPEData>("/installations_classees", query);
-}
+});
 
-export async function fetchCavites(params: {
-  codeInsee: string;
-  lon?: number;
-  lat?: number;
-  rayon?: number;
-}): Promise<CaviteData> {
-  const query: Record<string, string> = { code_insee: params.codeInsee };
-  if (params.lon != null && params.lat != null) {
-    query.latlon = `${params.lon},${params.lat}`;
-    query.rayon = String(params.rayon ?? 5000);
+export const fetchCavites = cache(async (
+  codeInsee: string,
+  lon?: number,
+  lat?: number,
+  rayon?: number,
+): Promise<CaviteData> => {
+  const query: Record<string, string> = { code_insee: codeInsee };
+  if (lon != null && lat != null) {
+    query.latlon = `${lon},${lat}`;
+    query.rayon = String(rayon ?? 5000);
   }
   return geoFetch<CaviteData>("/cavites", query);
-}
+});

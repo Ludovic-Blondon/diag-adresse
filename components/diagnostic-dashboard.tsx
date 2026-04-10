@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
 import { RiskCard } from "./risk-card";
 import { RiskSummary } from "./risk-summary";
@@ -32,9 +33,56 @@ interface DashboardProps {
   citycode: string;
 }
 
-export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps) {
-  const hubeauCode = toHubeauCode(citycode);
+function SectionSkeleton({ lines = 3 }: { lines?: number }) {
+  return (
+    <div className="space-y-3 animate-pulse">
+      {Array.from({ length: lines }, (_, i) => (
+        <div
+          key={i}
+          className="h-4 rounded bg-muted"
+          style={{ width: `${80 - i * 15}%` }}
+        />
+      ))}
+    </div>
+  );
+}
 
+export function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps) {
+  return (
+    <div className="space-y-8">
+      <Suspense fallback={<SectionSkeleton lines={6} />}>
+        <RiskSection lon={lon} lat={lat} citycode={citycode} />
+      </Suspense>
+
+      <Separator />
+
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Carte</h2>
+        <Suspense
+          fallback={
+            <div className="w-full h-80 rounded-lg border bg-muted animate-pulse" />
+          }
+        >
+          <MapSection lon={lon} lat={lat} citycode={citycode} />
+        </Suspense>
+      </section>
+
+      <Separator />
+
+      <Suspense fallback={<SectionSkeleton />}>
+        <WaterSection citycode={citycode} />
+      </Suspense>
+
+      <Separator />
+
+      <Suspense fallback={<SectionSkeleton />}>
+        <EnergySection citycode={citycode} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function RiskSection({ lon, lat, citycode }: DashboardProps) {
   const [
     riskReportResult,
     radonResult,
@@ -42,17 +90,13 @@ export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps
     seismicResult,
     icpeResult,
     cavitesResult,
-    waterResult,
-    dpeResult,
   ] = await Promise.allSettled([
-    fetchRiskReport({ lon, lat }),
+    fetchRiskReport(lon, lat),
     fetchRadon(citycode),
     fetchRGA(lon, lat),
     fetchSeismicZone(citycode),
-    fetchICPE({ codeInsee: citycode, lon, lat }),
-    fetchCavites({ codeInsee: citycode, lon, lat }),
-    fetchWaterQuality(hubeauCode),
-    fetchDPEStats(citycode),
+    fetchICPE(citycode, lon, lat),
+    fetchCavites(citycode, lon, lat),
   ]);
 
   const levelOrder = { fort: 0, moyen: 1, faible: 2, negligeable: 3 };
@@ -90,13 +134,13 @@ export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps
     cavitesResult.status === "rejected";
 
   return (
-    <div className="space-y-8">
-      {/* Risk summary */}
+    <>
       <section>
         <h2 className="text-lg font-semibold mb-3">Synthese des risques</h2>
         {allRisksFailed ? (
           <p className="text-sm text-muted-foreground">
-            Les donnees de risques sont temporairement indisponibles. Veuillez reessayer plus tard.
+            Les donnees de risques sont temporairement indisponibles. Veuillez
+            reessayer plus tard.
           </p>
         ) : (
           <RiskSummary risks={risks} />
@@ -105,7 +149,6 @@ export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps
 
       <Separator />
 
-      {/* Risk cards */}
       <section>
         <h2 className="text-lg font-semibold mb-3">Detail des risques</h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -121,46 +164,67 @@ export async function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps
           ))}
         </div>
       </section>
+    </>
+  );
+}
 
-      <Separator />
+async function MapSection({ lon, lat, citycode }: DashboardProps) {
+  let icpeList: Awaited<ReturnType<typeof fetchICPE>>["data"] = [];
+  try {
+    const result = await fetchICPE(citycode, lon, lat);
+    icpeList = result.data;
+  } catch {
+    // Map still works without ICPE markers
+  }
 
-      {/* Map */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">Carte</h2>
-        <RiskMap
-          lon={lon}
-          lat={lat}
-          icpeList={icpeResult.status === "fulfilled" ? icpeResult.value.data : []}
-        />
-      </section>
+  return <RiskMap lon={lon} lat={lat} icpeList={icpeList} />;
+}
 
-      <Separator />
+async function WaterSection({ citycode }: { citycode: string }) {
+  const hubeauCode = toHubeauCode(citycode);
+  let data = null;
+  try {
+    data = await fetchWaterQuality(hubeauCode);
+  } catch {
+    data = null;
+  }
 
-      {/* Water quality */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">Qualite de l&apos;eau potable</h2>
-        {waterResult.status === "fulfilled" ? (
-          <WaterQualityCard data={waterResult.value} />
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Donnees indisponibles pour cette commune.
-          </p>
-        )}
-      </section>
+  return (
+    <section>
+      <h2 className="text-lg font-semibold mb-3">
+        Qualite de l&apos;eau potable
+      </h2>
+      {data ? (
+        <WaterQualityCard data={data} />
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Donnees indisponibles pour cette commune.
+        </p>
+      )}
+    </section>
+  );
+}
 
-      <Separator />
+async function EnergySection({ citycode }: { citycode: string }) {
+  let data = null;
+  try {
+    data = await fetchDPEStats(citycode);
+  } catch {
+    data = null;
+  }
 
-      {/* Energy / DPE */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">Performance energetique (DPE)</h2>
-        {dpeResult.status === "fulfilled" ? (
-          <EnergyCard data={dpeResult.value} />
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Aucun DPE disponible pour ce secteur.
-          </p>
-        )}
-      </section>
-    </div>
+  return (
+    <section>
+      <h2 className="text-lg font-semibold mb-3">
+        Performance energetique (DPE)
+      </h2>
+      {data ? (
+        <EnergyCard data={data} />
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Aucun DPE disponible pour ce secteur.
+        </p>
+      )}
+    </section>
   );
 }

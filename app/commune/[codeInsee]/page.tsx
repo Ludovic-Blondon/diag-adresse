@@ -1,9 +1,7 @@
-import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
-import { DashboardSkeleton } from "@/app/adresse/[slug]/loading";
-import { generateCommuneMetadata, fetchDiagnosticSummary } from "@/lib/seo";
+import { generateCommuneMetadata } from "@/lib/seo";
 import { TOP_COMMUNES } from "@/lib/communes";
 import { AddressSearch } from "@/components/address-search";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -27,8 +25,7 @@ async function getCommuneInfo(codeInsee: string) {
 export async function generateMetadata({ params }: Props) {
   const { codeInsee } = await params;
   const commune = await getCommuneInfo(codeInsee);
-  const summary = await fetchDiagnosticSummary(codeInsee);
-  return generateCommuneMetadata(codeInsee, commune.name, summary);
+  return generateCommuneMetadata(codeInsee, commune.name);
 }
 
 export default async function CommunePage({ params }: Props) {
@@ -73,13 +70,11 @@ export default async function CommunePage({ params }: Props) {
 
       <AddressSearch placeholder="Affiner avec une adresse precise..." />
 
-      <Suspense fallback={<DashboardSkeleton />}>
-        <DiagnosticDashboard
-          lon={center.lon}
-          lat={center.lat}
-          citycode={codeInsee}
-        />
-      </Suspense>
+      <DiagnosticDashboard
+        lon={center.lon}
+        lat={center.lat}
+        citycode={codeInsee}
+      />
 
       <section>
         <h2 className="text-lg font-semibold mb-3">

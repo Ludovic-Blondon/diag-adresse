@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DiagAdresse
 
-## Getting Started
+Diagnostic complet de votre adresse en France : risques naturels et industriels, qualite de l'eau, performance energetique.
 
-First, run the development server:
+## Commandes
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm dev            # Serveur de developpement
+pnpm build          # Build de production
+pnpm start          # Serveur de production (apres build)
+pnpm lint           # ESLint
+npx tsc --noEmit    # Verification des types
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## TODO SEO
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Priorite haute
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [ ] Acheter un domaine custom (`.fr` ideal) et le connecter sur Vercel
+- [ ] Connecter Google Search Console, soumettre le sitemap
+- [ ] Ameliorer le maillage interne (communes voisines, liens departement dans le footer, guides risques vers communes concernees)
+- [ ] Elargir la homepage (plus de villes populaires + section departements)
 
-## Learn More
+### Priorite moyenne
 
-To learn more about Next.js, take a look at the following resources:
+- [ ] Ajouter des headers `Cache-Control` dans `next.config.ts` pour les assets statiques (Core Web Vitals)
+- [ ] Creer une page `/faq` dediee avec schema `FAQPage`
+- [ ] Creer des pages par region (`/region/[code]`)
+- [ ] Enrichir les guides risques avec plus de contenu longue traine
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Priorite basse
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [ ] Creer un blog / articles (ex: "Comment lire un DPE", "Zones inondables en France")
+- [ ] Soumettre le site aux annuaires d'outils immobiliers francais
+- [ ] Obtenir des backlinks (guest posts, forums immobilier/renovation)

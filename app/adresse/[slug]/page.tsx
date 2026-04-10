@@ -8,6 +8,7 @@ import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
+import { getDepartementCode, DEPARTEMENTS } from "@/lib/departements";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -19,13 +20,13 @@ const resolveAddress = cache(async (slug: string, lon?: string, lat?: string, ci
     const lonN = parseFloat(lon);
     const latN = parseFloat(lat);
     if (!Number.isNaN(lonN) && !Number.isNaN(latN) && /^\d{5}$/.test(citycode)) {
-      return { label: slugToQuery(slug), lon: lonN, lat: latN, citycode };
+      return { label: slugToQuery(slug), lon: lonN, lat: latN, citycode, city: "" };
     }
   }
   const results = await autocomplete(slugToQuery(slug), 1);
   if (results.length === 0) return null;
   const r = results[0];
-  return { label: r.label, lon: r.lon, lat: r.lat, citycode: r.citycode };
+  return { label: r.label, lon: r.lon, lat: r.lat, citycode: r.citycode, city: r.city };
 });
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
@@ -74,6 +75,10 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
     );
   }
 
+  const depCode = getDepartementCode(address.citycode);
+  const depName = DEPARTEMENTS[depCode];
+  const communeName = address.city || `Commune ${address.citycode}`;
+
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-6">
       <script
@@ -91,7 +96,13 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
         }}
       />
       <Breadcrumbs
-        items={[{ name: address.label, href: `/adresse/${slug}` }]}
+        items={[
+          ...(depName
+            ? [{ name: depName, href: `/departement/${depCode}` }]
+            : []),
+          { name: communeName, href: `/commune/${address.citycode}` },
+          { name: address.label, href: `/adresse/${slug}` },
+        ]}
       />
       <div className="flex items-start justify-between gap-4">
         <div>

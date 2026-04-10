@@ -8,6 +8,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
 import { RISK_NAV } from "@/lib/navigation";
+import { getDepartementCode, DEPARTEMENTS } from "@/lib/departements";
 
 export const revalidate = 604800; // 7 days
 
@@ -42,6 +43,9 @@ export default async function CommunePage({ params }: Props) {
     notFound();
   }
 
+  const depCode = getDepartementCode(codeInsee);
+  const depName = DEPARTEMENTS[depCode];
+
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-6">
       <script
@@ -60,7 +64,12 @@ export default async function CommunePage({ params }: Props) {
       />
       <div>
         <Breadcrumbs
-          items={[{ name: commune.name, href: `/commune/${codeInsee}` }]}
+          items={[
+            ...(depName
+              ? [{ name: depName, href: `/departement/${depCode}` }]
+              : []),
+            { name: commune.name, href: `/commune/${codeInsee}` },
+          ]}
         />
         <h1 className="text-2xl font-bold mt-2">{commune.name}</h1>
         <p className="text-sm text-muted-foreground">

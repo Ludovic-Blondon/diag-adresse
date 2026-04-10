@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { BASE_URL } from "@/lib/constants";
 import communeCodes from "@/lib/sitemap-communes.json";
+import { getActiveDepartements } from "@/lib/departements";
 
 const RISK_TYPES = [
   "inondation",
@@ -22,6 +23,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
   ];
+
+  // Departement pages
+  for (const dep of getActiveDepartements()) {
+    pages.push({
+      url: `${BASE_URL}/departement/${dep.code}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    });
+  }
 
   // Risk guide pages
   for (const type of RISK_TYPES) {

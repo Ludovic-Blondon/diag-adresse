@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AddressSearch } from "@/components/address-search";
 import { websiteJsonLd } from "@/lib/json-ld";
 import { POPULAR_CITIES } from "@/lib/navigation";
+import { TOP_COMMUNES } from "@/lib/communes";
 
 export default function Home() {
   return (
@@ -38,6 +39,24 @@ export default function Home() {
               </Link>
             ))}
           </div>
+          <details className="mt-4">
+            <summary className="text-xs text-muted-foreground cursor-pointer hover:underline">
+              Voir plus de villes
+            </summary>
+            <div className="flex flex-wrap justify-center gap-2 mt-3">
+              {TOP_COMMUNES.filter(
+                (c) => !POPULAR_CITIES.some((p) => p.code === c.code),
+              ).map((city) => (
+                <Link
+                  key={city.code}
+                  href={`/commune/${city.code}`}
+                  className="rounded-full border px-4 py-1.5 text-sm hover:bg-accent transition-colors"
+                >
+                  {city.name}
+                </Link>
+              ))}
+            </div>
+          </details>
         </section>
       </div>
     </main>

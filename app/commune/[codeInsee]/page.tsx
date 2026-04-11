@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
 import { generateCommuneMetadata } from "@/lib/seo";
@@ -7,6 +8,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
 import { getDepartementCode, DEPARTEMENTS } from "@/lib/departements";
+import { getTopCommunesForDepartement } from "@/lib/regions";
 
 export const revalidate = 604800; // 7 days
 
@@ -43,6 +45,9 @@ export default async function CommunePage({ params }: Props) {
 
   const depCode = getDepartementCode(codeInsee);
   const depName = DEPARTEMENTS[depCode];
+  const siblingCommunes = getTopCommunesForDepartement(depCode)
+    .filter((c) => c.code !== codeInsee)
+    .slice(0, 8);
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-6">
@@ -82,6 +87,25 @@ export default async function CommunePage({ params }: Props) {
         lat={center.lat}
         citycode={codeInsee}
       />
+
+      {siblingCommunes.length > 0 && (
+        <section>
+          <h2 className="text-lg font-semibold mb-3">
+            Autres communes {depName ? `en ${depName}` : "du departement"}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {siblingCommunes.map((c) => (
+              <Link
+                key={c.code}
+                href={`/commune/${c.code}`}
+                className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+              >
+                {c.name}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { organizationJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
 import { RISK_NAV } from "@/lib/navigation";
+import { REGIONS, getDepartementsForRegion } from "@/lib/regions";
 import "./globals.css";
 
 const inter = Inter({
@@ -79,7 +80,7 @@ export default function RootLayout({
               <ThemeToggle />
             </header>
             {children}
-            <footer className="mt-auto border-t px-4 py-6">
+            <footer className="mt-auto border-t px-4 py-6 space-y-4">
               <nav className="mx-auto max-w-4xl flex flex-wrap justify-center gap-x-4 gap-y-1">
                 {RISK_NAV.map((r) => (
                   <Link
@@ -91,6 +92,32 @@ export default function RootLayout({
                   </Link>
                 ))}
               </nav>
+              <details className="mx-auto max-w-6xl">
+                <summary className="text-xs text-muted-foreground cursor-pointer text-center hover:underline">
+                  Tous les departements
+                </summary>
+                <div className="mt-4 columns-2 md:columns-3 lg:columns-4 gap-4">
+                  {REGIONS.map((region) => (
+                    <div key={region.name} className="break-inside-avoid mb-5">
+                      <h3 className="text-xs font-medium mb-1">
+                        {region.name}
+                      </h3>
+                      <ul className="space-y-0.5">
+                        {getDepartementsForRegion(region).map((dep) => (
+                          <li key={dep.code}>
+                            <Link
+                              href={`/departement/${dep.code}`}
+                              className="text-xs text-muted-foreground hover:underline"
+                            >
+                              {dep.name} ({dep.code})
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </details>
             </footer>
           </TooltipProvider>
         </ThemeProvider>

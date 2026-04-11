@@ -16,10 +16,10 @@ npx tsc --noEmit    # Verification des types
 
 ### Priorite haute
 
-- [ ] Acheter un domaine custom (`.fr` ideal) et le connecter sur Vercel
-- [ ] Connecter Google Search Console, soumettre le sitemap
-- [ ] Ameliorer le maillage interne (communes voisines, liens departement dans le footer, guides risques vers communes concernees)
-- [ ] Elargir la homepage (plus de villes populaires + section departements)
+- [x] Acheter un domaine custom (`.fr` ideal) et le connecter sur Vercel
+- [x] Connecter Google Search Console, soumettre le sitemap
+- [x] Ameliorer le maillage interne (communes voisines, liens departement dans le footer, guides risques vers communes concernees)
+- [x] Elargir la homepage (plus de villes populaires + section departements)
 
 ### Priorite moyenne
 

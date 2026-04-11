@@ -7,6 +7,8 @@ import { faqPageJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
 import { RISK_GUIDES } from "@/lib/risk-guides";
 import { POPULAR_CITIES } from "@/lib/navigation";
+import { TOP_COMMUNES } from "@/lib/communes";
+import { getActiveDepartements } from "@/lib/departements";
 
 interface Props {
   params: Promise<{ type: string }>;
@@ -120,7 +122,7 @@ export default async function RiskGuidePage({ params }: Props) {
           Consultez le diagnostic d&apos;une grande ville
         </h2>
         <div className="flex flex-wrap gap-2">
-          {POPULAR_CITIES.slice(0, 8).map((city) => (
+          {POPULAR_CITIES.map((city) => (
             <Link
               key={city.code}
               href={`/commune/${city.code}`}
@@ -130,7 +132,42 @@ export default async function RiskGuidePage({ params }: Props) {
             </Link>
           ))}
         </div>
+        <details className="mt-3">
+          <summary className="text-xs text-muted-foreground cursor-pointer hover:underline">
+            Voir plus de villes
+          </summary>
+          <div className="flex flex-wrap gap-2 mt-3">
+            {TOP_COMMUNES.filter(
+              (c) => !POPULAR_CITIES.some((p) => p.code === c.code),
+            ).map((city) => (
+              <Link
+                key={city.code}
+                href={`/commune/${city.code}`}
+                className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+              >
+                {city.name}
+              </Link>
+            ))}
+          </div>
+        </details>
       </section>
+
+      <details>
+        <summary className="text-lg font-semibold cursor-pointer hover:underline">
+          Parcourir par departement
+        </summary>
+        <div className="flex flex-wrap gap-2 mt-3">
+          {getActiveDepartements().map((dep) => (
+            <Link
+              key={dep.code}
+              href={`/departement/${dep.code}`}
+              className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+            >
+              {dep.name}
+            </Link>
+          ))}
+        </div>
+      </details>
 
       <section>
         <h2 className="text-lg font-semibold mb-3">Autres guides</h2>

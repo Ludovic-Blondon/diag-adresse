@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { BASE_URL } from "@/lib/constants";
 import { DEPARTEMENTS, getActiveDepartements } from "@/lib/departements";
 import { RISK_NAV } from "@/lib/navigation";
+import { getRegionForDepartement } from "@/lib/regions";
 
 export const revalidate = 604800; // 7 days
 export const dynamicParams = false;
@@ -74,6 +75,12 @@ export default async function DepartementPage({ params }: Props) {
   if (!name) notFound();
 
   const communes = await getCommunesForDepartement(code);
+  const region = getRegionForDepartement(code);
+  const siblingDepartements = region
+    ? region.departements
+        .filter((d) => d !== code && DEPARTEMENTS[d])
+        .map((d) => ({ code: d, name: DEPARTEMENTS[d] }))
+    : [];
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-8">
@@ -111,6 +118,25 @@ export default async function DepartementPage({ params }: Props) {
                     {c.population.toLocaleString("fr-FR")} hab.
                   </span>
                 )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {region && siblingDepartements.length > 0 && (
+        <section>
+          <h2 className="text-lg font-semibold mb-3">
+            Departements en {region.name}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {siblingDepartements.map((dep) => (
+              <Link
+                key={dep.code}
+                href={`/departement/${dep.code}`}
+                className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+              >
+                {dep.name} ({dep.code})
               </Link>
             ))}
           </div>

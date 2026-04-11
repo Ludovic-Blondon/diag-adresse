@@ -29,6 +29,9 @@ export const metadata: Metadata = {
   description:
     "Risques naturels et industriels, qualite de l'eau, performance energetique : le diagnostic complet de votre adresse en France.",
   metadataBase: new URL(BASE_URL),
+  verification: {
+    google: "ngRiAmVkdtheHcVPZyf1g9QlfKjTtrKjHjaY5N6Jpis",
+  },
   openGraph: {
     type: "website",
     locale: "fr_FR",

@@ -6,7 +6,11 @@ import { Input } from "@/components/ui/input";
 import { slugify } from "@/lib/slug";
 import type { GeocodeSuggestion } from "@/lib/types/geocode";
 
-export function AddressSearch({ placeholder = "Entrez une adresse..." }: { placeholder?: string }) {
+export function AddressSearch({
+  placeholder = "Entrez une adresse...",
+}: {
+  placeholder?: string;
+}) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<GeocodeSuggestion[]>([]);
@@ -78,13 +82,15 @@ export function AddressSearch({ placeholder = "Entrez une adresse..." }: { place
 
   useEffect(() => {
     if (activeIndex >= 0 && listRef.current) {
-      const el = listRef.current.children[activeIndex] as HTMLElement | undefined;
+      const el = listRef.current.children[activeIndex] as
+        | HTMLElement
+        | undefined;
       el?.scrollIntoView({ block: "nearest" });
     }
   }, [activeIndex]);
 
   return (
-    <div className="relative w-full max-w-xl mx-auto">
+    <div className="relative mx-auto w-full max-w-xl">
       <Input
         type="text"
         role="combobox"
@@ -102,8 +108,8 @@ export function AddressSearch({ placeholder = "Entrez une adresse..." }: { place
         onFocus={() => suggestions.length > 0 && setOpen(true)}
       />
       {loading && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+        <div className="absolute top-1/2 right-3 -translate-y-1/2">
+          <div className="border-muted-foreground h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
         </div>
       )}
       {open && (
@@ -111,7 +117,7 @@ export function AddressSearch({ placeholder = "Entrez une adresse..." }: { place
           id="address-listbox"
           role="listbox"
           ref={listRef}
-          className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-72 overflow-auto"
+          className="bg-popover absolute z-50 mt-1 max-h-72 w-full overflow-auto rounded-md border shadow-lg"
         >
           {suggestions.map((s, i) => (
             <li
@@ -126,7 +132,7 @@ export function AddressSearch({ placeholder = "Entrez une adresse..." }: { place
               onMouseEnter={() => setActiveIndex(i)}
             >
               <span className="font-medium">{s.label}</span>
-              <span className="block text-xs text-muted-foreground">
+              <span className="text-muted-foreground block text-xs">
                 {s.context}
               </span>
             </li>

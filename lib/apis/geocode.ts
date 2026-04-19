@@ -1,10 +1,13 @@
-import { GEOCODE_URL, GEOCODE_FALLBACK_URL, API_TIMEOUT_MS } from "../constants";
-import type {
-  GeocodeResponse,
-  GeocodeSuggestion,
-} from "../types/geocode";
+import {
+  GEOCODE_URL,
+  GEOCODE_FALLBACK_URL,
+  API_TIMEOUT_MS,
+} from "../constants";
+import type { GeocodeResponse, GeocodeSuggestion } from "../types/geocode";
 
-function toSuggestion(feature: GeocodeResponse["features"][number]): GeocodeSuggestion {
+function toSuggestion(
+  feature: GeocodeResponse["features"][number],
+): GeocodeSuggestion {
   const { properties, geometry } = feature;
   return {
     label: properties.label,

@@ -31,38 +31,38 @@ async function fetchLastResult(
   return data.data?.[0] ?? null;
 }
 
-export const fetchWaterQuality = cache(async (
-  codeCommune: string,
-): Promise<WaterQualityResult> => {
-  const results = await Promise.allSettled(
-    WATER_PARAMS.map((p) => fetchLastResult(codeCommune, p.code)),
-  );
+export const fetchWaterQuality = cache(
+  async (codeCommune: string): Promise<WaterQualityResult> => {
+    const results = await Promise.allSettled(
+      WATER_PARAMS.map((p) => fetchLastResult(codeCommune, p.code)),
+    );
 
-  const params: WaterParam[] = WATER_PARAMS.map((entry, i) => {
-    const result = results[i];
-    const dis = result.status === "fulfilled" ? result.value : null;
-    const rawValue = dis?.resultat_alphanumerique;
-    const parsed = rawValue
-      ? parseFloat(rawValue.replace(",", ".").replace(/^</, ""))
-      : null;
-    const value = parsed != null && !isNaN(parsed) ? parsed : null;
+    const params: WaterParam[] = WATER_PARAMS.map((entry, i) => {
+      const result = results[i];
+      const dis = result.status === "fulfilled" ? result.value : null;
+      const rawValue = dis?.resultat_alphanumerique;
+      const parsed = rawValue
+        ? parseFloat(rawValue.replace(",", ".").replace(/^</, ""))
+        : null;
+      const value = parsed != null && !isNaN(parsed) ? parsed : null;
 
-    let compliant: boolean | null = null;
-    if (value != null && entry.threshold != null) {
-      compliant = value <= entry.threshold;
-    }
+      let compliant: boolean | null = null;
+      if (value != null && entry.threshold != null) {
+        compliant = value <= entry.threshold;
+      }
 
-    return {
-      code: entry.code,
-      label: entry.label,
-      value,
-      unit: entry.unit,
-      threshold: entry.threshold,
-      date: dis?.date_prelevement ?? null,
-      compliant,
-      category: entry.category,
-    };
-  });
+      return {
+        code: entry.code,
+        label: entry.label,
+        value,
+        unit: entry.unit,
+        threshold: entry.threshold,
+        date: dis?.date_prelevement ?? null,
+        compliant,
+        category: entry.category,
+      };
+    });
 
-  return { params };
-});
+    return { params };
+  },
+);

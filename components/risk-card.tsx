@@ -22,7 +22,13 @@ interface RiskCardProps {
   communeOnly?: boolean;
 }
 
-export function RiskCard({ title, level, description, details, communeOnly }: RiskCardProps) {
+export function RiskCard({
+  title,
+  level,
+  description,
+  details,
+  communeOnly,
+}: RiskCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -38,14 +44,17 @@ export function RiskCard({ title, level, description, details, communeOnly }: Ri
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-1.5">
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-muted-foreground text-sm">{description}</p>
           {communeOnly && (
             <Tooltip>
-              <TooltipTrigger className="shrink-0 cursor-help text-xs text-muted-foreground/60">
+              <TooltipTrigger className="text-muted-foreground/60 shrink-0 cursor-help text-xs">
                 &#9432;
               </TooltipTrigger>
               <TooltipContent>
-                <p>Risque identifie au niveau communal, non confirme a cette adresse</p>
+                <p>
+                  Risque identifie au niveau communal, non confirme a cette
+                  adresse
+                </p>
               </TooltipContent>
             </Tooltip>
           )}
@@ -54,12 +63,12 @@ export function RiskCard({ title, level, description, details, communeOnly }: Ri
           <>
             <button
               onClick={() => setExpanded(!expanded)}
-              className="mt-2 text-xs text-primary underline-offset-4 hover:underline"
+              className="text-primary mt-2 text-xs underline-offset-4 hover:underline"
             >
               {expanded ? "Masquer les details" : "Voir les details"}
             </button>
             {expanded && (
-              <p className="mt-2 text-xs text-muted-foreground">{details}</p>
+              <p className="text-muted-foreground mt-2 text-xs">{details}</p>
             )}
           </>
         )}

@@ -21,9 +21,7 @@ interface Props {
   params: Promise<{ code: string }>;
 }
 
-async function getCommunesForDepartement(
-  depCode: string,
-): Promise<Commune[]> {
+async function getCommunesForDepartement(depCode: string): Promise<Commune[]> {
   const res = await fetch(
     `https://geo.api.gouv.fr/departements/${depCode}/communes?fields=nom,code,population`,
     { next: { revalidate: 604800 } },
@@ -83,14 +81,12 @@ export default async function DepartementPage({ params }: Props) {
     : [];
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-8">
+    <main className="mx-auto w-full max-w-4xl space-y-8 px-4 py-8">
       <div>
         <Breadcrumbs
           items={[{ name: `${name} (${code})`, href: `/departement/${code}` }]}
         />
-        <h1 className="text-2xl font-bold mt-2">
-          Departement {name}
-        </h1>
+        <h1 className="mt-2 text-2xl font-bold">Departement {name}</h1>
         <p className="text-muted-foreground mt-1">
           Diagnostic des communes du departement {name} ({code}) : risques
           naturels et industriels, qualite de l&apos;eau potable et performance
@@ -102,7 +98,7 @@ export default async function DepartementPage({ params }: Props) {
 
       {communes.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold mb-3">
+          <h2 className="mb-3 text-lg font-semibold">
             Communes principales ({communes.length})
           </h2>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -110,11 +106,11 @@ export default async function DepartementPage({ params }: Props) {
               <Link
                 key={c.code}
                 href={`/commune/${c.code}`}
-                className="rounded-lg border px-4 py-3 hover:bg-accent transition-colors"
+                className="hover:bg-accent rounded-lg border px-4 py-3 transition-colors"
               >
                 <span className="font-medium">{c.nom}</span>
                 {c.population != null && (
-                  <span className="text-sm text-muted-foreground ml-2">
+                  <span className="text-muted-foreground ml-2 text-sm">
                     {c.population.toLocaleString("fr-FR")} hab.
                   </span>
                 )}
@@ -126,7 +122,7 @@ export default async function DepartementPage({ params }: Props) {
 
       {region && siblingDepartements.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold mb-3">
+          <h2 className="mb-3 text-lg font-semibold">
             Departements en {region.name}
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -134,7 +130,7 @@ export default async function DepartementPage({ params }: Props) {
               <Link
                 key={dep.code}
                 href={`/departement/${dep.code}`}
-                className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+                className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
               >
                 {dep.name} ({dep.code})
               </Link>
@@ -144,15 +140,13 @@ export default async function DepartementPage({ params }: Props) {
       )}
 
       <section>
-        <h2 className="text-lg font-semibold mb-3">
-          Guides sur les risques
-        </h2>
+        <h2 className="mb-3 text-lg font-semibold">Guides sur les risques</h2>
         <div className="flex flex-wrap gap-2">
           {RISK_NAV.map((risk) => (
             <Link
               key={risk.type}
               href={`/risque/${risk.type}`}
-              className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+              className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
             >
               {risk.label}
             </Link>

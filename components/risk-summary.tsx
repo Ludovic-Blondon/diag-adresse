@@ -1,8 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import {
-  RISK_LEVEL_BADGE,
-  type RiskLevel,
-} from "@/lib/constants";
+import { RISK_LEVEL_BADGE, type RiskLevel } from "@/lib/constants";
 import type { ScoredRisk } from "@/lib/scoring";
 
 interface RiskSummaryProps {

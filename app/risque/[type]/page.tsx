@@ -51,7 +51,7 @@ export default async function RiskGuidePage({ params }: Props) {
   if (!guide) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-8 space-y-8">
+    <main className="mx-auto w-full max-w-3xl space-y-8 px-4 py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -59,10 +59,8 @@ export default async function RiskGuidePage({ params }: Props) {
         }}
       />
       <div>
-        <Breadcrumbs
-          items={[{ name: guide.title, href: `/risque/${type}` }]}
-        />
-        <h1 className="text-3xl font-bold mt-2">{guide.title}</h1>
+        <Breadcrumbs items={[{ name: guide.title, href: `/risque/${type}` }]} />
+        <h1 className="mt-2 text-3xl font-bold">{guide.title}</h1>
         <p className="text-muted-foreground mt-2">{guide.description}</p>
       </div>
 
@@ -70,7 +68,7 @@ export default async function RiskGuidePage({ params }: Props) {
         {guide.content.split("\n\n").map((paragraph, i) => {
           if (paragraph.startsWith("**") && paragraph.endsWith("**")) {
             return (
-              <h2 key={i} className="text-xl font-semibold mt-6 mb-3">
+              <h2 key={i} className="mt-6 mb-3 text-xl font-semibold">
                 {paragraph.replace(/\*\*/g, "")}
               </h2>
             );
@@ -79,19 +77,22 @@ export default async function RiskGuidePage({ params }: Props) {
             const [title, ...rest] = paragraph.split("\n");
             return (
               <div key={i}>
-                <h3 className="text-lg font-semibold mt-4 mb-2">
+                <h3 className="mt-4 mb-2 text-lg font-semibold">
                   {title.replace(/\*\*/g, "")}
                 </h3>
                 {rest.map((line, j) => {
                   if (line.startsWith("- ")) {
                     return (
-                      <li key={j} className="ml-4 text-sm text-muted-foreground">
+                      <li
+                        key={j}
+                        className="text-muted-foreground ml-4 text-sm"
+                      >
                         {line.slice(2)}
                       </li>
                     );
                   }
                   return (
-                    <p key={j} className="text-sm text-muted-foreground">
+                    <p key={j} className="text-muted-foreground text-sm">
                       {line}
                     </p>
                   );
@@ -100,25 +101,26 @@ export default async function RiskGuidePage({ params }: Props) {
             );
           }
           return (
-            <p key={i} className="text-sm text-muted-foreground leading-relaxed">
+            <p
+              key={i}
+              className="text-muted-foreground text-sm leading-relaxed"
+            >
               {paragraph}
             </p>
           );
         })}
       </article>
 
-      <div className="rounded-lg border bg-muted/50 p-6 space-y-3">
-        <h2 className="font-semibold">
-          Verifiez votre adresse
-        </h2>
-        <p className="text-sm text-muted-foreground">
+      <div className="bg-muted/50 space-y-3 rounded-lg border p-6">
+        <h2 className="font-semibold">Verifiez votre adresse</h2>
+        <p className="text-muted-foreground text-sm">
           Consultez le diagnostic complet pour votre adresse :
         </p>
         <AddressSearch />
       </div>
 
       <section>
-        <h2 className="text-lg font-semibold mb-3">
+        <h2 className="mb-3 text-lg font-semibold">
           Consultez le diagnostic d&apos;une grande ville
         </h2>
         <div className="flex flex-wrap gap-2">
@@ -126,24 +128,24 @@ export default async function RiskGuidePage({ params }: Props) {
             <Link
               key={city.code}
               href={`/commune/${city.code}`}
-              className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+              className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
             >
               {city.name}
             </Link>
           ))}
         </div>
         <details className="mt-3">
-          <summary className="text-xs text-muted-foreground cursor-pointer hover:underline">
+          <summary className="text-muted-foreground cursor-pointer text-xs hover:underline">
             Voir plus de villes
           </summary>
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="mt-3 flex flex-wrap gap-2">
             {TOP_COMMUNES.filter(
               (c) => !POPULAR_CITIES.some((p) => p.code === c.code),
             ).map((city) => (
               <Link
                 key={city.code}
                 href={`/commune/${city.code}`}
-                className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+                className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
               >
                 {city.name}
               </Link>
@@ -153,15 +155,15 @@ export default async function RiskGuidePage({ params }: Props) {
       </section>
 
       <details>
-        <summary className="text-lg font-semibold cursor-pointer hover:underline">
+        <summary className="cursor-pointer text-lg font-semibold hover:underline">
           Parcourir par departement
         </summary>
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className="mt-3 flex flex-wrap gap-2">
           {getActiveDepartements().map((dep) => (
             <Link
               key={dep.code}
               href={`/departement/${dep.code}`}
-              className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+              className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
             >
               {dep.name}
             </Link>
@@ -170,7 +172,7 @@ export default async function RiskGuidePage({ params }: Props) {
       </details>
 
       <section>
-        <h2 className="text-lg font-semibold mb-3">Autres guides</h2>
+        <h2 className="mb-3 text-lg font-semibold">Autres guides</h2>
         <div className="flex flex-wrap gap-2">
           {Object.entries(RISK_GUIDES)
             .filter(([key]) => key !== type)
@@ -178,7 +180,7 @@ export default async function RiskGuidePage({ params }: Props) {
               <Link
                 key={key}
                 href={`/risque/${key}`}
-                className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+                className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
               >
                 {g.title}
               </Link>

@@ -129,7 +129,7 @@ export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
   return (
     <div
       ref={containerRef}
-      className="w-full h-80 rounded-lg border overflow-hidden"
+      className="h-80 w-full overflow-hidden rounded-lg border"
     />
   );
 }

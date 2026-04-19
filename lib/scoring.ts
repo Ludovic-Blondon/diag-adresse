@@ -86,7 +86,11 @@ export function scoreRGA(data: RGAData): ScoredRisk {
 /** Returns null if the risk status is unknown/not applicable */
 function levelFromStatus(statut: string | undefined): RiskLevel | null {
   const s = statut?.toLowerCase() ?? "";
-  if (s.includes("inconnu") || s.includes("non connu") || s.includes("non concerne")) {
+  if (
+    s.includes("inconnu") ||
+    s.includes("non connu") ||
+    s.includes("non concerne")
+  ) {
     return null;
   }
   if (s.includes("existant") && !s.includes("non") && !s.includes("inex")) {
@@ -103,9 +107,19 @@ function resolveRiskStatus(
   statutCommune: string | undefined,
 ): { level: RiskLevel; description: string; source: RiskSource } | null {
   const adresseLevel = levelFromStatus(statutAdresse);
-  if (adresseLevel) return { level: adresseLevel, description: statutAdresse!, source: "adresse" };
+  if (adresseLevel)
+    return {
+      level: adresseLevel,
+      description: statutAdresse!,
+      source: "adresse",
+    };
   const communeLevel = levelFromStatus(statutCommune);
-  if (communeLevel) return { level: communeLevel, description: statutCommune!, source: "commune" };
+  if (communeLevel)
+    return {
+      level: communeLevel,
+      description: statutCommune!,
+      source: "commune",
+    };
   return null;
 }
 
@@ -115,7 +129,10 @@ export function scoreInondation(report: RiskReport): ScoredRisk | null {
   );
   if (!inondation) return null;
 
-  const resolved = resolveRiskStatus(inondation.libelleStatutAdresse, inondation.libelleStatutCommune);
+  const resolved = resolveRiskStatus(
+    inondation.libelleStatutAdresse,
+    inondation.libelleStatutCommune,
+  );
   if (!resolved) return null;
 
   return {
@@ -189,13 +206,23 @@ export function scoreRiskReport(report: RiskReport): ScoredRisk[] {
   const technos = report.risquesTechnologiques.filter((r) => r.present);
 
   // Skip risks already handled by dedicated endpoints
-  const handled = ["inondation", "séisme", "seisme", "radon", "argile", "retrait gonflement"];
+  const handled = [
+    "inondation",
+    "séisme",
+    "seisme",
+    "radon",
+    "argile",
+    "retrait gonflement",
+  ];
 
   for (const r of [...naturels, ...technos]) {
     const lbl = r.libelle?.toLowerCase() ?? "";
     if (handled.some((h) => lbl.includes(h))) continue;
 
-    const resolved = resolveRiskStatus(r.libelleStatutAdresse, r.libelleStatutCommune);
+    const resolved = resolveRiskStatus(
+      r.libelleStatutAdresse,
+      r.libelleStatutCommune,
+    );
     if (!resolved) continue;
 
     scored.push({

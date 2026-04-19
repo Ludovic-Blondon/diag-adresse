@@ -35,11 +35,11 @@ interface DashboardProps {
 
 function SectionSkeleton({ lines = 3 }: { lines?: number }) {
   return (
-    <div className="space-y-3 animate-pulse">
+    <div className="animate-pulse space-y-3">
       {Array.from({ length: lines }, (_, i) => (
         <div
           key={i}
-          className="h-4 rounded bg-muted"
+          className="bg-muted h-4 rounded"
           style={{ width: `${80 - i * 15}%` }}
         />
       ))}
@@ -57,10 +57,10 @@ export function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps) {
       <Separator />
 
       <section>
-        <h2 className="text-lg font-semibold mb-3">Carte</h2>
+        <h2 className="mb-3 text-lg font-semibold">Carte</h2>
         <Suspense
           fallback={
-            <div className="w-full h-80 rounded-lg border bg-muted animate-pulse" />
+            <div className="bg-muted h-80 w-full animate-pulse rounded-lg border" />
           }
         >
           <MapSection lon={lon} lat={lat} citycode={citycode} />
@@ -136,9 +136,9 @@ async function RiskSection({ lon, lat, citycode }: DashboardProps) {
   return (
     <>
       <section>
-        <h2 className="text-lg font-semibold mb-3">Synthese des risques</h2>
+        <h2 className="mb-3 text-lg font-semibold">Synthese des risques</h2>
         {allRisksFailed ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Les donnees de risques sont temporairement indisponibles. Veuillez
             reessayer plus tard.
           </p>
@@ -150,7 +150,7 @@ async function RiskSection({ lon, lat, citycode }: DashboardProps) {
       <Separator />
 
       <section>
-        <h2 className="text-lg font-semibold mb-3">Detail des risques</h2>
+        <h2 className="mb-3 text-lg font-semibold">Detail des risques</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {risks.map((risk) => (
             <RiskCard
@@ -191,13 +191,13 @@ async function WaterSection({ citycode }: { citycode: string }) {
 
   return (
     <section>
-      <h2 className="text-lg font-semibold mb-3">
+      <h2 className="mb-3 text-lg font-semibold">
         Qualite de l&apos;eau potable
       </h2>
       {data ? (
         <WaterQualityCard data={data} />
       ) : (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Donnees indisponibles pour cette commune.
         </p>
       )}
@@ -215,13 +215,13 @@ async function EnergySection({ citycode }: { citycode: string }) {
 
   return (
     <section>
-      <h2 className="text-lg font-semibold mb-3">
+      <h2 className="mb-3 text-lg font-semibold">
         Performance energetique (DPE)
       </h2>
       {data ? (
         <EnergyCard data={data} />
       ) : (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Aucun DPE disponible pour ce secteur.
         </p>
       )}

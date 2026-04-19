@@ -15,25 +15,48 @@ interface Props {
   searchParams: Promise<{ lon?: string; lat?: string; citycode?: string }>;
 }
 
-const resolveAddress = cache(async (slug: string, lon?: string, lat?: string, citycode?: string) => {
-  if (lon && lat && citycode) {
-    const lonN = parseFloat(lon);
-    const latN = parseFloat(lat);
-    if (!Number.isNaN(lonN) && !Number.isNaN(latN) && /^\d{5}$/.test(citycode)) {
-      return { label: slugToQuery(slug), lon: lonN, lat: latN, citycode, city: "" };
+const resolveAddress = cache(
+  async (slug: string, lon?: string, lat?: string, citycode?: string) => {
+    if (lon && lat && citycode) {
+      const lonN = parseFloat(lon);
+      const latN = parseFloat(lat);
+      if (
+        !Number.isNaN(lonN) &&
+        !Number.isNaN(latN) &&
+        /^\d{5}$/.test(citycode)
+      ) {
+        return {
+          label: slugToQuery(slug),
+          lon: lonN,
+          lat: latN,
+          citycode,
+          city: "",
+        };
+      }
     }
-  }
-  const results = await autocomplete(slugToQuery(slug), 1);
-  if (results.length === 0) return null;
-  const r = results[0];
-  return { label: r.label, lon: r.lon, lat: r.lat, citycode: r.citycode, city: r.city };
-});
+    const results = await autocomplete(slugToQuery(slug), 1);
+    if (results.length === 0) return null;
+    const r = results[0];
+    return {
+      label: r.label,
+      lon: r.lon,
+      lat: r.lat,
+      citycode: r.citycode,
+      city: r.city,
+    };
+  },
+);
 
-export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: Props): Promise<Metadata> {
   const { slug } = await params;
   const sp = await searchParams;
   const address = await resolveAddress(slug, sp.lon, sp.lat, sp.citycode);
-  const title = address ? `Diagnostic - ${address.label}` : "Diagnostic adresse";
+  const title = address
+    ? `Diagnostic - ${address.label}`
+    : "Diagnostic adresse";
   const description = address
     ? `Risques, qualite de l'eau et DPE pour ${address.label}`
     : "Diagnostic complet de votre adresse";
@@ -66,7 +89,7 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
   if (!address) {
     return (
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-16">
-        <h1 className="text-2xl font-bold mb-4">Adresse introuvable</h1>
+        <h1 className="mb-4 text-2xl font-bold">Adresse introuvable</h1>
         <p className="text-muted-foreground mb-8">
           Nous n&apos;avons pas pu identifier cette adresse.
         </p>
@@ -80,7 +103,7 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
   const communeName = address.city || `Commune ${address.citycode}`;
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-6">
+    <main className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -107,9 +130,9 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">{address.label}</h1>
-          <p className="text-sm text-muted-foreground">
-            Code INSEE : {address.citycode} — Coordonnees : {address.lat.toFixed(5)},{" "}
-            {address.lon.toFixed(5)}
+          <p className="text-muted-foreground text-sm">
+            Code INSEE : {address.citycode} — Coordonnees :{" "}
+            {address.lat.toFixed(5)}, {address.lon.toFixed(5)}
           </p>
         </div>
         <ShareButton

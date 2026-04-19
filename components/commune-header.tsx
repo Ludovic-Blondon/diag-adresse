@@ -18,12 +18,14 @@ export function CommuneHeader({
     <div>
       <Breadcrumbs
         items={[
-          ...(depName ? [{ name: depName, href: `/departement/${depCode}` }] : []),
+          ...(depName
+            ? [{ name: depName, href: `/departement/${depCode}` }]
+            : []),
           { name, href: `/commune/${codeInsee}` },
         ]}
       />
-      <h1 className="text-2xl font-bold mt-2">{name}</h1>
-      <p className="text-sm text-muted-foreground">Code INSEE : {codeInsee}</p>
+      <h1 className="mt-2 text-2xl font-bold">{name}</h1>
+      <p className="text-muted-foreground text-sm">Code INSEE : {codeInsee}</p>
     </div>
   );
 }

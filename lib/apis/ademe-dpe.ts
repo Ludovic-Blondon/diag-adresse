@@ -18,7 +18,10 @@ interface MetricAggResponse {
   total: number;
 }
 
-async function ademeFetch<T>(path: string, params: Record<string, string>): Promise<T> {
+async function ademeFetch<T>(
+  path: string,
+  params: Record<string, string>,
+): Promise<T> {
   const qs = new URLSearchParams(params);
   const url = `${ADEME_DPE_BASE_URL}${path}?${qs}`;
   const res = await fetch(url, {
@@ -29,45 +32,45 @@ async function ademeFetch<T>(path: string, params: Record<string, string>): Prom
   return res.json();
 }
 
-export const fetchDPEStats = cache(async (codeInsee: string): Promise<DPEStats> => {
-  const filter = `code_insee_ban:${codeInsee}`;
+export const fetchDPEStats = cache(
+  async (codeInsee: string): Promise<DPEStats> => {
+    const filter = `code_insee_ban:${codeInsee}`;
 
-  const [distResult, consoResult, gesResult] = await Promise.allSettled([
-    ademeFetch<ValuesAggResponse>("/values_agg", {
-      field: "etiquette_dpe",
-      qs: filter,
-      agg_size: "10",
-      size: "0",
-    }),
-    ademeFetch<MetricAggResponse>("/metric_agg", {
-      metric: "avg",
-      field: "conso_5_usages_par_m2_ep",
-      qs: filter,
-    }),
-    ademeFetch<MetricAggResponse>("/metric_agg", {
-      metric: "avg",
-      field: "emission_ges_5_usages_par_m2",
-      qs: filter,
-    }),
-  ]);
+    const [distResult, consoResult, gesResult] = await Promise.allSettled([
+      ademeFetch<ValuesAggResponse>("/values_agg", {
+        field: "etiquette_dpe",
+        qs: filter,
+        agg_size: "10",
+        size: "0",
+      }),
+      ademeFetch<MetricAggResponse>("/metric_agg", {
+        metric: "avg",
+        field: "conso_5_usages_par_m2_ep",
+        qs: filter,
+      }),
+      ademeFetch<MetricAggResponse>("/metric_agg", {
+        metric: "avg",
+        field: "emission_ges_5_usages_par_m2",
+        qs: filter,
+      }),
+    ]);
 
-  // Build distribution
-  const buckets =
-    distResult.status === "fulfilled" ? distResult.value.aggs : [];
-  const totalDPE =
-    distResult.status === "fulfilled" ? distResult.value.total : 0;
+    // Build distribution
+    const buckets =
+      distResult.status === "fulfilled" ? distResult.value.aggs : [];
+    const totalDPE =
+      distResult.status === "fulfilled" ? distResult.value.total : 0;
 
-  const distribution: DPEDistribution[] = DPE_LABELS.map((label) => {
-    const bucket = buckets.find(
-      (b) => b.value.toUpperCase() === label,
-    );
-    return { label: label as DPELabel, count: bucket?.total ?? 0 };
-  });
+    const distribution: DPEDistribution[] = DPE_LABELS.map((label) => {
+      const bucket = buckets.find((b) => b.value.toUpperCase() === label);
+      return { label: label as DPELabel, count: bucket?.total ?? 0 };
+    });
 
-  const avgConso =
-    consoResult.status === "fulfilled" ? consoResult.value.metric : null;
-  const avgGES =
-    gesResult.status === "fulfilled" ? gesResult.value.metric : null;
+    const avgConso =
+      consoResult.status === "fulfilled" ? consoResult.value.metric : null;
+    const avgGES =
+      gesResult.status === "fulfilled" ? gesResult.value.metric : null;
 
-  return { distribution, avgConso, avgGES, totalDPE };
-});
+    return { distribution, avgConso, avgGES, totalDPE };
+  },
+);

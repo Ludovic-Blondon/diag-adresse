@@ -15,10 +15,10 @@ export function DashboardSkeleton() {
 
       {/* Risk cards skeleton */}
       <section>
-        <Skeleton className="h-5 w-36 mb-3" />
+        <Skeleton className="mb-3 h-5 w-36" />
         <div className="grid gap-4 sm:grid-cols-2">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-lg border p-6 space-y-3">
+            <div key={i} className="space-y-3 rounded-lg border p-6">
               <div className="flex justify-between">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-5 w-16 rounded-full" />
@@ -31,10 +31,10 @@ export function DashboardSkeleton() {
 
       {/* Water skeleton */}
       <section>
-        <Skeleton className="h-5 w-48 mb-3" />
+        <Skeleton className="mb-3 h-5 w-48" />
         <div className="grid gap-4 sm:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-lg border p-6 space-y-3">
+            <div key={i} className="space-y-3 rounded-lg border p-6">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-8 w-20" />
               <Skeleton className="h-2 w-full rounded-full" />
@@ -45,8 +45,8 @@ export function DashboardSkeleton() {
 
       {/* DPE skeleton */}
       <section>
-        <Skeleton className="h-5 w-52 mb-3" />
-        <div className="rounded-lg border p-6 space-y-3">
+        <Skeleton className="mb-3 h-5 w-52" />
+        <div className="space-y-3 rounded-lg border p-6">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3">
               <Skeleton className="h-8 w-8 rounded" />

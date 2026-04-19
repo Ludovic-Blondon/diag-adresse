@@ -89,7 +89,8 @@ Les sols argileux gonflent en presence d'eau et se retractent lors des secheress
           "Les niveaux d'exposition vont de 0 (non concerne) a 3 (exposition forte). Utilisez DiagAdresse pour connaitre le niveau d'exposition de votre adresse a partir des donnees Georisques.",
       },
       {
-        question: "Quelles precautions prendre pour construire sur sol argileux ?",
+        question:
+          "Quelles precautions prendre pour construire sur sol argileux ?",
         answer:
           "Il est recommande de realiser des fondations profondes et rigides, d'installer un drainage perimetrique, d'eviter les plantations d'arbres trop pres des fondations, et de maintenir un taux d'humidite constant autour des fondations.",
       },

@@ -73,33 +73,33 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col">
         <ThemeProvider>
           <TooltipProvider>
             <header className="flex items-center justify-end px-4 py-2">
               <ThemeToggle />
             </header>
             {children}
-            <footer className="mt-auto border-t px-4 py-6 space-y-4">
-              <nav className="mx-auto max-w-4xl flex flex-wrap justify-center gap-x-4 gap-y-1">
+            <footer className="mt-auto space-y-4 border-t px-4 py-6">
+              <nav className="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-4 gap-y-1">
                 {RISK_NAV.map((r) => (
                   <Link
                     key={r.type}
                     href={`/risque/${r.type}`}
-                    className="text-xs text-muted-foreground hover:underline"
+                    className="text-muted-foreground text-xs hover:underline"
                   >
                     {r.label}
                   </Link>
                 ))}
               </nav>
               <details className="mx-auto max-w-6xl">
-                <summary className="text-xs text-muted-foreground cursor-pointer text-center hover:underline">
+                <summary className="text-muted-foreground cursor-pointer text-center text-xs hover:underline">
                   Tous les departements
                 </summary>
-                <div className="mt-4 columns-2 md:columns-3 lg:columns-4 gap-4">
+                <div className="mt-4 columns-2 gap-4 md:columns-3 lg:columns-4">
                   {REGIONS.map((region) => (
-                    <div key={region.name} className="break-inside-avoid mb-5">
-                      <h3 className="text-xs font-medium mb-1">
+                    <div key={region.name} className="mb-5 break-inside-avoid">
+                      <h3 className="mb-1 text-xs font-medium">
                         {region.name}
                       </h3>
                       <ul className="space-y-0.5">
@@ -107,7 +107,7 @@ export default function RootLayout({
                           <li key={dep.code}>
                             <Link
                               href={`/departement/${dep.code}`}
-                              className="text-xs text-muted-foreground hover:underline"
+                              className="text-muted-foreground text-xs hover:underline"
                             >
                               {dep.name} ({dep.code})
                             </Link>

@@ -60,7 +60,7 @@ export default async function CommunePage({ params }: Props) {
     .slice(0, 8);
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-8 space-y-6">
+    <main className="mx-auto w-full max-w-4xl space-y-6 px-4 py-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -92,7 +92,7 @@ export default async function CommunePage({ params }: Props) {
 
       {siblingCommunes.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold mb-3">
+          <h2 className="mb-3 text-lg font-semibold">
             Autres communes {depName ? `en ${depName}` : "du departement"}
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -100,7 +100,7 @@ export default async function CommunePage({ params }: Props) {
               <Link
                 key={c.code}
                 href={`/commune/${c.code}`}
-                className="rounded-full border px-3 py-1 text-sm hover:bg-accent transition-colors"
+                className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
               >
                 {c.name}
               </Link>

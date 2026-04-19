@@ -22,7 +22,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           __html: JSON.stringify(breadcrumbJsonLd(jsonLdItems)),
         }}
       />
-      <nav aria-label="Fil d'Ariane" className="text-sm text-muted-foreground">
+      <nav aria-label="Fil d'Ariane" className="text-muted-foreground text-sm">
         <ol className="flex flex-wrap items-center gap-1.5">
           {allItems.map((item, i) => (
             <li key={item.href} className="flex items-center gap-1.5">

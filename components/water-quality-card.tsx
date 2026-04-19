@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  WATER_CATEGORY_LABELS,
-  type WaterCategory,
-} from "@/lib/constants";
+import { WATER_CATEGORY_LABELS, type WaterCategory } from "@/lib/constants";
 import type { WaterQualityResult, WaterParam } from "@/lib/types/hubeau";
 
 interface WaterQualityCardProps {
@@ -24,11 +21,13 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
     new Set(),
   );
 
-  const keyParams = data.params.filter((p) => p.category === "indicateurs_cles");
+  const keyParams = data.params.filter(
+    (p) => p.category === "indicateurs_cles",
+  );
 
   if (data.params.every((p) => p.value == null)) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Aucune donnee disponible pour cette commune.
       </p>
     );
@@ -66,15 +65,16 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
           );
 
           return (
-            <div key={cat} className="rounded-lg border overflow-hidden">
+            <div key={cat} className="overflow-hidden rounded-lg border">
               <button
                 onClick={() => toggle(cat)}
-                className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium hover:bg-accent/50 transition-colors"
+                className="hover:bg-accent/50 flex w-full items-center justify-between px-4 py-3 text-sm font-medium transition-colors"
               >
                 <span className="flex items-center gap-2">
                   {WATER_CATEGORY_LABELS[cat]}
-                  <span className="text-xs text-muted-foreground font-normal">
-                    ({catParams.length} parametre{catParams.length > 1 ? "s" : ""})
+                  <span className="text-muted-foreground text-xs font-normal">
+                    ({catParams.length} parametre
+                    {catParams.length > 1 ? "s" : ""})
                   </span>
                 </span>
                 <span className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                     }`}
                   />
                   <svg
-                    className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}
+                    className={`text-muted-foreground h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -98,25 +98,29 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                 </span>
               </button>
               {isOpen && (
-                <div className="border-t px-4 py-3 overflow-x-auto">
+                <div className="overflow-x-auto border-t px-4 py-3">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-xs text-muted-foreground">
-                        <th className="text-left font-medium pb-2">Parametre</th>
-                        <th className="text-right font-medium pb-2">Valeur</th>
-                        <th className="text-right font-medium pb-2">Seuil</th>
-                        <th className="text-right font-medium pb-2">Statut</th>
+                      <tr className="text-muted-foreground text-xs">
+                        <th className="pb-2 text-left font-medium">
+                          Parametre
+                        </th>
+                        <th className="pb-2 text-right font-medium">Valeur</th>
+                        <th className="pb-2 text-right font-medium">Seuil</th>
+                        <th className="pb-2 text-right font-medium">Statut</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
                       {catParams.map((p) => (
                         <tr key={p.code}>
                           <td className="py-2 pr-4">{p.label}</td>
-                          <td className="py-2 text-right tabular-nums whitespace-nowrap">
+                          <td className="py-2 text-right whitespace-nowrap tabular-nums">
                             {p.value?.toFixed(2)}{" "}
-                            <span className="text-muted-foreground">{p.unit}</span>
+                            <span className="text-muted-foreground">
+                              {p.unit}
+                            </span>
                           </td>
-                          <td className="py-2 text-right text-muted-foreground tabular-nums whitespace-nowrap">
+                          <td className="text-muted-foreground py-2 text-right whitespace-nowrap tabular-nums">
                             {p.threshold != null
                               ? `${p.threshold} ${p.unit}`
                               : "—"}
@@ -133,7 +137,9 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                                 {p.compliant ? "OK" : "Depassement"}
                               </span>
                             ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
+                              <span className="text-muted-foreground text-xs">
+                                —
+                              </span>
                             )}
                           </td>
                         </tr>
@@ -141,7 +147,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                     </tbody>
                   </table>
                   {catParams[0]?.date && (
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-muted-foreground mt-2 text-xs">
                       Dernier prelevement : {catParams[0].date}
                     </p>
                   )}
@@ -159,7 +165,7 @@ function ParamCard({ param }: { param: WaterParam }) {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between text-sm font-medium">
           {param.label}
           {param.compliant != null && (
             <span
@@ -182,12 +188,14 @@ function ParamCard({ param }: { param: WaterParam }) {
                 {param.value.toFixed(param.value < 1 ? 2 : 1)}
               </span>
               {param.unit && (
-                <span className="text-sm text-muted-foreground">{param.unit}</span>
+                <span className="text-muted-foreground text-sm">
+                  {param.unit}
+                </span>
               )}
             </div>
             {param.threshold != null && (
               <>
-                <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+                <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
                   <div
                     className={`h-full rounded-full transition-all ${
                       param.compliant ? "bg-green-500" : "bg-red-500"
@@ -197,17 +205,17 @@ function ParamCard({ param }: { param: WaterParam }) {
                     }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   Seuil : {param.threshold} {param.unit}
                 </p>
               </>
             )}
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">Non mesure</p>
+          <p className="text-muted-foreground text-sm">Non mesure</p>
         )}
         {param.date && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             Prelevement : {param.date}
           </p>
         )}

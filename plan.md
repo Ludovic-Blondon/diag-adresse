@@ -8,84 +8,85 @@ Le diagnostic complet de votre adresse en France : risques naturels/industriels,
 
 ### API Adresse / Geocodage
 
-| Parametre | Detail |
-|---|---|
-| **Base URL (primaire)** | `https://data.geopf.fr/geocodage` |
-| **Fallback** | `https://api-adresse.data.gouv.fr` (ancien domaine, en fin de vie) |
-| **Endpoint search** | `GET /search?q=...&autocomplete=true&limit=5&type=housenumber` |
-| **Endpoint reverse** | `GET /reverse?lon=...&lat=...&limit=1` |
-| **Rate limit** | 50 req/s par IP |
-| **Auth** | Aucune |
-| **Format reponse** | GeoJSON FeatureCollection |
-| **Champs cles** | `properties.label`, `properties.citycode` (code INSEE), `properties.postcode`, `properties.city`, `properties.context`, `geometry.coordinates [lon, lat]` |
+| Parametre               | Detail                                                                                                                                                    |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Base URL (primaire)** | `https://data.geopf.fr/geocodage`                                                                                                                         |
+| **Fallback**            | `https://api-adresse.data.gouv.fr` (ancien domaine, en fin de vie)                                                                                        |
+| **Endpoint search**     | `GET /search?q=...&autocomplete=true&limit=5&type=housenumber`                                                                                            |
+| **Endpoint reverse**    | `GET /reverse?lon=...&lat=...&limit=1`                                                                                                                    |
+| **Rate limit**          | 50 req/s par IP                                                                                                                                           |
+| **Auth**                | Aucune                                                                                                                                                    |
+| **Format reponse**      | GeoJSON FeatureCollection                                                                                                                                 |
+| **Champs cles**         | `properties.label`, `properties.citycode` (code INSEE), `properties.postcode`, `properties.city`, `properties.context`, `geometry.coordinates [lon, lat]` |
 
 ### Georisques
 
-| Parametre | Detail |
-|---|---|
-| **Base URL** | `https://georisques.gouv.fr/api/v1` |
-| **Auth** | Aucune (V1). V2 necessite un token Bearer (inscription gratuite) |
-| **Rate limit** | `resultats_rapport_risque` limite a 1 req/s |
+| Parametre      | Detail                                                           |
+| -------------- | ---------------------------------------------------------------- |
+| **Base URL**   | `https://georisques.gouv.fr/api/v1`                              |
+| **Auth**       | Aucune (V1). V2 necessite un token Bearer (inscription gratuite) |
+| **Rate limit** | `resultats_rapport_risque` limite a 1 req/s                      |
 
 **Endpoints :**
 
-| Endpoint | Params cles | Usage |
-|---|---|---|
-| `/resultats_rapport_risque` | `latlon=lon,lat` OU `code_insee` | **Principal** : tous les risques en un appel |
-| `/radon` | `code_insee` | Classe potentiel radon (1 a 3) |
-| `/rga` | `latlon=lon,lat` | Retrait-gonflement argile (exposition 0 a 3) |
-| `/zonage_sismique` | `code_insee` | Zone sismicite (1 a 5) |
-| `/installations_classees` | `code_insee`, `latlon`, `rayon`, `statutSeveso` | ICPE / Seveso a proximite |
-| `/cavites` | `code_insee`, `latlon`, `rayon` (max 10000m) | Cavites souterraines |
-| `/tri_zonage` | `latlon` (requis) | Zones inondables TRI |
+| Endpoint                    | Params cles                                     | Usage                                        |
+| --------------------------- | ----------------------------------------------- | -------------------------------------------- |
+| `/resultats_rapport_risque` | `latlon=lon,lat` OU `code_insee`                | **Principal** : tous les risques en un appel |
+| `/radon`                    | `code_insee`                                    | Classe potentiel radon (1 a 3)               |
+| `/rga`                      | `latlon=lon,lat`                                | Retrait-gonflement argile (exposition 0 a 3) |
+| `/zonage_sismique`          | `code_insee`                                    | Zone sismicite (1 a 5)                       |
+| `/installations_classees`   | `code_insee`, `latlon`, `rayon`, `statutSeveso` | ICPE / Seveso a proximite                    |
+| `/cavites`                  | `code_insee`, `latlon`, `rayon` (max 10000m)    | Cavites souterraines                         |
+| `/tri_zonage`               | `latlon` (requis)                               | Zones inondables TRI                         |
 
 **Pieges :**
+
 - Format `latlon` = `longitude,latitude` (pas l'inverse)
 - `/rga` retourne un body vide (HTTP 200, pas de JSON) si hors couverture
 - `resultats_rapport_risque` : chaque risque a `present` (bool) + `libelleStatutCommune` / `libelleStatutAdresse`
 
 ### Hub'Eau - Qualite eau potable
 
-| Parametre | Detail |
-|---|---|
-| **Base URL** | `https://hubeau.eaufrance.fr/api/v1/qualite_eau_potable` |
-| **Auth** | Aucune |
-| **CORS** | Active |
-| **Mise a jour** | Mensuelle |
+| Parametre       | Detail                                                   |
+| --------------- | -------------------------------------------------------- |
+| **Base URL**    | `https://hubeau.eaufrance.fr/api/v1/qualite_eau_potable` |
+| **Auth**        | Aucune                                                   |
+| **CORS**        | Active                                                   |
+| **Mise a jour** | Mensuelle                                                |
 
 **Endpoints :**
 
-| Endpoint | Params cles | Usage |
-|---|---|---|
-| `/communes_udi` | `code_commune` | Obtenir les `code_reseau` des UDI |
-| `/resultats_dis` | `code_commune`, `code_parametre`, `sort=desc`, `size` | Resultats d'analyses |
+| Endpoint         | Params cles                                           | Usage                             |
+| ---------------- | ----------------------------------------------------- | --------------------------------- |
+| `/communes_udi`  | `code_commune`                                        | Obtenir les `code_reseau` des UDI |
+| `/resultats_dis` | `code_commune`, `code_parametre`, `sort=desc`, `size` | Resultats d'analyses              |
 
 **Codes parametres :**
 
-| Code | Libelle | Unite | Seuil reglementaire |
-|---|---|---|---|
-| 1340 | Nitrates | mg/L | 50 mg/L |
-| 6276 | Total pesticides | ug/L | 0.5 ug/L |
-| 1345 | Durete (TH) | degre F | Indicatif : <15 douce, 15-25 moyenne, >25 dure |
-| 1350 | Fluor | mg/L | 1.5 mg/L |
+| Code | Libelle          | Unite   | Seuil reglementaire                            |
+| ---- | ---------------- | ------- | ---------------------------------------------- |
+| 1340 | Nitrates         | mg/L    | 50 mg/L                                        |
+| 6276 | Total pesticides | ug/L    | 0.5 ug/L                                       |
+| 1345 | Durete (TH)      | degre F | Indicatif : <15 douce, 15-25 moyenne, >25 dure |
+| 1350 | Fluor            | mg/L    | 1.5 mg/L                                       |
 
 **Piege critique : Paris = 75056** (pas les codes arrondissement 75101-75120). Idem Lyon (69123) et Marseille (13055).
 
 ### Base DPE ADEME
 
-| Parametre | Detail |
-|---|---|
+| Parametre    | Detail                                                                     |
+| ------------ | -------------------------------------------------------------------------- |
 | **Base URL** | `https://data.ademe.fr/data-fair/api/v1/datasets/meg-83tjwtg8dyz4vv7h1dqe` |
-| **Auth** | Aucune |
-| **Volume** | ~8.2 millions de DPE |
+| **Auth**     | Aucune                                                                     |
+| **Volume**   | ~8.2 millions de DPE                                                       |
 
 **Endpoints :**
 
-| Endpoint | Params | Usage |
-|---|---|---|
-| `/values_agg` | `field=etiquette_dpe&qs=code_insee_ban:XXXXX&agg_size=10&size=0` | Distribution des etiquettes A-G |
-| `/metric_agg` | `metric=avg&field=conso_5_usages_par_m2_ep&qs=code_insee_ban:XXXXX` | Consommation moyenne |
-| `/metric_agg` | `metric=avg&field=emission_ges_5_usages_par_m2&qs=code_insee_ban:XXXXX` | Emission GES moyenne |
+| Endpoint      | Params                                                                  | Usage                           |
+| ------------- | ----------------------------------------------------------------------- | ------------------------------- |
+| `/values_agg` | `field=etiquette_dpe&qs=code_insee_ban:XXXXX&agg_size=10&size=0`        | Distribution des etiquettes A-G |
+| `/metric_agg` | `metric=avg&field=conso_5_usages_par_m2_ep&qs=code_insee_ban:XXXXX`     | Consommation moyenne            |
+| `/metric_agg` | `metric=avg&field=emission_ges_5_usages_par_m2&qs=code_insee_ban:XXXXX` | Emission GES moyenne            |
 
 **Note :** DPE utilise `code_insee_ban` qui accepte les codes arrondissement (75107 OK) — inverse de Hub'Eau.
 
@@ -95,16 +96,16 @@ Le diagnostic complet de votre adresse en France : risques naturels/industriels,
 
 ### Stack
 
-| Composant | Choix |
-|---|---|
-| Framework | Next.js 16.x (App Router) |
-| Langage | TypeScript strict |
-| Styling | Tailwind CSS 4.x |
-| UI components | shadcn/ui |
-| Carte | MapLibre GL JS + tuiles IGN (Phase 5) |
-| Validation | Zod |
-| Cache | Next.js fetch cache + ISR |
-| Deploiement | Vercel |
+| Composant     | Choix                                 |
+| ------------- | ------------------------------------- |
+| Framework     | Next.js 16.x (App Router)             |
+| Langage       | TypeScript strict                     |
+| Styling       | Tailwind CSS 4.x                      |
+| UI components | shadcn/ui                             |
+| Carte         | MapLibre GL JS + tuiles IGN (Phase 5) |
+| Validation    | Zod                                   |
+| Cache         | Next.js fetch cache + ISR             |
+| Deploiement   | Vercel                                |
 
 ### Structure des fichiers
 
@@ -189,6 +190,7 @@ npm install zod
 ```
 
 Fichiers :
+
 - `next.config.ts` : configurer `images.remotePatterns` si necessaire
 - `app/layout.tsx` : metadata de base (title, description, viewport), police Inter
 - `lib/constants.ts` : URLs de base des APIs, seuils reglementaires, mapping couleurs
@@ -198,6 +200,7 @@ Fichiers :
 Fichier : `lib/apis/geocode.ts`
 
 Deux fonctions :
+
 1. `autocomplete(query: string, limit?: number): Promise<GeocodeSuggestion[]>`
    - Appelle `data.geopf.fr/geocodage/search?q=...&autocomplete=true&limit=5`
    - Fallback sur `api-adresse.data.gouv.fr/search` si echec
@@ -207,6 +210,7 @@ Deux fonctions :
 Fichier : `lib/types/geocode.ts` -- types GeoJSON de la reponse
 
 Fichier : `lib/slug.ts` :
+
 - `slugify("20 Avenue de Segur 75007 Paris")` -> `"20-avenue-de-segur-75007-paris"`
 - `slugToQuery(slug)` pour reconstruire la query de geocodage
 
@@ -257,13 +261,16 @@ Fichier : `app/adresse/[slug]/page.tsx`
 Fichier : `lib/apis/georisques.ts`
 
 Fonction principale :
+
 ```
 fetchRiskReport(params: { codeInsee?: string; lon?: number; lat?: number }): Promise<RiskReport>
 ```
+
 - Appelle `/api/v1/resultats_rapport_risque?latlon=lon,lat`
 - Rate limit 1 req/s : implementer un rate limiter cote serveur
 
 Fonctions complementaires :
+
 ```
 fetchRadon(codeInsee: string): Promise<RadonData>
 fetchRGA(lon: number, lat: number): Promise<RGAData>
@@ -275,6 +282,7 @@ fetchCavites(params): Promise<CaviteData[]>
 Fichier : `lib/types/georisques.ts`
 
 **Decisions :**
+
 - Toujours envoyer `latlon=lon,lat` quand on a les coordonnees (resultats au niveau adresse)
 - ICPE : rayon 5000m par defaut, Seveso en priorite
 
@@ -285,6 +293,7 @@ Fichier : `lib/scoring.ts`
 4 niveaux : `negligible`, `faible`, `moyen`, `fort`
 
 Regles de mapping :
+
 - **Seisme** : zone 1 = negligible, 2 = faible, 3 = moyen, 4-5 = fort
 - **Radon** : classe 1 = faible, 2 = moyen, 3 = fort
 - **Argile (RGA)** : exposition 0 = negligible, 1 = faible, 2 = moyen, 3 = fort
@@ -296,10 +305,12 @@ Couleurs associees : vert, jaune, orange, rouge.
 ### Etape 2.3 -- Composants risques
 
 Fichier : `components/risk-card.tsx`
+
 - Props : `title`, `level`, `description`, `icon`, `details` (optionnel)
 - Carte shadcn/ui avec badge couleur, icone SVG, section depliable
 
 Fichier : `components/risk-summary.tsx`
+
 - Barre avec tous les risques en badges couleur
 - Resume textuel : "3 risques identifies dont 1 important"
 
@@ -335,11 +346,13 @@ fetchWaterQuality(codeCommune: string): Promise<WaterQualityResult>
 ```
 
 Strategie :
+
 1. Appeler `/communes_udi?code_commune=XXX` pour obtenir les `code_reseau`
 2. Pour chaque parametre cle (1340, 6276, 1345, 1350), appeler `/resultats_dis?code_commune=XXX&code_parametre=YYY&sort=desc&size=1` pour la derniere mesure
 3. Retourner objet structure avec derniere mesure + conformite
 
 Fichier : `lib/paris.ts` -- Mapping arrondissements :
+
 - 751XX -> 75056
 - 6938X -> 69123
 - 132XX -> 13055
@@ -361,6 +374,7 @@ fetchDPEStats(codeInsee: string): Promise<DPEStats>
 ```
 
 Strategie :
+
 1. `/values_agg` -> distribution des etiquettes A-G
 2. `/metric_agg` (conso) -> consommation moyenne kWh/m2/an
 3. `/metric_agg` (GES) -> emission GES moyenne kgCO2/m2/an
@@ -376,6 +390,7 @@ Fichier : `components/energy-card.tsx`
 ### Etape 3.5 -- Integration
 
 Mettre a jour `diagnostic-dashboard.tsx` :
+
 - Ajouter Hub'Eau et ADEME dans le `Promise.allSettled()`
 - Sections eau et energie avec Suspense boundaries separees
 
@@ -457,39 +472,39 @@ Fichier : `components/share-button.tsx`
 
 ## Edge cases critiques
 
-| Edge case | Solution |
-|---|---|
-| **Paris/Lyon/Marseille** | Hub'Eau veut le code commune global (75056), DPE veut le code arrondissement (75107) — deux mappings inverses |
-| **Georisques `/rga` body vide** | HTTP 200 + body vide si hors couverture — gerer ce cas |
-| **DOM-TOM** | Couverture limitee — afficher message adapte |
-| **Adresses sans numero (lieu-dit)** | Type `locality`/`street`, pas de coordonnees precises pour le RGA |
-| **Communes fusionnees** | Code INSEE peut avoir change, donnees historiques sur l'ancien code |
-| **Slug ambigu** | Stocker lon/lat/citycode dans les searchParams, re-geocoder si absents |
-| **Surconsommation API en dev** | `MOCK_APIS=true` pour utiliser des fixtures JSON |
+| Edge case                           | Solution                                                                                                      |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Paris/Lyon/Marseille**            | Hub'Eau veut le code commune global (75056), DPE veut le code arrondissement (75107) — deux mappings inverses |
+| **Georisques `/rga` body vide**     | HTTP 200 + body vide si hors couverture — gerer ce cas                                                        |
+| **DOM-TOM**                         | Couverture limitee — afficher message adapte                                                                  |
+| **Adresses sans numero (lieu-dit)** | Type `locality`/`street`, pas de coordonnees precises pour le RGA                                             |
+| **Communes fusionnees**             | Code INSEE peut avoir change, donnees historiques sur l'ancien code                                           |
+| **Slug ambigu**                     | Stocker lon/lat/citycode dans les searchParams, re-geocoder si absents                                        |
+| **Surconsommation API en dev**      | `MOCK_APIS=true` pour utiliser des fixtures JSON                                                              |
 
 ---
 
 ## Risques techniques
 
-| API | Risque | Mitigation |
-|---|---|---|
-| API Adresse (ancien) | Decomissionnement | Geoplateforme en primaire, ancien en fallback |
-| Georisques V1 | Deprecation au profit de V2 | S'inscrire pour token V2 (gratuit), abstraire le client |
-| Georisques `resultats_rapport_risque` | Rate limit 1 req/s | Cache 24h minimum, ne jamais appeler cote client |
-| Hub'Eau | Anomalies donnees possibles | Verifier dates de prelevement, bandeau d'avertissement |
-| ADEME DPE | Dataset ID potentiellement instable | Variable d'env `ADEME_DPE_DATASET_ID` |
-| ADEME DPE | Pas de DPE pour communes rurales | Afficher "Aucun DPE disponible" |
-| Toutes | Timeout / indisponibilite | `Promise.allSettled()`, timeout 10s, afficher sections disponibles |
+| API                                   | Risque                              | Mitigation                                                         |
+| ------------------------------------- | ----------------------------------- | ------------------------------------------------------------------ |
+| API Adresse (ancien)                  | Decomissionnement                   | Geoplateforme en primaire, ancien en fallback                      |
+| Georisques V1                         | Deprecation au profit de V2         | S'inscrire pour token V2 (gratuit), abstraire le client            |
+| Georisques `resultats_rapport_risque` | Rate limit 1 req/s                  | Cache 24h minimum, ne jamais appeler cote client                   |
+| Hub'Eau                               | Anomalies donnees possibles         | Verifier dates de prelevement, bandeau d'avertissement             |
+| ADEME DPE                             | Dataset ID potentiellement instable | Variable d'env `ADEME_DPE_DATASET_ID`                              |
+| ADEME DPE                             | Pas de DPE pour communes rurales    | Afficher "Aucun DPE disponible"                                    |
+| Toutes                                | Timeout / indisponibilite           | `Promise.allSettled()`, timeout 10s, afficher sections disponibles |
 
 ---
 
 ## Calendrier
 
-| Semaine | Phases | Resultat |
-|---|---|---|
-| **Sem 1** | Phase 1 + debut Phase 2 | Autocomplete fonctionnel, premiers risques |
-| **Sem 2** | Fin Phase 2 + Phase 3 | **MVP complet** — risques + eau + DPE |
-| **Sem 3** | Phase 4 + Phase 5 | Pages SEO + carte + partage — **pret pour lancement** |
+| Semaine   | Phases                  | Resultat                                              |
+| --------- | ----------------------- | ----------------------------------------------------- |
+| **Sem 1** | Phase 1 + debut Phase 2 | Autocomplete fonctionnel, premiers risques            |
+| **Sem 2** | Fin Phase 2 + Phase 3   | **MVP complet** — risques + eau + DPE                 |
+| **Sem 3** | Phase 4 + Phase 5       | Pages SEO + carte + partage — **pret pour lancement** |
 
 ## Dependances npm
 

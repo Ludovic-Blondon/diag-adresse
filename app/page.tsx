@@ -13,11 +13,11 @@ export default function Home() {
           __html: JSON.stringify(websiteJsonLd()),
         }}
       />
-      <div className="w-full max-w-2xl text-center space-y-8">
+      <div className="w-full max-w-2xl space-y-8 text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
           DiagAdresse
         </h1>
-        <p className="text-lg text-muted-foreground">
+        <p className="text-muted-foreground text-lg">
           Le diagnostic complet de votre adresse en France : risques naturels et
           industriels, qualite de l&apos;eau, performance energetique.
         </p>
@@ -25,7 +25,7 @@ export default function Home() {
         <AddressSearch />
 
         <section className="pt-8">
-          <h2 className="text-sm font-medium text-muted-foreground mb-4">
+          <h2 className="text-muted-foreground mb-4 text-sm font-medium">
             Villes populaires
           </h2>
           <div className="flex flex-wrap justify-center gap-2">
@@ -33,24 +33,24 @@ export default function Home() {
               <Link
                 key={city.code}
                 href={`/commune/${city.code}`}
-                className="rounded-full border px-4 py-1.5 text-sm hover:bg-accent transition-colors"
+                className="hover:bg-accent rounded-full border px-4 py-1.5 text-sm transition-colors"
               >
                 {city.name}
               </Link>
             ))}
           </div>
           <details className="mt-4">
-            <summary className="text-xs text-muted-foreground cursor-pointer hover:underline">
+            <summary className="text-muted-foreground cursor-pointer text-xs hover:underline">
               Voir plus de villes
             </summary>
-            <div className="flex flex-wrap justify-center gap-2 mt-3">
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
               {TOP_COMMUNES.filter(
                 (c) => !POPULAR_CITIES.some((p) => p.code === c.code),
               ).map((city) => (
                 <Link
                   key={city.code}
                   href={`/commune/${city.code}`}
-                  className="rounded-full border px-4 py-1.5 text-sm hover:bg-accent transition-colors"
+                  className="hover:bg-accent rounded-full border px-4 py-1.5 text-sm transition-colors"
                 >
                   {city.name}
                 </Link>

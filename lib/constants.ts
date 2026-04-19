@@ -37,8 +37,7 @@ export const RISK_LEVEL_BADGE: Record<RiskLevel, string> = {
     "bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-950 dark:text-yellow-300 dark:border-yellow-800",
   moyen:
     "bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800",
-  fort:
-    "bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
+  fort: "bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
 };
 
 export const RISK_LEVEL_LABELS: Record<RiskLevel, string> = {
@@ -75,36 +74,168 @@ export interface WaterParamDef {
 
 export const WATER_PARAMS: WaterParamDef[] = [
   // --- Indicateurs cles (affiches en cards) ---
-  { code: "1340", label: "Nitrates", unit: "mg/L", threshold: 50, category: "indicateurs_cles" },
-  { code: "6276", label: "Pesticides totaux", unit: "µg/L", threshold: 0.5, category: "indicateurs_cles" },
-  { code: "1345", label: "Durete (TH)", unit: "°F", threshold: null, category: "indicateurs_cles" },
-  { code: "1302", label: "pH", unit: "", threshold: null, category: "indicateurs_cles" },
+  {
+    code: "1340",
+    label: "Nitrates",
+    unit: "mg/L",
+    threshold: 50,
+    category: "indicateurs_cles",
+  },
+  {
+    code: "6276",
+    label: "Pesticides totaux",
+    unit: "µg/L",
+    threshold: 0.5,
+    category: "indicateurs_cles",
+  },
+  {
+    code: "1345",
+    label: "Durete (TH)",
+    unit: "°F",
+    threshold: null,
+    category: "indicateurs_cles",
+  },
+  {
+    code: "1302",
+    label: "pH",
+    unit: "",
+    threshold: null,
+    category: "indicateurs_cles",
+  },
 
   // --- Physico-chimie ---
-  { code: "1303", label: "Conductivite", unit: "µS/cm", threshold: null, category: "physicochimie" },
-  { code: "1295", label: "Turbidite", unit: "NFU", threshold: 2, category: "physicochimie" },
-  { code: "1301", label: "Temperature", unit: "°C", threshold: 25, category: "physicochimie" },
-  { code: "1398", label: "Chlore libre", unit: "mg/L", threshold: null, category: "physicochimie" },
-  { code: "1399", label: "Chlore total", unit: "mg/L", threshold: null, category: "physicochimie" },
+  {
+    code: "1303",
+    label: "Conductivite",
+    unit: "µS/cm",
+    threshold: null,
+    category: "physicochimie",
+  },
+  {
+    code: "1295",
+    label: "Turbidite",
+    unit: "NFU",
+    threshold: 2,
+    category: "physicochimie",
+  },
+  {
+    code: "1301",
+    label: "Temperature",
+    unit: "°C",
+    threshold: 25,
+    category: "physicochimie",
+  },
+  {
+    code: "1398",
+    label: "Chlore libre",
+    unit: "mg/L",
+    threshold: null,
+    category: "physicochimie",
+  },
+  {
+    code: "1399",
+    label: "Chlore total",
+    unit: "mg/L",
+    threshold: null,
+    category: "physicochimie",
+  },
 
   // --- Mineraux et ions ---
-  { code: "1350", label: "Fluor", unit: "mg/L", threshold: 1.5, category: "mineraux" },
-  { code: "1335", label: "Ammonium", unit: "mg/L", threshold: 0.1, category: "mineraux" },
-  { code: "1337", label: "Chlorures", unit: "mg/L", threshold: 250, category: "mineraux" },
-  { code: "1338", label: "Sulfates", unit: "mg/L", threshold: 250, category: "mineraux" },
-  { code: "1339", label: "Nitrites", unit: "mg/L", threshold: null, category: "mineraux" },
-  { code: "1374", label: "Calcium", unit: "mg/L", threshold: null, category: "mineraux" },
-  { code: "1372", label: "Magnesium", unit: "mg/L", threshold: null, category: "mineraux" },
+  {
+    code: "1350",
+    label: "Fluor",
+    unit: "mg/L",
+    threshold: 1.5,
+    category: "mineraux",
+  },
+  {
+    code: "1335",
+    label: "Ammonium",
+    unit: "mg/L",
+    threshold: 0.1,
+    category: "mineraux",
+  },
+  {
+    code: "1337",
+    label: "Chlorures",
+    unit: "mg/L",
+    threshold: 250,
+    category: "mineraux",
+  },
+  {
+    code: "1338",
+    label: "Sulfates",
+    unit: "mg/L",
+    threshold: 250,
+    category: "mineraux",
+  },
+  {
+    code: "1339",
+    label: "Nitrites",
+    unit: "mg/L",
+    threshold: null,
+    category: "mineraux",
+  },
+  {
+    code: "1374",
+    label: "Calcium",
+    unit: "mg/L",
+    threshold: null,
+    category: "mineraux",
+  },
+  {
+    code: "1372",
+    label: "Magnesium",
+    unit: "mg/L",
+    threshold: null,
+    category: "mineraux",
+  },
 
   // --- Metaux ---
-  { code: "1370", label: "Aluminium", unit: "µg/L", threshold: 200, category: "metaux" },
-  { code: "1393", label: "Fer total", unit: "µg/L", threshold: 200, category: "metaux" },
+  {
+    code: "1370",
+    label: "Aluminium",
+    unit: "µg/L",
+    threshold: 200,
+    category: "metaux",
+  },
+  {
+    code: "1393",
+    label: "Fer total",
+    unit: "µg/L",
+    threshold: 200,
+    category: "metaux",
+  },
 
   // --- Bacteriologie ---
-  { code: "1449", label: "Escherichia coli", unit: "n/100mL", threshold: 0, category: "bacteriologie" },
-  { code: "6455", label: "Enterocoques", unit: "n/100mL", threshold: 0, category: "bacteriologie" },
-  { code: "1447", label: "Coliformes", unit: "n/100mL", threshold: 0, category: "bacteriologie" },
-  { code: "1042", label: "Spores sulfito-reducteurs", unit: "n/100mL", threshold: 0, category: "bacteriologie" },
+  {
+    code: "1449",
+    label: "Escherichia coli",
+    unit: "n/100mL",
+    threshold: 0,
+    category: "bacteriologie",
+  },
+  {
+    code: "6455",
+    label: "Enterocoques",
+    unit: "n/100mL",
+    threshold: 0,
+    category: "bacteriologie",
+  },
+  {
+    code: "1447",
+    label: "Coliformes",
+    unit: "n/100mL",
+    threshold: 0,
+    category: "bacteriologie",
+  },
+  {
+    code: "1042",
+    label: "Spores sulfito-reducteurs",
+    unit: "n/100mL",
+    threshold: 0,
+    category: "bacteriologie",
+  },
 ];
 
 // --- DPE labels ---

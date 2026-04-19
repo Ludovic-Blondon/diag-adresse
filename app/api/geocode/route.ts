@@ -17,7 +17,8 @@ function isRateLimited(ip: string): boolean {
 }
 
 export async function GET(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (isRateLimited(ip)) {
     return NextResponse.json(
       { error: "Trop de requetes, veuillez reessayer dans une minute" },

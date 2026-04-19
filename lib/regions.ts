@@ -1,5 +1,5 @@
 import { DEPARTEMENTS, getDepartementCode } from "./departements";
-import { TOP_COMMUNES } from "./communes";
+import { TOP_COMMUNES, type TopCommune } from "./communes";
 
 export interface Region {
   name: string;
@@ -71,9 +71,7 @@ export function getRegionForDepartement(depCode: string): Region | undefined {
 }
 
 /** Get TOP_COMMUNES entries that belong to a given departement */
-export function getTopCommunesForDepartement(
-  depCode: string,
-): { code: string; name: string }[] {
+export function getTopCommunesForDepartement(depCode: string): TopCommune[] {
   return TOP_COMMUNES.filter((c) => getDepartementCode(c.code) === depCode);
 }
 

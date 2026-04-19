@@ -2,9 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
 import { generateCommuneMetadata } from "@/lib/seo";
-import { TOP_COMMUNES } from "@/lib/communes";
+import { TOP_COMMUNES, type TopCommune } from "@/lib/communes";
 import { AddressSearch } from "@/components/address-search";
-import { Breadcrumbs } from "@/components/breadcrumbs";
+import { CommuneHeader } from "@/components/commune-header";
 import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
 import { getDepartementCode, DEPARTEMENTS } from "@/lib/departements";
@@ -12,32 +12,42 @@ import { getTopCommunesForDepartement } from "@/lib/regions";
 
 export const revalidate = 604800; // 7 days
 
+export function generateStaticParams() {
+  return TOP_COMMUNES.map((c) => ({ codeInsee: c.code }));
+}
+
 interface Props {
   params: Promise<{ codeInsee: string }>;
 }
 
-async function getCommuneInfo(codeInsee: string) {
+type CommuneInfo =
+  | ({ kind: "known" } & TopCommune)
+  | { kind: "unknown"; code: string; name: string };
+
+function getCommuneInfo(codeInsee: string): CommuneInfo {
   const known = TOP_COMMUNES.find((c) => c.code === codeInsee);
-  if (known) return known;
-  // Try reverse geocode with a rough center — fallback
-  return { code: codeInsee, name: `Commune ${codeInsee}` };
+  if (known) return { kind: "known", ...known };
+  return { kind: "unknown", code: codeInsee, name: `Commune ${codeInsee}` };
 }
 
 export async function generateMetadata({ params }: Props) {
   const { codeInsee } = await params;
-  const commune = await getCommuneInfo(codeInsee);
+  const commune = getCommuneInfo(codeInsee);
   return generateCommuneMetadata(codeInsee, commune.name);
 }
 
 export default async function CommunePage({ params }: Props) {
   const { codeInsee } = await params;
-  const commune = await getCommuneInfo(codeInsee);
+  const commune = getCommuneInfo(codeInsee);
 
-  // Get approximate center via reverse geocode of the commune
-  // For now, use a simple approach: geocode the commune name
-  const { autocomplete } = await import("@/lib/apis/geocode");
-  const results = await autocomplete(commune.name, 1);
-  const center = results[0];
+  let center: { lat: number; lon: number } | undefined;
+  if (commune.kind === "known") {
+    center = { lat: commune.lat, lon: commune.lon };
+  } else {
+    const { autocomplete } = await import("@/lib/apis/geocode");
+    const results = await autocomplete(commune.name, 1);
+    center = results[0];
+  }
 
   if (!center) {
     notFound();
@@ -65,20 +75,12 @@ export default async function CommunePage({ params }: Props) {
           ),
         }}
       />
-      <div>
-        <Breadcrumbs
-          items={[
-            ...(depName
-              ? [{ name: depName, href: `/departement/${depCode}` }]
-              : []),
-            { name: commune.name, href: `/commune/${codeInsee}` },
-          ]}
-        />
-        <h1 className="text-2xl font-bold mt-2">{commune.name}</h1>
-        <p className="text-sm text-muted-foreground">
-          Code INSEE : {codeInsee}
-        </p>
-      </div>
+      <CommuneHeader
+        name={commune.name}
+        codeInsee={codeInsee}
+        depCode={depCode}
+        depName={depName}
+      />
 
       <AddressSearch placeholder="Affiner avec une adresse precise..." />
 

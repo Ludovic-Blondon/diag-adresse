@@ -35,24 +35,31 @@ export async function getCommuneByInseeCode(
   };
 }
 
+export interface PostalCommune {
+  code: string;
+  name: string;
+}
+
 /**
- * Resolve a postal code to a unique INSEE code.
- * Returns null if zero or multiple communes match (ambiguous).
+ * List communes matching a postal code, sorted alphabetically.
+ * Returns [] if zero matches or on error (fail-safe).
  * Used as a fallback when a /commune/[codeInsee] hit looks like a postal code.
  */
-export async function getInseeCodeByPostalCode(
+export async function getCommunesByPostalCode(
   postalCode: string,
-): Promise<string | null> {
-  const url = `${GEO_GOUV_BASE_URL}/communes?codePostal=${encodeURIComponent(postalCode)}&fields=code&format=json`;
+): Promise<PostalCommune[]> {
+  const url = `${GEO_GOUV_BASE_URL}/communes?codePostal=${encodeURIComponent(postalCode)}&fields=code,nom&format=json`;
   try {
     const res = await fetch(url, {
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
       next: { revalidate: 2592000 }, // 30 days
     });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { code: string }[];
-    return data.length === 1 ? data[0].code : null;
+    if (!res.ok) return [];
+    const data = (await res.json()) as { code: string; nom: string }[];
+    return data
+      .map((c) => ({ code: c.code, name: c.nom }))
+      .sort((a, b) => a.name.localeCompare(b.name, "fr"));
   } catch {
-    return null; // timeout / réseau → fail-safe, on laisse le notFound() s'appliquer
+    return []; // timeout / réseau → fail-safe, on laisse le notFound() s'appliquer
   }
 }

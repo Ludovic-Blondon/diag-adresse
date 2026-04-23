@@ -7,13 +7,14 @@ import { generateCommuneMetadata } from "@/lib/seo";
 import { TOP_COMMUNES } from "@/lib/communes";
 import { AddressSearch } from "@/components/address-search";
 import { CommuneHeader } from "@/components/commune-header";
+import { PostalDisambiguation } from "@/components/postal-disambiguation";
 import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
 import { getDepartementCode, DEPARTEMENTS } from "@/lib/departements";
 import { getTopCommunesForDepartement } from "@/lib/regions";
 import {
   getCommuneByInseeCode,
-  getInseeCodeByPostalCode,
+  getCommunesByPostalCode,
   type CommuneLookup,
 } from "@/lib/apis/geo-gouv";
 
@@ -35,13 +36,22 @@ const getCommuneInfo = cache(
   },
 );
 
+const getPostalMatches = cache(getCommunesByPostalCode);
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { codeInsee } = await params;
   const commune = await getCommuneInfo(codeInsee);
-  if (!commune) {
-    return { title: "Commune introuvable", robots: { index: false } };
+  if (commune) {
+    return generateCommuneMetadata(codeInsee, commune.name);
   }
-  return generateCommuneMetadata(codeInsee, commune.name);
+  const matches = await getPostalMatches(codeInsee);
+  if (matches.length > 1) {
+    return {
+      title: `Plusieurs communes pour le code postal ${codeInsee}`,
+      robots: { index: false },
+    };
+  }
+  return { title: "Commune introuvable", robots: { index: false } };
 }
 
 export default async function CommunePage({ params }: Props) {
@@ -49,9 +59,12 @@ export default async function CommunePage({ params }: Props) {
   const commune = await getCommuneInfo(codeInsee);
 
   if (!commune) {
-    const inseeFromPostal = await getInseeCodeByPostalCode(codeInsee);
-    if (inseeFromPostal && inseeFromPostal !== codeInsee) {
-      permanentRedirect(`/commune/${inseeFromPostal}`);
+    const matches = await getPostalMatches(codeInsee);
+    if (matches.length === 1 && matches[0].code !== codeInsee) {
+      permanentRedirect(`/commune/${matches[0].code}`);
+    }
+    if (matches.length > 1) {
+      return <PostalDisambiguation codeInsee={codeInsee} matches={matches} />;
     }
     notFound();
   }

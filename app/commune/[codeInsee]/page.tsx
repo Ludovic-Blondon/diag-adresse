@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
 import { generateCommuneMetadata } from "@/lib/seo";
 import { TOP_COMMUNES } from "@/lib/communes";
@@ -11,7 +11,11 @@ import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
 import { getDepartementCode, DEPARTEMENTS } from "@/lib/departements";
 import { getTopCommunesForDepartement } from "@/lib/regions";
-import { getCommuneByInseeCode, type CommuneLookup } from "@/lib/apis/geo-gouv";
+import {
+  getCommuneByInseeCode,
+  getInseeCodeByPostalCode,
+  type CommuneLookup,
+} from "@/lib/apis/geo-gouv";
 
 export const revalidate = 604800; // 7 days
 
@@ -45,6 +49,10 @@ export default async function CommunePage({ params }: Props) {
   const commune = await getCommuneInfo(codeInsee);
 
   if (!commune) {
+    const inseeFromPostal = await getInseeCodeByPostalCode(codeInsee);
+    if (inseeFromPostal && inseeFromPostal !== codeInsee) {
+      permanentRedirect(`/commune/${inseeFromPostal}`);
+    }
     notFound();
   }
 

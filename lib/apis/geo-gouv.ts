@@ -34,3 +34,25 @@ export async function getCommuneByInseeCode(
     lon: data.centre.coordinates[0],
   };
 }
+
+/**
+ * Resolve a postal code to a unique INSEE code.
+ * Returns null if zero or multiple communes match (ambiguous).
+ * Used as a fallback when a /commune/[codeInsee] hit looks like a postal code.
+ */
+export async function getInseeCodeByPostalCode(
+  postalCode: string,
+): Promise<string | null> {
+  const url = `${GEO_GOUV_BASE_URL}/communes?codePostal=${encodeURIComponent(postalCode)}&fields=code&format=json`;
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
+      next: { revalidate: 2592000 }, // 30 days
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { code: string }[];
+    return data.length === 1 ? data[0].code : null;
+  } catch {
+    return null; // timeout / réseau → fail-safe, on laisse le notFound() s'appliquer
+  }
+}

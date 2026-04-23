@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AddressSearch } from "@/components/address-search";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { LinkPendingIndicator } from "@/components/link-pending-indicator";
 import type { PostalCommune } from "@/lib/apis/geo-gouv";
 
 interface Props {
@@ -37,9 +38,10 @@ export function PostalDisambiguation({ codeInsee, matches }: Props) {
             <Link
               key={c.code}
               href={`/commune/${c.code}`}
-              className="hover:bg-accent rounded-lg border px-4 py-3 transition-colors"
+              className="hover:bg-accent flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors"
             >
               <span className="font-medium">{c.name}</span>
+              <LinkPendingIndicator />
             </Link>
           ))}
         </div>

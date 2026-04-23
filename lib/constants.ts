@@ -25,6 +25,9 @@ export const ADEME_DPE_BASE_URL =
   process.env.ADEME_DPE_BASE_URL ??
   "https://data.ademe.fr/data-fair/api/v1/datasets/meg-83tjwtg8dyz4vv7h1dqe";
 
+export const GEO_GOUV_BASE_URL =
+  process.env.GEO_GOUV_BASE_URL ?? "https://geo.api.gouv.fr";
+
 // --- Risk levels ---
 
 export const RISK_LEVELS = ["negligeable", "faible", "moyen", "fort"] as const;

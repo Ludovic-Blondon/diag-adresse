@@ -80,12 +80,17 @@ export default async function DepartementPage({ params }: Props) {
         .map((d) => ({ code: d, name: DEPARTEMENTS[d] }))
     : [];
 
+  const breadcrumbItems = region
+    ? [
+        { name: region.name, href: `/region/${region.code}` },
+        { name: `${name} (${code})`, href: `/departement/${code}` },
+      ]
+    : [{ name: `${name} (${code})`, href: `/departement/${code}` }];
+
   return (
     <main className="mx-auto w-full max-w-4xl space-y-8 px-4 py-8">
       <div>
-        <Breadcrumbs
-          items={[{ name: `${name} (${code})`, href: `/departement/${code}` }]}
-        />
+        <Breadcrumbs items={breadcrumbItems} />
         <h1 className="mt-2 text-2xl font-bold">Departement {name}</h1>
         <p className="text-muted-foreground mt-1">
           Diagnostic des communes du departement {name} ({code}) : risques
@@ -123,7 +128,13 @@ export default async function DepartementPage({ params }: Props) {
       {region && siblingDepartements.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold">
-            Departements en {region.name}
+            Departements en{" "}
+            <Link
+              href={`/region/${region.code}`}
+              className="hover:underline"
+            >
+              {region.name}
+            </Link>
           </h2>
           <div className="flex flex-wrap gap-2">
             {siblingDepartements.map((dep) => (

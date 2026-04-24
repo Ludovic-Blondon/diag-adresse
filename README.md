@@ -23,10 +23,10 @@ npx tsc --noEmit    # Verification des types
 
 ### Priorite moyenne
 
-- [ ] Ajouter des headers `Cache-Control` dans `next.config.ts` pour les assets statiques (Core Web Vitals)
-- [ ] Creer une page `/faq` dediee avec schema `FAQPage`
-- [ ] Creer des pages par region (`/region/[code]`)
-- [ ] Enrichir les guides risques avec plus de contenu longue traine
+- [x] Ajouter des headers `Cache-Control` dans `next.config.ts` pour les assets statiques (Core Web Vitals)
+- [x] Creer une page `/faq` dediee avec schema `FAQPage`
+- [x] Creer des pages par region (`/region/[code]`)
+- [x] Enrichir les guides risques avec plus de contenu longue traine
 
 ### Priorite basse
 

@@ -63,9 +63,7 @@ export default async function RegionPage({ params }: Props) {
   return (
     <main className="mx-auto w-full max-w-4xl space-y-8 px-4 py-8">
       <div>
-        <Breadcrumbs
-          items={[{ name: region.name, href: `/region/${code}` }]}
-        />
+        <Breadcrumbs items={[{ name: region.name, href: `/region/${code}` }]} />
         <h1 className="mt-2 text-2xl font-bold">Region {region.name}</h1>
         <p className="text-muted-foreground mt-1">
           Diagnostic des communes et departements de la region {region.name} :

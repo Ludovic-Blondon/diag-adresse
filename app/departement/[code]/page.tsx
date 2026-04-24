@@ -129,10 +129,7 @@ export default async function DepartementPage({ params }: Props) {
         <section>
           <h2 className="mb-3 text-lg font-semibold">
             Departements en{" "}
-            <Link
-              href={`/region/${region.code}`}
-              className="hover:underline"
-            >
+            <Link href={`/region/${region.code}`} className="hover:underline">
               {region.name}
             </Link>
           </h2>

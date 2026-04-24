@@ -223,10 +223,19 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
     intro:
       "Le retrait-gonflement des argiles est la deuxieme cause d'indemnisation au titre des catastrophes naturelles en France, derriere les inondations. Aggravation par le rechauffement climatique et les episodes de secheresse : 48% du territoire metropolitain est desormais classe en exposition moyenne ou forte. Les fissures sur les murs porteurs sont la consequence la plus visible.",
     keyFigures: [
-      { value: "48%", label: "du territoire metropolitain expose (moyen/fort)" },
+      {
+        value: "48%",
+        label: "du territoire metropolitain expose (moyen/fort)",
+      },
       { value: "2e", label: "poste d'indemnisation cat-nat" },
-      { value: "G1 PGC", label: "etude obligatoire a la vente en zone moyenne/forte" },
-      { value: "10 000 - 30 000 EUR", label: "cout moyen de reparation de fissures" },
+      {
+        value: "G1 PGC",
+        label: "etude obligatoire a la vente en zone moyenne/forte",
+      },
+      {
+        value: "10 000 - 30 000 EUR",
+        label: "cout moyen de reparation de fissures",
+      },
     ],
     sections: [
       {
@@ -275,12 +284,14 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
     relatedRisks: ["inondation", "cavites"],
     faq: [
       {
-        question: "Comment savoir si mon terrain est expose au retrait-gonflement des argiles ?",
+        question:
+          "Comment savoir si mon terrain est expose au retrait-gonflement des argiles ?",
         answer:
           "Les niveaux d'exposition vont de 0 (non concerne) a 3 (exposition forte). Utilisez DiagAdresse pour connaitre le niveau d'exposition de votre adresse a partir des donnees Georisques et du BRGM.",
       },
       {
-        question: "Quelles precautions prendre pour construire sur sol argileux ?",
+        question:
+          "Quelles precautions prendre pour construire sur sol argileux ?",
         answer:
           "Fondations profondes et rigides ancrees sous la zone de dessication, drainage perimetrique, chaînage structurel, eloignement des arbres a grand developpement et maintien d'une hygrometrie stable autour des fondations. Une etude G2 PRO doit detailler ces dispositions.",
       },
@@ -300,7 +311,8 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
           "Une etude G1 PGC coute en general 800 a 1 500 EUR pour une maison individuelle. Une etude G2 PRO, beaucoup plus detaillee, coute 2 500 a 5 000 EUR selon la surface et la complexite du projet. Le cout est a la charge du vendeur pour la G1 et du maitre d'ouvrage pour la G2.",
       },
       {
-        question: "Puis-je refuser une vente en cas d'etude geotechnique defavorable ?",
+        question:
+          "Puis-je refuser une vente en cas d'etude geotechnique defavorable ?",
         answer:
           "Si l'etude revele un risque significatif non mentionne au compromis, vous pouvez en principe renoncer a l'achat sans perdre les arrhes sous reserve des conditions suspensives prevues. Faites-vous conseiller par le notaire des la reception de l'etude.",
       },
@@ -421,7 +433,10 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
       { value: "~500 000", label: "ICPE recensees en France" },
       { value: "~1 300", label: "sites Seveso (seuil haut et bas)" },
       { value: "~700", label: "sites Seveso seuil haut" },
-      { value: "PPRT", label: "plan obligatoire autour de chaque Seveso seuil haut" },
+      {
+        value: "PPRT",
+        label: "plan obligatoire autour de chaque Seveso seuil haut",
+      },
     ],
     sections: [
       {
@@ -515,7 +530,10 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
     keyFigures: [
       { value: "500 000+", label: "cavites recensees en France" },
       { value: "3 000 km", label: "de galeries en Ile-de-France" },
-      { value: "IGC", label: "Inspection Generale des Carrieres (Paris, 92, 94)" },
+      {
+        value: "IGC",
+        label: "Inspection Generale des Carrieres (Paris, 92, 94)",
+      },
       { value: "Loi 2003", label: "obligation de recensement communal" },
     ],
     sections: [
@@ -582,7 +600,8 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
           "N'y descendez pas, ne la rebouchez pas. Signalez immediatement a la mairie et faites appel a un bureau d'etudes geotechnique pour une investigation. Prevenez votre assureur et, si vous etes en Ile-de-France, saisissez l'IGC. Les solutions de confortement (clavage, injection) doivent etre dimensionnees par un professionnel.",
       },
       {
-        question: "L'etude geotechnique est-elle obligatoire pour les cavites ?",
+        question:
+          "L'etude geotechnique est-elle obligatoire pour les cavites ?",
         answer:
           "Non, sauf en zone de Plan de Prevention des Risques cavites. Elle est cependant fortement recommandee a l'achat d'un bien situe en secteur connu pour ses cavites. Une etude G5 (recherche de cavites) coute 1 500 a 3 000 EUR pour une maison individuelle.",
       },

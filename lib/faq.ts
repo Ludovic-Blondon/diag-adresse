@@ -53,7 +53,8 @@ export const FAQ_SECTIONS: FaqSection[] = [
           "Oui, toutes les donnees proviennent d'API gouvernementales francaises. DiagAdresse n'ajoute ni ne modifie aucune valeur : les chiffres affiches correspondent a ceux publies par les operateurs publics. Les scores de risque (faible, moyen, fort) sont une agregation visuelle calculee par DiagAdresse a partir des valeurs brutes.",
       },
       {
-        question: "Pourquoi certaines informations manquent-elles pour mon adresse ?",
+        question:
+          "Pourquoi certaines informations manquent-elles pour mon adresse ?",
         answer:
           "Plusieurs causes sont possibles : la commune peut ne pas etre couverte par un PPR pour un risque donne, les prelevements d'eau potable recents peuvent manquer, les DPE sont publies a la maille du quartier (IRIS) donc indisponibles pour certaines petites communes. L'absence d'information dans une rubrique ne prejuge ni de la presence ni de l'absence du risque.",
       },
@@ -68,7 +69,8 @@ export const FAQ_SECTIONS: FaqSection[] = [
           "Six familles de risques : inondation, seisme, retrait-gonflement des argiles, radon, installations classees (ICPE / Seveso) et cavites souterraines. S'y ajoutent la qualite de l'eau potable (21 parametres) et la distribution des diagnostics de performance energetique (DPE) dans le quartier.",
       },
       {
-        question: "DiagAdresse remplace-t-il l'Etat des Risques et Pollutions ?",
+        question:
+          "DiagAdresse remplace-t-il l'Etat des Risques et Pollutions ?",
         answer:
           "Non. L'Etat des Risques et Pollutions (ERP), parfois appele Information Acquereur Locataire (IAL), est un document officiel obligatoire a la vente et a la location, qui doit etre fourni par le vendeur ou le bailleur. DiagAdresse vous permet de preparer votre analyse ou de verifier les informations, mais ne peut etre produit en lieu et place de l'ERP officiel.",
       },

@@ -91,6 +91,20 @@ export default function RootLayout({
                     {r.label}
                   </Link>
                 ))}
+                <Link
+                  href="/faq"
+                  className="text-muted-foreground text-xs hover:underline"
+                >
+                  FAQ
+                </Link>
+                <a
+                  href="https://github.com/Ludovic-Blondon/diag-adresse/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground text-xs hover:underline"
+                >
+                  Contact / signaler un probleme
+                </a>
               </nav>
               <details className="mx-auto max-w-6xl">
                 <summary className="text-muted-foreground cursor-pointer text-center text-xs hover:underline">
@@ -98,9 +112,14 @@ export default function RootLayout({
                 </summary>
                 <div className="mt-4 columns-2 gap-4 md:columns-3 lg:columns-4">
                   {REGIONS.map((region) => (
-                    <div key={region.name} className="mb-5 break-inside-avoid">
+                    <div key={region.code} className="mb-5 break-inside-avoid">
                       <h3 className="mb-1 text-xs font-medium">
-                        {region.name}
+                        <Link
+                          href={`/region/${region.code}`}
+                          className="hover:underline"
+                        >
+                          {region.name}
+                        </Link>
                       </h3>
                       <ul className="space-y-0.5">
                         {getDepartementsForRegion(region).map((dep) => (

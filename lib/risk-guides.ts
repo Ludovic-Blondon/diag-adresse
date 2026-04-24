@@ -1,3 +1,5 @@
+export const RISK_GUIDES_UPDATED_AT = "2026-04-24";
+
 export interface RiskKeyFigure {
   value: string;
   label: string;

@@ -116,7 +116,19 @@ export const REGIONS: Region[] = [
   {
     code: "outre-mer",
     name: "Outre-mer",
-    departements: ["971", "972", "973", "974", "975", "976"],
+    departements: [
+      "971",
+      "972",
+      "973",
+      "974",
+      "975",
+      "976",
+      "977",
+      "978",
+      "986",
+      "987",
+      "988",
+    ],
   },
 ];
 

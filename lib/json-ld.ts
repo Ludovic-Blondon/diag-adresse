@@ -58,6 +58,37 @@ export function faqPageJsonLd(
   };
 }
 
+export function articleJsonLd(opts: {
+  title: string;
+  description: string;
+  url: string;
+  datePublished: string;
+  dateModified: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: opts.title,
+    description: opts.description,
+    datePublished: opts.datePublished,
+    dateModified: opts.dateModified,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": opts.url,
+    },
+    author: {
+      "@type": "Organization",
+      name: "DiagAdresse",
+      url: BASE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "DiagAdresse",
+      url: BASE_URL,
+    },
+  };
+}
+
 export function placeJsonLd(opts: {
   name: string;
   description: string;

@@ -9,7 +9,9 @@ pnpm dev            # Serveur de developpement
 pnpm build          # Build de production
 pnpm start          # Serveur de production (apres build)
 pnpm lint           # ESLint
-npx tsc --noEmit    # Verification des types
+pnpm typecheck      # Verification des types TypeScript
+pnpm format         # Verifier le formatage Prettier
+pnpm format:write   # Appliquer le formatage Prettier
 ```
 
 ## TODO SEO

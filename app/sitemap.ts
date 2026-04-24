@@ -3,6 +3,7 @@ import { BASE_URL } from "@/lib/constants";
 import communeCodes from "@/lib/sitemap-communes.json";
 import { getActiveDepartements } from "@/lib/departements";
 import { REGIONS } from "@/lib/regions";
+import { ALL_ARTICLES } from "@/lib/articles";
 
 const RISK_TYPES = [
   "inondation",
@@ -29,7 +30,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.6,
     },
+    {
+      url: `${BASE_URL}/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
   ];
+
+  // Blog articles
+  for (const article of ALL_ARTICLES) {
+    pages.push({
+      url: `${BASE_URL}/blog/${article.slug}`,
+      lastModified: new Date(article.updatedAt),
+      changeFrequency: "monthly",
+      priority: 0.75,
+    });
+  }
 
   // Region pages
   for (const region of REGIONS) {

@@ -92,6 +92,12 @@ export default function RootLayout({
                   </Link>
                 ))}
                 <Link
+                  href="/blog"
+                  className="text-muted-foreground text-xs hover:underline"
+                >
+                  Blog
+                </Link>
+                <Link
                   href="/faq"
                   className="text-muted-foreground text-xs hover:underline"
                 >

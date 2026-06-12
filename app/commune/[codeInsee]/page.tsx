@@ -83,7 +83,7 @@ export default async function CommunePage({ params }: Props) {
           __html: JSON.stringify(
             placeJsonLd({
               name: commune.name,
-              description: `Diagnostic complet de ${commune.name} : risques naturels, qualite de l'eau, performance energetique.`,
+              description: `Diagnostic complet de ${commune.name} : risques naturels, qualité de l'eau, performance énergétique.`,
               latitude: commune.lat,
               longitude: commune.lon,
               url: `${BASE_URL}/commune/${codeInsee}`,
@@ -98,7 +98,7 @@ export default async function CommunePage({ params }: Props) {
         depName={depName}
       />
 
-      <AddressSearch placeholder="Affiner avec une adresse precise..." />
+      <AddressSearch placeholder="Affiner avec une adresse précise..." />
 
       <DiagnosticDashboard
         lon={commune.lon}
@@ -109,7 +109,7 @@ export default async function CommunePage({ params }: Props) {
       {siblingCommunes.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold">
-            Autres communes {depName ? `en ${depName}` : "du departement"}
+            Autres communes {depName ? `en ${depName}` : "du département"}
           </h2>
           <div className="flex flex-wrap gap-2">
             {siblingCommunes.map((c) => (

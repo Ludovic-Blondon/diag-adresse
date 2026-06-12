@@ -25,10 +25,10 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params;
   const region = getRegionByCode(code);
-  if (!region) return { title: "Region introuvable" };
+  if (!region) return { title: "Région introuvable" };
 
   const title = `Diagnostic en ${region.name}`;
-  const description = `Risques naturels et industriels, qualite de l'eau et performance energetique : consultez le diagnostic des communes et departements de la region ${region.name}.`;
+  const description = `Risques naturels et industriels, qualité de l'eau et performance énergétique : consultez le diagnostic des communes et départements de la région ${region.name}.`;
 
   return {
     title,
@@ -64,20 +64,20 @@ export default async function RegionPage({ params }: Props) {
     <main className="mx-auto w-full max-w-4xl space-y-8 px-4 py-8">
       <div>
         <Breadcrumbs items={[{ name: region.name, href: `/region/${code}` }]} />
-        <h1 className="mt-2 text-2xl font-bold">Region {region.name}</h1>
+        <h1 className="mt-2 text-2xl font-bold">Région {region.name}</h1>
         <p className="text-muted-foreground mt-1">
-          Diagnostic des communes et departements de la region {region.name} :
-          risques naturels et industriels, qualite de l&apos;eau potable et
-          performance energetique (DPE).
+          Diagnostic des communes et départements de la région {region.name} :
+          risques naturels et industriels, qualité de l&apos;eau potable et
+          performance énergétique (DPE).
         </p>
       </div>
 
-      <AddressSearch placeholder="Rechercher une adresse dans cette region..." />
+      <AddressSearch placeholder="Rechercher une adresse dans cette région..." />
 
       {departements.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold">
-            Departements ({departements.length})
+            Départements ({departements.length})
           </h2>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {departements.map((dep) => (
@@ -129,7 +129,7 @@ export default async function RegionPage({ params }: Props) {
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Autres regions</h2>
+        <h2 className="mb-3 text-lg font-semibold">Autres régions</h2>
         <div className="flex flex-wrap gap-2">
           {REGIONS.filter((r) => r.code !== code).map((r) => (
             <Link

@@ -58,7 +58,7 @@ export async function generateMetadata({
     ? `Diagnostic - ${address.label}`
     : "Diagnostic adresse";
   const description = address
-    ? `Risques, qualite de l'eau et DPE pour ${address.label}`
+    ? `Risques, qualité de l'eau et DPE pour ${address.label}`
     : "Diagnostic complet de votre adresse";
   return {
     title,
@@ -110,7 +110,7 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
           __html: JSON.stringify(
             placeJsonLd({
               name: address.label,
-              description: `Diagnostic complet pour ${address.label} : risques, qualite de l'eau, performance energetique.`,
+              description: `Diagnostic complet pour ${address.label} : risques, qualité de l'eau, performance énergétique.`,
               latitude: address.lat,
               longitude: address.lon,
               url: `${BASE_URL}/adresse/${slug}`,
@@ -131,7 +131,7 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
         <div>
           <h1 className="text-2xl font-bold">{address.label}</h1>
           <p className="text-muted-foreground text-sm">
-            Code INSEE : {address.citycode} — Coordonnees :{" "}
+            Code INSEE : {address.citycode} — Coordonnées :{" "}
             {address.lat.toFixed(5)}, {address.lon.toFixed(5)}
           </p>
         </div>

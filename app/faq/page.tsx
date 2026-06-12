@@ -7,9 +7,9 @@ import { faqPageJsonLd } from "@/lib/json-ld";
 import { ALL_FAQ_ENTRIES, FAQ_SECTIONS } from "@/lib/faq";
 import { RISK_NAV } from "@/lib/navigation";
 
-const title = "Questions frequentes sur DiagAdresse";
+const title = "Questions fréquentes sur DiagAdresse";
 const description =
-  "Reponses aux questions frequentes sur DiagAdresse : fonctionnement du service, sources de donnees, valeur juridique du diagnostic et confidentialite.";
+  "Réponses aux questions fréquentes sur DiagAdresse : fonctionnement du service, sources de données, valeur juridique du diagnostic et confidentialité.";
 
 export const metadata: Metadata = {
   title,
@@ -70,7 +70,7 @@ export default function FaqPage() {
       ))}
 
       <div className="bg-muted/50 space-y-3 rounded-lg border p-6">
-        <h2 className="font-semibold">Verifiez votre adresse</h2>
+        <h2 className="font-semibold">Vérifiez votre adresse</h2>
         <p className="text-muted-foreground text-sm">
           Lancez un diagnostic complet directement depuis votre adresse :
         </p>

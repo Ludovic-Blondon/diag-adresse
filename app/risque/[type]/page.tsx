@@ -71,7 +71,7 @@ export default async function RiskGuidePage({ params }: Props) {
       </header>
 
       <aside
-        aria-label="Chiffres cles"
+        aria-label="Chiffres clés"
         className="bg-muted/50 grid grid-cols-2 gap-3 rounded-lg border p-4 sm:grid-cols-4"
       >
         {guide.keyFigures.map((fig) => (
@@ -111,14 +111,14 @@ export default async function RiskGuidePage({ params }: Props) {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-xl font-semibold">Cout et assurance</h2>
+          <h2 className="text-xl font-semibold">Coût et assurance</h2>
           <p className="text-muted-foreground leading-relaxed">
             {guide.costAndInsurance}
           </p>
         </section>
 
         <section className="bg-muted/50 space-y-2 rounded-lg border p-5">
-          <h2 className="text-lg font-semibold">Obligations legales</h2>
+          <h2 className="text-lg font-semibold">Obligations légales</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {guide.legalObligations}
           </p>
@@ -127,7 +127,7 @@ export default async function RiskGuidePage({ params }: Props) {
 
       {relatedGuides.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Risques lies</h2>
+          <h2 className="mb-3 text-lg font-semibold">Risques liés</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {relatedGuides.map(({ slug, guide: g }) => (
               <Link
@@ -146,7 +146,7 @@ export default async function RiskGuidePage({ params }: Props) {
       )}
 
       <section>
-        <h2 className="mb-3 text-xl font-semibold">Questions frequentes</h2>
+        <h2 className="mb-3 text-xl font-semibold">Questions fréquentes</h2>
         <div className="space-y-2">
           {guide.faq.map((q) => (
             <details
@@ -165,7 +165,7 @@ export default async function RiskGuidePage({ params }: Props) {
       </section>
 
       <div className="bg-muted/50 space-y-3 rounded-lg border p-6">
-        <h2 className="font-semibold">Verifiez votre adresse</h2>
+        <h2 className="font-semibold">Vérifiez votre adresse</h2>
         <p className="text-muted-foreground text-sm">
           Consultez le diagnostic complet pour votre adresse :
         </p>
@@ -209,7 +209,7 @@ export default async function RiskGuidePage({ params }: Props) {
 
       <details>
         <summary className="cursor-pointer text-lg font-semibold hover:underline">
-          Parcourir par departement
+          Parcourir par département
         </summary>
         <div className="mt-3 flex flex-wrap gap-2">
           {getActiveDepartements().map((dep) => (

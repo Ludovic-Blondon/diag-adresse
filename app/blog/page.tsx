@@ -8,7 +8,7 @@ import { RISK_NAV } from "@/lib/navigation";
 
 const title = "Blog DiagAdresse";
 const description =
-  "Articles et guides pratiques sur les diagnostics immobiliers, les risques naturels, la performance energetique et la reglementation francaise.";
+  "Articles et guides pratiques sur les diagnostics immobiliers, les risques naturels, la performance énergétique et la réglementation française.";
 
 export const metadata: Metadata = {
   title,
@@ -70,7 +70,7 @@ export default function BlogIndexPage() {
       </section>
 
       <div className="bg-muted/50 space-y-3 rounded-lg border p-6">
-        <h2 className="font-semibold">Verifiez votre adresse</h2>
+        <h2 className="font-semibold">Vérifiez votre adresse</h2>
         <p className="text-muted-foreground text-sm">
           Lancez un diagnostic complet directement depuis votre adresse :
         </p>

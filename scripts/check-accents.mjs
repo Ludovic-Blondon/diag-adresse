@@ -83,9 +83,17 @@ function collectFiles() {
   return files;
 }
 
-/** Chaines sans espace ni apostrophe = slugs, cles, classes, URLs : ignorees. */
-function looksLikeProse(text) {
-  return /[ '’]/.test(text);
+/**
+ * Decide si un litteral de chaine doit etre scanne.
+ * - Texte avec espace ou apostrophe = prose visible.
+ * - Mot unique entierement composé de lettres et commençant par une majuscule
+ *   (ex. "Seisme", "Turbidite") = libelle probable : les slugs, cles et classes
+ *   Tailwind sont en minuscules, donc exclus.
+ * Les autres mono-mots (slugs, cles, URLs, classes, codes) sont ignores.
+ */
+function looksLikeRenderedText(text) {
+  if (/[ '’]/.test(text)) return true;
+  return /^\p{Lu}\p{L}*$/u.test(text);
 }
 
 function checkFile(file, rel) {
@@ -123,7 +131,7 @@ function checkFile(file, rel) {
       ts.isTemplateMiddle(node) ||
       ts.isTemplateTail(node)
     ) {
-      if (looksLikeProse(node.text)) {
+      if (looksLikeRenderedText(node.text)) {
         report(node.text, node.getStart(sf) + 1);
       }
     } else if (ts.isJsxText(node)) {

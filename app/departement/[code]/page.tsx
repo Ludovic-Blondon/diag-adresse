@@ -40,10 +40,10 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params;
   const name = DEPARTEMENTS[code];
-  if (!name) return { title: "Departement introuvable" };
+  if (!name) return { title: "Département introuvable" };
 
   const title = `Diagnostic ${name} (${code})`;
-  const description = `Risques naturels, qualite de l'eau et performance energetique : consultez le diagnostic des communes du departement ${name}.`;
+  const description = `Risques naturels, qualité de l'eau et performance énergétique : consultez le diagnostic des communes du département ${name}.`;
 
   return {
     title,
@@ -91,15 +91,15 @@ export default async function DepartementPage({ params }: Props) {
     <main className="mx-auto w-full max-w-4xl space-y-8 px-4 py-8">
       <div>
         <Breadcrumbs items={breadcrumbItems} />
-        <h1 className="mt-2 text-2xl font-bold">Departement {name}</h1>
+        <h1 className="mt-2 text-2xl font-bold">Département {name}</h1>
         <p className="text-muted-foreground mt-1">
-          Diagnostic des communes du departement {name} ({code}) : risques
-          naturels et industriels, qualite de l&apos;eau potable et performance
-          energetique (DPE).
+          Diagnostic des communes du département {name} ({code}) : risques
+          naturels et industriels, qualité de l&apos;eau potable et performance
+          énergétique (DPE).
         </p>
       </div>
 
-      <AddressSearch placeholder="Rechercher une adresse dans ce departement..." />
+      <AddressSearch placeholder="Rechercher une adresse dans ce département..." />
 
       {communes.length > 0 && (
         <section>
@@ -128,7 +128,7 @@ export default async function DepartementPage({ params }: Props) {
       {region && siblingDepartements.length > 0 && (
         <section>
           <h2 className="mb-3 text-lg font-semibold">
-            Departements en{" "}
+            Départements en{" "}
             <Link href={`/region/${region.code}`} className="hover:underline">
               {region.name}
             </Link>

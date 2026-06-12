@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { BASE_URL } from "./constants";
 
 const FALLBACK_DESCRIPTION = (name: string) =>
-  `Risques naturels et industriels, qualite de l'eau potable et performance energetique (DPE) pour ${name}. Consultez le diagnostic complet.`;
+  `Risques naturels et industriels, qualité de l'eau potable et performance énergétique (DPE) pour ${name}. Consultez le diagnostic complet.`;
 
 export function generateCommuneMetadata(
   codeInsee: string,

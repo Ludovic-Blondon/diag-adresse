@@ -19,7 +19,7 @@ export interface ScoredRisk {
   source?: RiskSource;
 }
 
-// --- Seisme ---
+// --- Séisme ---
 
 export function scoreSeismic(data: SeismicData): ScoredRisk {
   const zone = Number(data.data?.[0]?.code_zone) || 1;
@@ -32,9 +32,9 @@ export function scoreSeismic(data: SeismicData): ScoredRisk {
   };
   return {
     id: "seisme",
-    label: "Seisme",
+    label: "Séisme",
     level: map[zone] ?? "negligeable",
-    description: `Zone de sismicite ${zone}/5`,
+    description: `Zone de sismicité ${zone}/5`,
   };
 }
 
@@ -64,7 +64,7 @@ export function scoreRGA(data: RGAData): ScoredRisk {
       id: "argile",
       label: "Retrait-gonflement argile",
       level: "negligeable",
-      description: "Hors couverture ou non concerne",
+      description: "Hors couverture ou non concerné",
     };
   }
   const map: Record<number, RiskLevel> = {
@@ -153,7 +153,7 @@ export function scoreICPE(data: ICPEData): ScoredRisk {
       id: "icpe",
       label: "Sites industriels (ICPE)",
       level: "negligeable",
-      description: "Aucun site industriel a proximite",
+      description: "Aucun site industriel à proximité",
     };
   }
   const sevesoHaut = items.some((i) =>
@@ -177,23 +177,23 @@ export function scoreICPE(data: ICPEData): ScoredRisk {
   };
 }
 
-// --- Cavites ---
+// --- Cavités ---
 
 export function scoreCavites(data: CaviteData): ScoredRisk {
   const count = data.data?.length ?? 0;
   if (count === 0) {
     return {
       id: "cavites",
-      label: "Cavites souterraines",
+      label: "Cavités souterraines",
       level: "negligeable",
-      description: "Aucune cavite repertoriee a proximite",
+      description: "Aucune cavité répertoriée à proximité",
     };
   }
   return {
     id: "cavites",
-    label: "Cavites souterraines",
+    label: "Cavités souterraines",
     level: count >= 5 ? "moyen" : "faible",
-    description: `${count} cavite${count > 1 ? "s" : ""} a proximite`,
+    description: `${count} cavité${count > 1 ? "s" : ""} à proximité`,
   };
 }
 

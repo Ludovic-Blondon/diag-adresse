@@ -74,7 +74,7 @@ export default async function OGImage({
           color: "#a1a1aa",
         }}
       >
-        {"Risques • Eau • Energie"}
+        {"Risques • Eau • Énergie"}
       </div>
     </div>,
     { ...size },

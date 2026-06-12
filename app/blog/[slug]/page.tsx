@@ -105,13 +105,13 @@ export default async function BlogArticlePage({ params }: Props) {
         <h1 className="text-3xl font-bold">{article.title}</h1>
         <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
           <time dateTime={article.publishedAt}>
-            Publie le {dateFormatter.format(new Date(article.publishedAt))}
+            Publié le {dateFormatter.format(new Date(article.publishedAt))}
           </time>
           {article.updatedAt !== article.publishedAt && (
             <>
               <span aria-hidden="true">·</span>
               <time dateTime={article.updatedAt}>
-                Mis a jour le{" "}
+                Mis à jour le{" "}
                 {dateFormatter.format(new Date(article.updatedAt))}
               </time>
             </>
@@ -123,10 +123,10 @@ export default async function BlogArticlePage({ params }: Props) {
       </header>
 
       <aside
-        aria-label="A retenir"
+        aria-label="À retenir"
         className="bg-muted/50 space-y-2 rounded-lg border p-5"
       >
-        <h2 className="text-lg font-semibold">A retenir</h2>
+        <h2 className="text-lg font-semibold">À retenir</h2>
         <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
           {article.keyTakeaways.map((point) => (
             <li key={point}>{point}</li>
@@ -155,7 +155,7 @@ export default async function BlogArticlePage({ params }: Props) {
       </article>
 
       <section>
-        <h2 className="mb-3 text-xl font-semibold">Questions frequentes</h2>
+        <h2 className="mb-3 text-xl font-semibold">Questions fréquentes</h2>
         <div className="space-y-2">
           {article.faq.map((q) => (
             <details
@@ -175,7 +175,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
       {relatedRisks.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Risques lies</h2>
+          <h2 className="mb-3 text-lg font-semibold">Risques liés</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {relatedRisks.map(({ slug: s, guide }) => (
               <Link
@@ -195,7 +195,7 @@ export default async function BlogArticlePage({ params }: Props) {
 
       {relatedArticles.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Articles lies</h2>
+          <h2 className="mb-3 text-lg font-semibold">Articles liés</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             {relatedArticles.map((a) => (
               <Link
@@ -214,7 +214,7 @@ export default async function BlogArticlePage({ params }: Props) {
       )}
 
       <div className="bg-muted/50 space-y-3 rounded-lg border p-6">
-        <h2 className="font-semibold">Verifiez votre adresse</h2>
+        <h2 className="font-semibold">Vérifiez votre adresse</h2>
         <p className="text-muted-foreground text-sm">
           Consultez le diagnostic complet pour votre adresse :
         </p>

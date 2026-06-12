@@ -136,11 +136,11 @@ async function RiskSection({ lon, lat, citycode }: DashboardProps) {
   return (
     <>
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Synthese des risques</h2>
+        <h2 className="mb-3 text-lg font-semibold">Synthèse des risques</h2>
         {allRisksFailed ? (
           <p className="text-muted-foreground text-sm">
-            Les donnees de risques sont temporairement indisponibles. Veuillez
-            reessayer plus tard.
+            Les données de risques sont temporairement indisponibles. Veuillez
+            réessayer plus tard.
           </p>
         ) : (
           <RiskSummary risks={risks} />
@@ -150,7 +150,7 @@ async function RiskSection({ lon, lat, citycode }: DashboardProps) {
       <Separator />
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Detail des risques</h2>
+        <h2 className="mb-3 text-lg font-semibold">Détail des risques</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {risks.map((risk) => (
             <RiskCard
@@ -192,13 +192,13 @@ async function WaterSection({ citycode }: { citycode: string }) {
   return (
     <section>
       <h2 className="mb-3 text-lg font-semibold">
-        Qualite de l&apos;eau potable
+        Qualité de l&apos;eau potable
       </h2>
       {data ? (
         <WaterQualityCard data={data} />
       ) : (
         <p className="text-muted-foreground text-sm">
-          Donnees indisponibles pour cette commune.
+          Données indisponibles pour cette commune.
         </p>
       )}
     </section>
@@ -216,7 +216,7 @@ async function EnergySection({ citycode }: { citycode: string }) {
   return (
     <section>
       <h2 className="mb-3 text-lg font-semibold">
-        Performance energetique (DPE)
+        Performance énergétique (DPE)
       </h2>
       {data ? (
         <EnergyCard data={data} />

@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "DiagAdresse - Diagnostic complet de votre adresse",
     short_name: "DiagAdresse",
     description:
-      "Risques naturels et industriels, qualite de l'eau, performance energetique : le diagnostic complet de votre adresse en France.",
+      "Risques naturels et industriels, qualité de l'eau, performance énergétique : le diagnostic complet de votre adresse en France.",
     start_url: "/",
     display: "standalone",
     background_color: "#09090b",

@@ -23,7 +23,7 @@ export function EnergyCard({ data }: EnergyCardProps) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium">
-            Distribution des etiquettes DPE
+            Distribution des étiquettes DPE
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
@@ -81,7 +81,7 @@ export function EnergyCard({ data }: EnergyCardProps) {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">
-                Emission GES moyenne
+                Émission GES moyenne
               </CardTitle>
             </CardHeader>
             <CardContent>

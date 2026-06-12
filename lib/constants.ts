@@ -44,7 +44,7 @@ export const RISK_LEVEL_BADGE: Record<RiskLevel, string> = {
 };
 
 export const RISK_LEVEL_LABELS: Record<RiskLevel, string> = {
-  negligeable: "Negligeable",
+  negligeable: "Négligeable",
   faible: "Faible",
   moyen: "Moyen",
   fort: "Fort",
@@ -60,11 +60,11 @@ export type WaterCategory =
   | "bacteriologie";
 
 export const WATER_CATEGORY_LABELS: Record<WaterCategory, string> = {
-  indicateurs_cles: "Indicateurs cles",
+  indicateurs_cles: "Indicateurs clés",
   physicochimie: "Physico-chimie",
-  mineraux: "Mineraux et ions",
-  metaux: "Metaux",
-  bacteriologie: "Bacteriologie",
+  mineraux: "Minéraux et ions",
+  metaux: "Métaux",
+  bacteriologie: "Bactériologie",
 };
 
 export interface WaterParamDef {
@@ -76,7 +76,7 @@ export interface WaterParamDef {
 }
 
 export const WATER_PARAMS: WaterParamDef[] = [
-  // --- Indicateurs cles (affiches en cards) ---
+  // --- Indicateurs clés (affichés en cards) ---
   {
     code: "1340",
     label: "Nitrates",
@@ -93,7 +93,7 @@ export const WATER_PARAMS: WaterParamDef[] = [
   },
   {
     code: "1345",
-    label: "Durete (TH)",
+    label: "Dureté (TH)",
     unit: "°F",
     threshold: null,
     category: "indicateurs_cles",
@@ -109,21 +109,21 @@ export const WATER_PARAMS: WaterParamDef[] = [
   // --- Physico-chimie ---
   {
     code: "1303",
-    label: "Conductivite",
+    label: "Conductivité",
     unit: "µS/cm",
     threshold: null,
     category: "physicochimie",
   },
   {
     code: "1295",
-    label: "Turbidite",
+    label: "Turbidité",
     unit: "NFU",
     threshold: 2,
     category: "physicochimie",
   },
   {
     code: "1301",
-    label: "Temperature",
+    label: "Température",
     unit: "°C",
     threshold: 25,
     category: "physicochimie",
@@ -143,7 +143,7 @@ export const WATER_PARAMS: WaterParamDef[] = [
     category: "physicochimie",
   },
 
-  // --- Mineraux et ions ---
+  // --- Minéraux et ions ---
   {
     code: "1350",
     label: "Fluor",
@@ -188,13 +188,13 @@ export const WATER_PARAMS: WaterParamDef[] = [
   },
   {
     code: "1372",
-    label: "Magnesium",
+    label: "Magnésium",
     unit: "mg/L",
     threshold: null,
     category: "mineraux",
   },
 
-  // --- Metaux ---
+  // --- Métaux ---
   {
     code: "1370",
     label: "Aluminium",
@@ -210,7 +210,7 @@ export const WATER_PARAMS: WaterParamDef[] = [
     category: "metaux",
   },
 
-  // --- Bacteriologie ---
+  // --- Bactériologie ---
   {
     code: "1449",
     label: "Escherichia coli",
@@ -220,7 +220,7 @@ export const WATER_PARAMS: WaterParamDef[] = [
   },
   {
     code: "6455",
-    label: "Enterocoques",
+    label: "Entérocoques",
     unit: "n/100mL",
     threshold: 0,
     category: "bacteriologie",
@@ -234,7 +234,7 @@ export const WATER_PARAMS: WaterParamDef[] = [
   },
   {
     code: "1042",
-    label: "Spores sulfito-reducteurs",
+    label: "Spores sulfito-réducteurs",
     unit: "n/100mL",
     threshold: 0,
     category: "bacteriologie",

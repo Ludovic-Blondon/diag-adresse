@@ -52,7 +52,7 @@ export function RiskCard({
               </TooltipTrigger>
               <TooltipContent>
                 <p>
-                  Risque identifie au niveau communal, non confirme a cette
+                  Risque identifié au niveau communal, non confirmé à cette
                   adresse
                 </p>
               </TooltipContent>
@@ -65,7 +65,7 @@ export function RiskCard({
               onClick={() => setExpanded(!expanded)}
               className="text-primary mt-2 text-xs underline-offset-4 hover:underline"
             >
-              {expanded ? "Masquer les details" : "Voir les details"}
+              {expanded ? "Masquer les détails" : "Voir les détails"}
             </button>
             {expanded && (
               <p className="text-muted-foreground mt-2 text-xs">{details}</p>

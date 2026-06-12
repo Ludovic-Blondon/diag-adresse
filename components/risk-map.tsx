@@ -66,7 +66,7 @@ export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
       // Address marker
       new ml.Marker({ color: "#2563eb" })
         .setLngLat([lon, lat])
-        .setPopup(new ml.Popup().setText("Adresse recherchee"))
+        .setPopup(new ml.Popup().setText("Adresse recherchée"))
         .addTo(map);
 
       // ICPE markers

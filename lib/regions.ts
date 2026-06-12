@@ -10,12 +10,12 @@ export interface Region {
 export const REGIONS: Region[] = [
   {
     code: "ile-de-france",
-    name: "Ile-de-France",
+    name: "Île-de-France",
     departements: ["75", "77", "78", "91", "92", "93", "94", "95"],
   },
   {
     code: "auvergne-rhone-alpes",
-    name: "Auvergne-Rhone-Alpes",
+    name: "Auvergne-Rhône-Alpes",
     departements: [
       "01",
       "03",
@@ -33,7 +33,7 @@ export const REGIONS: Region[] = [
   },
   {
     code: "bourgogne-franche-comte",
-    name: "Bourgogne-Franche-Comte",
+    name: "Bourgogne-Franche-Comté",
     departements: ["21", "25", "39", "58", "70", "71", "89", "90"],
   },
   {
@@ -110,7 +110,7 @@ export const REGIONS: Region[] = [
   },
   {
     code: "provence-alpes-cote-d-azur",
-    name: "Provence-Alpes-Cote d'Azur",
+    name: "Provence-Alpes-Côte d'Azur",
     departements: ["04", "05", "06", "13", "83", "84"],
   },
   {

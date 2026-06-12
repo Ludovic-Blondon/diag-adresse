@@ -12,9 +12,9 @@ export function RiskSummary({ risks }: RiskSummaryProps) {
 
   let summary: string;
   if (identified.length === 0) {
-    summary = "Aucun risque significatif identifie";
+    summary = "Aucun risque significatif identifié";
   } else {
-    summary = `${identified.length} risque${identified.length > 1 ? "s" : ""} identifie${identified.length > 1 ? "s" : ""}`;
+    summary = `${identified.length} risque${identified.length > 1 ? "s" : ""} identifié${identified.length > 1 ? "s" : ""}`;
     if (fort > 0) {
       summary += ` dont ${fort} important${fort > 1 ? "s" : ""}`;
     }

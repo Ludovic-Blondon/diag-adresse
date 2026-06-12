@@ -39,6 +39,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Accents
+        run: node scripts/check-accents.mjs
+
       - name: Typecheck
         run: pnpm typecheck
 

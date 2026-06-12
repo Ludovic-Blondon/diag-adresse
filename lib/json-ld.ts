@@ -7,7 +7,7 @@ export function organizationJsonLd() {
     name: "DiagAdresse",
     url: BASE_URL,
     description:
-      "Diagnostic complet de votre adresse en France : risques naturels et industriels, qualite de l'eau, performance energetique.",
+      "Diagnostic complet de votre adresse en France : risques naturels et industriels, qualité de l'eau, performance énergétique.",
   };
 }
 

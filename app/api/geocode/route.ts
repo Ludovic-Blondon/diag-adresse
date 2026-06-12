@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   if (isRateLimited(ip)) {
     return NextResponse.json(
-      { error: "Trop de requetes, veuillez reessayer dans une minute" },
+      { error: "Trop de requêtes, veuillez réessayer dans une minute" },
       { status: 429 },
     );
   }
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
   if (!q || q.length < 3) {
     return NextResponse.json(
-      { error: "Le parametre q doit faire au moins 3 caracteres" },
+      { error: "Le paramètre q doit faire au moins 3 caractères" },
       { status: 400 },
     );
   }
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
     });
   } catch {
     return NextResponse.json(
-      { error: "Erreur du service de geocodage" },
+      { error: "Erreur du service de géocodage" },
       { status: 502 },
     );
   }

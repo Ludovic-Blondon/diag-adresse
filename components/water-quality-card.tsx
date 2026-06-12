@@ -28,7 +28,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
   if (data.params.every((p) => p.value == null)) {
     return (
       <p className="text-muted-foreground text-sm">
-        Aucune donnee disponible pour cette commune.
+        Aucune donnée disponible pour cette commune.
       </p>
     );
   }
@@ -73,7 +73,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                 <span className="flex items-center gap-2">
                   {WATER_CATEGORY_LABELS[cat]}
                   <span className="text-muted-foreground text-xs font-normal">
-                    ({catParams.length} parametre
+                    ({catParams.length} paramètre
                     {catParams.length > 1 ? "s" : ""})
                   </span>
                 </span>
@@ -103,7 +103,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                     <thead>
                       <tr className="text-muted-foreground text-xs">
                         <th className="pb-2 text-left font-medium">
-                          Parametre
+                          Paramètre
                         </th>
                         <th className="pb-2 text-right font-medium">Valeur</th>
                         <th className="pb-2 text-right font-medium">Seuil</th>
@@ -134,7 +134,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                                     : "text-red-600 dark:text-red-400"
                                 }`}
                               >
-                                {p.compliant ? "OK" : "Depassement"}
+                                {p.compliant ? "OK" : "Dépassement"}
                               </span>
                             ) : (
                               <span className="text-muted-foreground text-xs">
@@ -148,7 +148,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                   </table>
                   {catParams[0]?.date && (
                     <p className="text-muted-foreground mt-2 text-xs">
-                      Dernier prelevement : {catParams[0].date}
+                      Dernier prélèvement : {catParams[0].date}
                     </p>
                   )}
                 </div>
@@ -212,11 +212,11 @@ function ParamCard({ param }: { param: WaterParam }) {
             )}
           </>
         ) : (
-          <p className="text-muted-foreground text-sm">Non mesure</p>
+          <p className="text-muted-foreground text-sm">Non mesuré</p>
         )}
         {param.date && (
           <p className="text-muted-foreground text-xs">
-            Prelevement : {param.date}
+            Prélèvement : {param.date}
           </p>
         )}
       </CardContent>

@@ -26,11 +26,11 @@ export function PostalDisambiguation({ codeInsee, matches }: Props) {
         </h1>
         <p className="text-muted-foreground mt-1">
           Le code postal {codeInsee} couvre {matches.length} communes.
-          Selectionnez celle qui vous interesse pour acceder au diagnostic.
+          Sélectionnez celle qui vous intéresse pour accéder au diagnostic.
         </p>
       </div>
 
-      <AddressSearch placeholder="Ou cherchez une adresse precise..." />
+      <AddressSearch placeholder="Ou cherchez une adresse précise..." />
 
       <section>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">

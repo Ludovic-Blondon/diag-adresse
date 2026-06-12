@@ -52,9 +52,9 @@ export default function OGImage() {
       >
         <span>Risques naturels</span>
         <span>{"•"}</span>
-        <span>{"Qualite de l'eau"}</span>
+        <span>{"Qualité de l'eau"}</span>
         <span>{"•"}</span>
-        <span>Performance energetique</span>
+        <span>Performance énergétique</span>
       </div>
     </div>,
     { ...size },

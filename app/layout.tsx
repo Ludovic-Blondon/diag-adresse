@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: "%s | DiagAdresse",
   },
   description:
-    "Risques naturels et industriels, qualite de l'eau, performance energetique : le diagnostic complet de votre adresse en France.",
+    "Risques naturels et industriels, qualité de l'eau, performance énergétique : le diagnostic complet de votre adresse en France.",
   metadataBase: new URL(BASE_URL),
   verification: {
     google: "ngRiAmVkdtheHcVPZyf1g9QlfKjTtrKjHjaY5N6Jpis",
@@ -109,12 +109,12 @@ export default function RootLayout({
                   rel="noopener noreferrer"
                   className="text-muted-foreground text-xs hover:underline"
                 >
-                  Contact / signaler un probleme
+                  Contact / signaler un problème
                 </a>
               </nav>
               <details className="mx-auto max-w-6xl">
                 <summary className="text-muted-foreground cursor-pointer text-center text-xs hover:underline">
-                  Tous les departements
+                  Tous les départements
                 </summary>
                 <div className="mt-4 columns-2 gap-4 md:columns-3 lg:columns-4">
                   {REGIONS.map((region) => (

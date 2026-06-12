@@ -19,7 +19,7 @@ export default function Home() {
         </h1>
         <p className="text-muted-foreground text-lg">
           Le diagnostic complet de votre adresse en France : risques naturels et
-          industriels, qualite de l&apos;eau, performance energetique.
+          industriels, qualité de l&apos;eau, performance énergétique.
         </p>
 
         <AddressSearch />

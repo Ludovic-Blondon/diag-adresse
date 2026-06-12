@@ -32,7 +32,7 @@ export function ShareButton({ title, url }: ShareButtonProps) {
 
   return (
     <Button variant="outline" size="sm" onClick={handleShare}>
-      {copied ? "Lien copie !" : "Partager"}
+      {copied ? "Lien copié !" : "Partager"}
     </Button>
   );
 }

@@ -15,9 +15,9 @@ export const POPULAR_CITIES = [
 
 export const RISK_NAV = [
   { type: "inondation", label: "Inondation" },
-  { type: "seisme", label: "Seisme" },
+  { type: "seisme", label: "Séisme" },
   { type: "argile", label: "Retrait-gonflement argiles" },
   { type: "radon", label: "Radon" },
   { type: "icpe", label: "Sites industriels (ICPE)" },
-  { type: "cavites", label: "Cavites souterraines" },
+  { type: "cavites", label: "Cavités souterraines" },
 ];

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddressSearch } from "@/components/address-search";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { BASE_URL } from "@/lib/constants";
+import { generateRegionMetadata } from "@/lib/seo";
 import { RISK_NAV } from "@/lib/navigation";
 import {
   REGIONS,
@@ -27,30 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params;
   const region = getRegionByCode(code);
   if (!region) return { title: "Région introuvable" };
-
-  const title = `Diagnostic en ${region.name}`;
-  const description = `Risques naturels et industriels, qualité de l'eau et performance énergétique : consultez le diagnostic des communes et départements de la région ${region.name}.`;
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      locale: "fr_FR",
-      siteName: "DiagAdresse",
-      url: `${BASE_URL}/region/${code}`,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-    alternates: {
-      canonical: `/region/${code}`,
-    },
-  };
+  return generateRegionMetadata(region.name, code);
 }
 
 export default async function RegionPage({ params }: Props) {
@@ -65,11 +42,13 @@ export default async function RegionPage({ params }: Props) {
     <main className="mx-auto w-full max-w-4xl space-y-8 px-4 py-8">
       <div>
         <Breadcrumbs items={[{ name: region.name, href: `/region/${code}` }]} />
-        <h1 className="mt-2 text-2xl font-bold">Région {region.name}</h1>
+        <h1 className="mt-2 text-2xl font-bold">
+          Risques, eau potable et DPE — {region.name}
+        </h1>
         <p className="text-muted-foreground mt-1">
-          Diagnostic des communes et départements de la région {region.name} :
-          risques naturels et industriels, qualité de l&apos;eau potable et
-          performance énergétique (DPE).
+          Zone inondable, sismicité, argiles, radon, qualité de l&apos;eau du
+          robinet et DPE des départements et communes de la région {region.name}
+          .
         </p>
       </div>
 

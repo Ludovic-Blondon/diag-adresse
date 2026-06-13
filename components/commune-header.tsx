@@ -1,5 +1,6 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { communePath } from "@/lib/commune-url";
+import { prepositionVille, deVille } from "@/lib/commune-text";
 
 interface CommuneHeaderProps {
   name: string;
@@ -24,8 +25,13 @@ export function CommuneHeader({
           { name, href: communePath(codeInsee, name) },
         ]}
       />
-      <h1 className="mt-2 text-2xl font-bold">{name}</h1>
-      <p className="text-muted-foreground text-sm">Code INSEE : {codeInsee}</p>
+      <h1 className="mt-2 text-2xl font-bold">
+        Risques, qualité de l&apos;eau et DPE {prepositionVille(name)}
+      </h1>
+      <p className="text-muted-foreground text-sm">
+        Commune {deVille(name)} ({depName ? `${depCode} — ${depName}` : depCode}
+        ) · Code INSEE {codeInsee}
+      </p>
     </div>
   );
 }

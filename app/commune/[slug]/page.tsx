@@ -98,7 +98,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       robots: { index: false },
     };
   }
-  return generateCommuneMetadata(resolution.codeInsee, resolution.commune.name);
+  return generateCommuneMetadata(
+    resolution.codeInsee,
+    resolution.commune.name,
+    getDepartementCode(resolution.codeInsee),
+  );
 }
 
 export default async function CommunePage({ params }: Props) {
@@ -152,6 +156,7 @@ export default async function CommunePage({ params }: Props) {
         lon={commune.lon}
         lat={commune.lat}
         citycode={codeInsee}
+        communeName={commune.name}
       />
 
       {siblingCommunes.length > 0 && (

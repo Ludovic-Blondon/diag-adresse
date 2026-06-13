@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { TOP_COMMUNES } from "@/lib/communes";
+import { parseCommuneParam } from "@/lib/commune-url";
 
 export const runtime = "edge";
 export const alt = "Diagnostic commune";
@@ -26,9 +27,11 @@ async function resolveCommuneName(codeInsee: string): Promise<string> {
 export default async function OGImage({
   params,
 }: {
-  params: Promise<{ codeInsee: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { codeInsee } = await params;
+  const { slug } = await params;
+  const parsed = parseCommuneParam(slug);
+  const codeInsee = parsed.kind === "other" ? slug : parsed.insee;
   const label = await resolveCommuneName(codeInsee);
 
   return new ImageResponse(

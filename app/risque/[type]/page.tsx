@@ -9,6 +9,7 @@ import { RISK_GUIDES } from "@/lib/risk-guides";
 import { POPULAR_CITIES } from "@/lib/navigation";
 import { TOP_COMMUNES } from "@/lib/communes";
 import { getActiveDepartements } from "@/lib/departements";
+import { communePath } from "@/lib/commune-url";
 
 interface Props {
   params: Promise<{ type: string }>;
@@ -180,7 +181,7 @@ export default async function RiskGuidePage({ params }: Props) {
           {POPULAR_CITIES.map((city) => (
             <Link
               key={city.code}
-              href={`/commune/${city.code}`}
+              href={communePath(city.code, city.name)}
               className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
             >
               {city.name}
@@ -197,7 +198,7 @@ export default async function RiskGuidePage({ params }: Props) {
             ).map((city) => (
               <Link
                 key={city.code}
-                href={`/commune/${city.code}`}
+                href={communePath(city.code, city.name)}
                 className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
               >
                 {city.name}

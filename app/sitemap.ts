@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { BASE_URL } from "@/lib/constants";
-import communeCodes from "@/lib/sitemap-communes.json";
+import communesIndex from "@/lib/communes-index.json";
+import { communePath } from "@/lib/commune-url";
 import { getActiveDepartements } from "@/lib/departements";
 import { REGIONS } from "@/lib/regions";
 import { ALL_ARTICLES } from "@/lib/articles";
@@ -78,9 +79,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }
 
   // Commune pages (2280 communes with population >= 5000)
-  for (const code of communeCodes) {
+  for (const [code, nom] of communesIndex) {
     pages.push({
-      url: `${BASE_URL}/commune/${code}`,
+      url: `${BASE_URL}${communePath(code, nom)}`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8,

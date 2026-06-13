@@ -43,7 +43,7 @@ export interface PostalCommune {
 /**
  * List communes matching a postal code, sorted alphabetically.
  * Returns [] if zero matches or on error (fail-safe).
- * Used as a fallback when a /commune/[codeInsee] hit looks like a postal code.
+ * Used as a fallback when a /commune/[slug] hit looks like a postal code.
  */
 export async function getCommunesByPostalCode(
   postalCode: string,

@@ -7,6 +7,7 @@ import { BASE_URL } from "@/lib/constants";
 import { DEPARTEMENTS, getActiveDepartements } from "@/lib/departements";
 import { RISK_NAV } from "@/lib/navigation";
 import { getRegionForDepartement } from "@/lib/regions";
+import { communePath } from "@/lib/commune-url";
 
 export const revalidate = 604800; // 7 days
 export const dynamicParams = false;
@@ -110,7 +111,7 @@ export default async function DepartementPage({ params }: Props) {
             {communes.map((c) => (
               <Link
                 key={c.code}
-                href={`/commune/${c.code}`}
+                href={communePath(c.code, c.nom)}
                 className="hover:bg-accent rounded-lg border px-4 py-3 transition-colors"
               >
                 <span className="font-medium">{c.nom}</span>

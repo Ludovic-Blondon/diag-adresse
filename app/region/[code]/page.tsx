@@ -11,6 +11,7 @@ import {
   getRegionByCode,
   getTopCommunesForRegion,
 } from "@/lib/regions";
+import { communePath } from "@/lib/commune-url";
 
 export const dynamicParams = false;
 
@@ -103,7 +104,7 @@ export default async function RegionPage({ params }: Props) {
             {topCommunes.map((c) => (
               <Link
                 key={c.code}
-                href={`/commune/${c.code}`}
+                href={communePath(c.code, c.name)}
                 className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
               >
                 {c.name}

@@ -1,4 +1,4 @@
-import communeCodes from "./sitemap-communes.json";
+import communesIndex from "./communes-index.json";
 
 /** All French departements with code and name */
 export const DEPARTEMENTS: Record<string, string> = {
@@ -123,10 +123,10 @@ export function getDepartementCode(codeInsee: string): string {
   return codeInsee.slice(0, 2);
 }
 
-/** Get all departement codes that have at least one commune in sitemap */
+/** Get all departement codes that have at least one commune in the index */
 export function getActiveDepartements(): { code: string; name: string }[] {
   const seen = new Set<string>();
-  for (const code of communeCodes) {
+  for (const [code] of communesIndex) {
     seen.add(getDepartementCode(code));
   }
   return Array.from(seen)

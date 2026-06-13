@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BASE_URL } from "./constants";
+import { communePath } from "./commune-url";
 
 const FALLBACK_DESCRIPTION = (name: string) =>
   `Risques naturels et industriels, qualité de l'eau potable et performance énergétique (DPE) pour ${name}. Consultez le diagnostic complet.`;
@@ -10,6 +11,7 @@ export function generateCommuneMetadata(
 ): Metadata {
   const title = `Diagnostic ${communeName} (${codeInsee})`;
   const description = FALLBACK_DESCRIPTION(communeName);
+  const path = communePath(codeInsee, communeName);
 
   return {
     title,
@@ -20,7 +22,7 @@ export function generateCommuneMetadata(
       type: "website",
       locale: "fr_FR",
       siteName: "DiagAdresse",
-      url: `${BASE_URL}/commune/${codeInsee}`,
+      url: `${BASE_URL}${path}`,
     },
     twitter: {
       card: "summary_large_image",
@@ -28,7 +30,7 @@ export function generateCommuneMetadata(
       description,
     },
     alternates: {
-      canonical: `/commune/${codeInsee}`,
+      canonical: path,
     },
   };
 }

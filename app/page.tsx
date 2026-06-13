@@ -3,6 +3,7 @@ import { AddressSearch } from "@/components/address-search";
 import { websiteJsonLd } from "@/lib/json-ld";
 import { POPULAR_CITIES } from "@/lib/navigation";
 import { TOP_COMMUNES } from "@/lib/communes";
+import { communePath } from "@/lib/commune-url";
 
 export default function Home() {
   return (
@@ -32,7 +33,7 @@ export default function Home() {
             {POPULAR_CITIES.map((city) => (
               <Link
                 key={city.code}
-                href={`/commune/${city.code}`}
+                href={communePath(city.code, city.name)}
                 className="hover:bg-accent rounded-full border px-4 py-1.5 text-sm transition-colors"
               >
                 {city.name}
@@ -49,7 +50,7 @@ export default function Home() {
               ).map((city) => (
                 <Link
                   key={city.code}
-                  href={`/commune/${city.code}`}
+                  href={communePath(city.code, city.name)}
                   className="hover:bg-accent rounded-full border px-4 py-1.5 text-sm transition-colors"
                 >
                   {city.name}

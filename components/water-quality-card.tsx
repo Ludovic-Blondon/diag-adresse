@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { CircleHelp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { WATER_CATEGORY_LABELS, type WaterCategory } from "@/lib/constants";
 import type { WaterQualityResult, WaterParam } from "@/lib/types/hubeau";
 
@@ -161,12 +167,70 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
   );
 }
 
+// Dureté (TH) — échelle indicative en degrés français (°f)
+const HARDNESS_CODE = "1345";
+
+const HARDNESS_SCALE = [
+  { max: 7, range: "0–7°f", label: "très douce" },
+  { max: 15, range: "7–15°f", label: "douce" },
+  { max: 30, range: "15–30°f", label: "moyennement dure" },
+  { max: 40, range: "30–40°f", label: "dure" },
+  { max: Infinity, range: "> 40°f", label: "très dure" },
+] as const;
+
+function hardnessBand(value: number) {
+  return HARDNESS_SCALE.find((b) => value < b.max) ?? HARDNESS_SCALE.at(-1)!;
+}
+
+function HardnessHelp({ value }: { value: number }) {
+  const band = hardnessBand(value);
+  const formatted = value.toLocaleString("fr-FR", { maximumFractionDigits: 1 });
+  const calcaire = value >= 30 ? " (calcaire)" : "";
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        aria-label="Aide sur la dureté de l'eau"
+        className="text-muted-foreground/60 hover:text-muted-foreground shrink-0 cursor-help transition-colors"
+      >
+        <CircleHelp className="size-3.5" aria-hidden />
+      </TooltipTrigger>
+      <TooltipContent className="max-w-[16rem]">
+        <div className="space-y-1.5 text-left">
+          <p>
+            {formatted}°f correspond à une eau {band.label}
+            {calcaire}.
+          </p>
+          <div className="border-background/20 space-y-0.5 border-t pt-1.5">
+            <p className="text-background/60">Échelle indicative</p>
+            <ul className="space-y-0.5">
+              {HARDNESS_SCALE.map((b) => (
+                <li
+                  key={b.range}
+                  className={b === band ? "font-medium" : "text-background/60"}
+                >
+                  {b.range} : {b.label}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function ParamCard({ param }: { param: WaterParam }) {
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-sm font-medium">
-          {param.label}
+          <span className="flex items-center gap-1.5">
+            {param.label}
+            {param.code === HARDNESS_CODE && param.value != null && (
+              <HardnessHelp value={param.value} />
+            )}
+          </span>
           {param.compliant != null && (
             <span
               className={`text-xs font-semibold ${

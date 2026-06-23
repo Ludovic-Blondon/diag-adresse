@@ -74,7 +74,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
             <div key={cat} className="overflow-hidden rounded-lg border">
               <button
                 onClick={() => toggle(cat)}
-                className="hover:bg-accent/50 flex w-full items-center justify-between px-4 py-3 text-sm font-medium transition-colors"
+                className="hover:bg-accent/50 flex w-full cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium transition-colors"
               >
                 <span className="flex items-center gap-2">
                   {WATER_CATEGORY_LABELS[cat]}

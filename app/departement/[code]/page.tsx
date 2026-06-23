@@ -3,10 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddressSearch } from "@/components/address-search";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { BASE_URL } from "@/lib/constants";
+import { generateDepartementMetadata } from "@/lib/seo";
 import { DEPARTEMENTS, getActiveDepartements } from "@/lib/departements";
 import { RISK_NAV } from "@/lib/navigation";
 import { getRegionForDepartement } from "@/lib/regions";
+import { communePath } from "@/lib/commune-url";
 
 export const revalidate = 604800; // 7 days
 export const dynamicParams = false;
@@ -41,30 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params;
   const name = DEPARTEMENTS[code];
   if (!name) return { title: "Département introuvable" };
-
-  const title = `Diagnostic ${name} (${code})`;
-  const description = `Risques naturels, qualité de l'eau et performance énergétique : consultez le diagnostic des communes du département ${name}.`;
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "website",
-      locale: "fr_FR",
-      siteName: "DiagAdresse",
-      url: `${BASE_URL}/departement/${code}`,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-    alternates: {
-      canonical: `/departement/${code}`,
-    },
-  };
+  return generateDepartementMetadata(name, code);
 }
 
 export default async function DepartementPage({ params }: Props) {
@@ -91,11 +69,12 @@ export default async function DepartementPage({ params }: Props) {
     <main className="mx-auto w-full max-w-4xl space-y-8 px-4 py-8">
       <div>
         <Breadcrumbs items={breadcrumbItems} />
-        <h1 className="mt-2 text-2xl font-bold">Département {name}</h1>
+        <h1 className="mt-2 text-2xl font-bold">
+          Risques naturels, eau potable et DPE — {name}
+        </h1>
         <p className="text-muted-foreground mt-1">
-          Diagnostic des communes du département {name} ({code}) : risques
-          naturels et industriels, qualité de l&apos;eau potable et performance
-          énergétique (DPE).
+          Zone inondable, sismicité, argiles, radon, qualité de l&apos;eau du
+          robinet et DPE des communes du département {name} ({code}).
         </p>
       </div>
 
@@ -110,7 +89,7 @@ export default async function DepartementPage({ params }: Props) {
             {communes.map((c) => (
               <Link
                 key={c.code}
-                href={`/commune/${c.code}`}
+                href={communePath(c.code, c.nom)}
                 className="hover:bg-accent rounded-lg border px-4 py-3 transition-colors"
               >
                 <span className="font-medium">{c.nom}</span>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AddressSearch } from "@/components/address-search";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { LinkPendingIndicator } from "@/components/link-pending-indicator";
+import { communePath } from "@/lib/commune-url";
 import type { PostalCommune } from "@/lib/apis/geo-gouv";
 
 interface Props {
@@ -17,6 +18,8 @@ export function PostalDisambiguation({ codeInsee, matches }: Props) {
           items={[
             {
               name: `Code postal ${codeInsee}`,
+              // Self-link: this page lives at /commune/{postalCode} (noindex);
+              // there is no single commune name to build a canonical slug from.
               href: `/commune/${codeInsee}`,
             },
           ]}
@@ -37,7 +40,7 @@ export function PostalDisambiguation({ codeInsee, matches }: Props) {
           {matches.map((c) => (
             <Link
               key={c.code}
-              href={`/commune/${c.code}`}
+              href={communePath(c.code, c.name)}
               className="hover:bg-accent flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors"
             >
               <span className="font-medium">{c.name}</span>

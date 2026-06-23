@@ -1,5 +1,6 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { Skeleton } from "@/components/ui/skeleton";
+import { communePath } from "@/lib/commune-url";
+import { prepositionVille, deVille } from "@/lib/commune-text";
 
 interface CommuneHeaderProps {
   name: string;
@@ -21,21 +22,16 @@ export function CommuneHeader({
           ...(depName
             ? [{ name: depName, href: `/departement/${depCode}` }]
             : []),
-          { name, href: `/commune/${codeInsee}` },
+          { name, href: communePath(codeInsee, name) },
         ]}
       />
-      <h1 className="mt-2 text-2xl font-bold">{name}</h1>
-      <p className="text-muted-foreground text-sm">Code INSEE : {codeInsee}</p>
-    </div>
-  );
-}
-
-export function CommuneHeaderSkeleton() {
-  return (
-    <div className="space-y-2">
-      <Skeleton className="h-4 w-48" />
-      <Skeleton className="h-8 w-64" />
-      <Skeleton className="h-4 w-40" />
+      <h1 className="mt-2 text-2xl font-bold">
+        Risques, qualité de l&apos;eau et DPE {prepositionVille(name)}
+      </h1>
+      <p className="text-muted-foreground text-sm">
+        Commune {deVille(name)} ({depName ? `${depCode} — ${depName}` : depCode}
+        ) · Code INSEE {codeInsee}
+      </p>
     </div>
   );
 }

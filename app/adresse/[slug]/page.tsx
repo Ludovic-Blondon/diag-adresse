@@ -9,6 +9,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
 import { getDepartementCode, DEPARTEMENTS } from "@/lib/departements";
+import { communePath } from "@/lib/commune-url";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -123,7 +124,14 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
           ...(depName
             ? [{ name: depName, href: `/departement/${depCode}` }]
             : []),
-          { name: communeName, href: `/commune/${address.citycode}` },
+          {
+            name: communeName,
+            // address.city is empty when searchParams bypass geocoding; fall
+            // back to the bare INSEE URL (the route/proxy will 308 it).
+            href: address.city
+              ? communePath(address.citycode, address.city)
+              : `/commune/${address.citycode}`,
+          },
           { name: address.label, href: `/adresse/${slug}` },
         ]}
       />

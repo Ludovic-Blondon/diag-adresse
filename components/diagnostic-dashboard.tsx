@@ -26,11 +26,35 @@ import {
   type ScoredRisk,
 } from "@/lib/scoring";
 import { toHubeauCode } from "@/lib/paris";
+import { prepositionVille } from "@/lib/commune-text";
 
 interface DashboardProps {
   lon: number;
   lat: number;
   citycode: string;
+  communeName?: string;
+}
+
+// H2 wording: search-intent questions on commune pages (communeName set),
+// generic labels on the address page (communeName undefined).
+function sectionHeadings(communeName?: string) {
+  if (!communeName) {
+    return {
+      summary: "Synthèse des risques",
+      detail: "Détail des risques",
+      map: "Carte",
+      water: "Qualité de l'eau potable",
+      energy: "Performance énergétique (DPE)",
+    };
+  }
+  const a = prepositionVille(communeName);
+  return {
+    summary: `Zone inondable ${a} ?`,
+    detail: `Risque argile et sismicité ${a}`,
+    map: `Carte des risques ${a}`,
+    water: `L'eau du robinet est-elle bonne ${a} ?`,
+    energy: `Les DPE ${a}`,
+  };
 }
 
 function SectionSkeleton({ lines = 3 }: { lines?: number }) {
@@ -47,17 +71,29 @@ function SectionSkeleton({ lines = 3 }: { lines?: number }) {
   );
 }
 
-export function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps) {
+export function DiagnosticDashboard({
+  lon,
+  lat,
+  citycode,
+  communeName,
+}: DashboardProps) {
+  const h = sectionHeadings(communeName);
   return (
     <div className="space-y-8">
       <Suspense fallback={<SectionSkeleton lines={6} />}>
-        <RiskSection lon={lon} lat={lat} citycode={citycode} />
+        <RiskSection
+          lon={lon}
+          lat={lat}
+          citycode={citycode}
+          summaryHeading={h.summary}
+          detailHeading={h.detail}
+        />
       </Suspense>
 
       <Separator />
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Carte</h2>
+        <h2 className="mb-3 text-lg font-semibold">{h.map}</h2>
         <Suspense
           fallback={
             <div className="bg-muted h-80 w-full animate-pulse rounded-lg border" />
@@ -70,19 +106,25 @@ export function DiagnosticDashboard({ lon, lat, citycode }: DashboardProps) {
       <Separator />
 
       <Suspense fallback={<SectionSkeleton />}>
-        <WaterSection citycode={citycode} />
+        <WaterSection citycode={citycode} heading={h.water} />
       </Suspense>
 
       <Separator />
 
       <Suspense fallback={<SectionSkeleton />}>
-        <EnergySection citycode={citycode} />
+        <EnergySection citycode={citycode} heading={h.energy} />
       </Suspense>
     </div>
   );
 }
 
-async function RiskSection({ lon, lat, citycode }: DashboardProps) {
+async function RiskSection({
+  lon,
+  lat,
+  citycode,
+  summaryHeading,
+  detailHeading,
+}: DashboardProps & { summaryHeading: string; detailHeading: string }) {
   const [
     riskReportResult,
     radonResult,
@@ -136,7 +178,7 @@ async function RiskSection({ lon, lat, citycode }: DashboardProps) {
   return (
     <>
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Synthèse des risques</h2>
+        <h2 className="mb-3 text-lg font-semibold">{summaryHeading}</h2>
         {allRisksFailed ? (
           <p className="text-muted-foreground text-sm">
             Les données de risques sont temporairement indisponibles. Veuillez
@@ -150,7 +192,7 @@ async function RiskSection({ lon, lat, citycode }: DashboardProps) {
       <Separator />
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Détail des risques</h2>
+        <h2 className="mb-3 text-lg font-semibold">{detailHeading}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {risks.map((risk) => (
             <RiskCard
@@ -180,7 +222,13 @@ async function MapSection({ lon, lat, citycode }: DashboardProps) {
   return <RiskMap lon={lon} lat={lat} icpeList={icpeList} />;
 }
 
-async function WaterSection({ citycode }: { citycode: string }) {
+async function WaterSection({
+  citycode,
+  heading,
+}: {
+  citycode: string;
+  heading: string;
+}) {
   const hubeauCode = toHubeauCode(citycode);
   let data = null;
   try {
@@ -191,9 +239,7 @@ async function WaterSection({ citycode }: { citycode: string }) {
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">
-        Qualité de l&apos;eau potable
-      </h2>
+      <h2 className="mb-3 text-lg font-semibold">{heading}</h2>
       {data ? (
         <WaterQualityCard data={data} />
       ) : (
@@ -205,7 +251,13 @@ async function WaterSection({ citycode }: { citycode: string }) {
   );
 }
 
-async function EnergySection({ citycode }: { citycode: string }) {
+async function EnergySection({
+  citycode,
+  heading,
+}: {
+  citycode: string;
+  heading: string;
+}) {
   let data = null;
   try {
     data = await fetchDPEStats(citycode);
@@ -215,9 +267,7 @@ async function EnergySection({ citycode }: { citycode: string }) {
 
   return (
     <section>
-      <h2 className="mb-3 text-lg font-semibold">
-        Performance énergétique (DPE)
-      </h2>
+      <h2 className="mb-3 text-lg font-semibold">{heading}</h2>
       {data ? (
         <EnergyCard data={data} />
       ) : (

@@ -63,7 +63,7 @@ export function RiskCard({
           <>
             <button
               onClick={() => setExpanded(!expanded)}
-              className="text-primary mt-2 text-xs underline-offset-4 hover:underline"
+              className="text-primary mt-2 cursor-pointer text-xs underline-offset-4 hover:underline"
             >
               {expanded ? "Masquer les détails" : "Voir les détails"}
             </button>

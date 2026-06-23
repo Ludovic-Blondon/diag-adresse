@@ -1,4 +1,4 @@
-import { slugify } from "./slug";
+import { slugifyCommune } from "./slugify-commune.mjs";
 
 const INSEE_RE = /^(\d{5}|2[ab]\d{3})$/i;
 const SLUGGED_INSEE_RE = /^(.+)-(\d{5}|2[ab]\d{3})$/i;
@@ -8,14 +8,9 @@ export type CommuneParam =
   | { kind: "sluggedInsee"; insee: string; slugPart: string }
   | { kind: "other" };
 
-/**
- * Slugify a commune name for URLs. Handles the OE/AE ligatures that NFD does
- * not decompose ("Œuilly" → "oeuilly", not "uilly"), then reuses the shared
- * slugify (diacritics, lowercase, non-alphanum → "-").
- */
-export function slugifyCommune(name: string): string {
-  return slugify(name.replace(/[œŒ]/g, "oe").replace(/[æÆ]/g, "ae"));
-}
+// slugifyCommune lives in lib/slugify-commune.mjs (shared with the generator
+// script); re-exported here so callers keep importing it from one place.
+export { slugifyCommune };
 
 /** Canonical commune page path: /commune/{slug}-{insee}, fully lowercase. */
 export function communePath(code: string, name: string): string {

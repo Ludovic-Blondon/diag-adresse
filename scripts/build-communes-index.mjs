@@ -2,23 +2,24 @@
 //
 // Downloads commune names from geo.api.gouv.fr, keeps only the curated set of
 // codes (population >= 5000), and writes [[code, nom], ...] sorted by code.
-// communes-index.json is the single source of truth for the commune list:
-// on re-run (annual COG update, name fixes) the code set is read back from it.
-// Bootstrap falls back to the legacy lib/sitemap-communes.json when the index
-// does not exist yet.
+// communes-index.json is the single source of truth for the commune list: the
+// code set is read back from it on every run (annual COG update, name fixes).
 //
 //   node scripts/build-communes-index.mjs
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { slugifyCommune } from "../lib/slugify-commune.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const indexPath = join(root, "lib/communes-index.json");
-const legacyPath = join(root, "lib/sitemap-communes.json");
 
-const codes = existsSync(indexPath)
-  ? JSON.parse(readFileSync(indexPath, "utf8")).map(([code]) => code)
-  : JSON.parse(readFileSync(legacyPath, "utf8"));
+if (!existsSync(indexPath)) {
+  throw new Error(
+    "lib/communes-index.json manquant — restaurez-le depuis git avant de regenerer.",
+  );
+}
+const codes = JSON.parse(readFileSync(indexPath, "utf8")).map(([code]) => code);
 const wanted = new Set(codes);
 
 const res = await fetch(
@@ -40,17 +41,7 @@ if (index.length !== wanted.size) {
   );
 }
 
-// Self-check: this slug logic must stay in sync with slugifyCommune (lib/commune-url.ts).
-const slugifyCommune = (name) =>
-  name
-    .replace(/[œŒ]/g, "oe")
-    .replace(/[æÆ]/g, "ae")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
+// Guard: the shared slugifyCommune must keep producing these canonical forms.
 for (const [input, expected] of [
   ["L'Haÿ-les-Roses", "l-hay-les-roses"],
   ["Œuilly", "oeuilly"],

@@ -21,6 +21,8 @@ export interface RiskGuide {
   costAndInsurance: string;
   legalObligations: string;
   relatedRisks: string[];
+  /** Liens internes additionnels (pages dossier, dossiers d'actualité…). */
+  relatedLinks?: { href: string; label: string }[];
   faq: { question: string; answer: string }[];
 }
 
@@ -295,6 +297,12 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
     legalObligations:
       "Loi ELAN (2018) et décret du 22 mai 2019 : étude géotechnique G1 PGC obligatoire pour toute vente de terrain constructible en zone d'aléas moyen ou fort, à joindre à la promesse de vente et à l'acte authentique. L'ERP mentionne systématiquement le niveau d'exposition argile. L'absence d'étude géotechnique peut engager la responsabilité du vendeur en cas de sinistre ultérieur.",
     relatedRisks: ["inondation", "cavites"],
+    relatedLinks: [
+      {
+        href: "/argile-2026",
+        label: "Nouvelle carte argile 2026 : ce qui change commune par commune",
+      },
+    ],
     faq: [
       {
         question:

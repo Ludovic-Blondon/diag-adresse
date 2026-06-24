@@ -1,0 +1,5 @@
+# Pipeline « Argile 2026 » — exécution locale uniquement (jamais sur Vercel).
+# Python 3.10+. Installer dans un venv :  python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
+geopandas>=1.0
+shapely>=2.0
+pyogrio>=0.8   # I/O vectoriel rapide (lecture SHP)

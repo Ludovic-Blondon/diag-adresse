@@ -145,7 +145,7 @@ export const ARTICLES: Record<string, Article> = {
       },
     ],
     relatedRisks: [],
-    relatedArticles: ["ial-etat-des-risques"],
+    relatedArticles: ["ial-etat-des-risques", "nouvelle-carte-argile-2026"],
   },
 
   "ial-etat-des-risques": {
@@ -269,7 +269,101 @@ export const ARTICLES: Record<string, Article> = {
       "icpe",
       "cavites",
     ],
-    relatedArticles: ["comment-lire-un-dpe"],
+    relatedArticles: ["comment-lire-un-dpe", "nouvelle-carte-argile-2026"],
+  },
+  "nouvelle-carte-argile-2026": {
+    slug: "nouvelle-carte-argile-2026",
+    title: "Nouvelle carte argile 2026 : ce qui change au 1er juillet",
+    description:
+      "L'arrêté du 9 janvier 2026 met à jour la carte d'exposition au retrait-gonflement des argiles. Qui est concerné, ce qui change pour les terrains à vendre, comment vérifier votre commune et le nouveau fonds de prévention.",
+    excerpt:
+      "Au 1er juillet 2026, une nouvelle carte d'exposition au retrait-gonflement des argiles s'applique aux ventes de terrains constructibles et aux constructions de maisons. On vous explique ce qui change, pour qui, et comment vérifier votre commune.",
+    publishedAt: "2026-06-25",
+    updatedAt: "2026-06-25",
+    readingMinutes: 7,
+    intro:
+      "Le retrait-gonflement des argiles (RGA) est la deuxième cause d'indemnisation au titre des catastrophes naturelles en France. Pris dans le cadre du Plan national d'adaptation au changement climatique (PNACC-3), l'arrêté du 9 janvier 2026 met à jour la carte nationale d'exposition, qui datait de 2020. Cette nouvelle carte s'applique à compter du 1er juillet 2026. Résultat : les zones d'exposition moyenne et forte passent de 48 % à 55 % du territoire métropolitain, et de nombreuses communes changent de classe. Voici ce que cela change concrètement, pour qui, et comment vérifier la situation de votre commune.",
+    sections: [
+      {
+        heading: "De la loi ELAN à l'arrêté du 9 janvier 2026",
+        body: "Depuis la loi ELAN et son décret du 22 mai 2019, la vente d'un terrain constructible situé en zone d'exposition moyenne ou forte impose au vendeur de joindre une étude géotechnique préalable de type G1 PGC à la promesse de vente. Le périmètre de cette obligation est défini par une carte nationale d'exposition. La première version, applicable depuis le 1er octobre 2020, vient d'être remplacée.\n\nL'arrêté du 9 janvier 2026 actualise cette carte pour tenir compte de la sinistralité récente — environ 240 000 sinistres recensés entre 2018 et 2022, soit 58 % de l'ensemble des sinistres argile indemnisés depuis 1989 — et des effets du changement climatique. La conséquence la plus visible : la surface du territoire classée en exposition moyenne ou forte progresse de 48 % à 55 %.",
+      },
+      {
+        heading: "Qui est concerné par la nouvelle carte (et qui ne l'est pas)",
+        body: "La nouvelle carte ne crée pas d'obligation nouvelle sur les logements déjà construits. Elle redéfinit le périmètre des obligations attachées aux terrains à bâtir et aux constructions neuves.",
+        items: [
+          "Concernés : les promesses et actes de vente de terrains non bâtis constructibles, ainsi que les contrats de construction de maison individuelle (CCMI), conclus à compter du 1er juillet 2026 en zone moyenne ou forte.",
+          "Non concernés : les ventes de maisons ou d'appartements déjà bâtis. L'exposition RGA reste mentionnée dans l'état des risques (IAL) remis à tout acheteur ou locataire, mais sans étude G1 imposée.",
+          "Non concernés : les ventes déjà signées avant le 1er juillet 2026 — la carte ne s'applique pas rétroactivement.",
+          "Non concernés : les terrains situés hors zone moyenne ou forte, même si leur commune compte par ailleurs des secteurs exposés.",
+        ],
+      },
+      {
+        heading: "Comment vérifier si votre commune change de classe",
+        body: "Notre comparatif de la carte 2020 et de la carte 2026 recense, département par département, les communes qui changent de classe d'exposition. Pour une adresse précise, la recherche DiagAdresse affiche le niveau d'exposition issu des données Géorisques et du BRGM, aux côtés des autres risques (inondation, séisme, radon, sites industriels, cavités).\n\nUn point de méthode important : la carte d'exposition est une indication à l'échelle de la commune et du secteur, pas une expertise du sol. L'exposition réelle d'un terrain se confirme toujours à la parcelle, par une étude géotechnique. Une commune classée en zone forte peut comporter des terrains peu sensibles, et inversement.",
+      },
+      {
+        heading:
+          "Le fonds de prévention contre le retrait-gonflement des argiles",
+        body: "En parallèle de la nouvelle carte, l'État expérimente un fonds de prévention dédié au RGA, destiné aux propriétaires de maisons individuelles existantes situées en zone d'exposition moyenne ou forte. Sa logique : agir sur les causes du phénomène — la gestion de l'eau autour de la maison — plutôt que sur la seule réparation des fissures. Le dispositif est d'abord déployé dans onze départements préfigurateurs.",
+        items: [
+          "Auvergne-Rhône-Alpes : Allier (03), Puy-de-Dôme (63).",
+          "Centre-Val de Loire : Indre (36).",
+          "Grand Est : Meurthe-et-Moselle (54).",
+          "Hauts-de-France : Nord (59).",
+          "Nouvelle-Aquitaine : Dordogne (24), Lot-et-Garonne (47).",
+          "Occitanie : Gers (32), Tarn (81), Tarn-et-Garonne (82).",
+          "Provence-Alpes-Côte d'Azur : Alpes-de-Haute-Provence (04).",
+        ],
+      },
+      {
+        heading: "Acheteur, vendeur : nos conseils",
+        body: "Que vous achetiez un terrain, fassiez construire ou vendiez un bien, quelques réflexes limitent les mauvaises surprises liées à la nouvelle carte.",
+        items: [
+          "Vendeur d'un terrain constructible : vérifiez la classe d'exposition à jour de la parcelle et anticipez l'étude G1 PGC si vous êtes en zone moyenne ou forte (à joindre à la promesse).",
+          "Acheteur d'un terrain : lisez attentivement l'étude G1 fournie ; avant de construire, commandez une étude G2 PRO qui dimensionne les fondations.",
+          "Vendeur d'une maison existante : l'exposition RGA doit figurer dans l'état des risques (IAL), valable six mois et remis dès la première visite.",
+          "Propriétaire en zone moyenne ou forte : surveillez les arbres proches des fondations, drainez les abords et maintenez une hygrométrie stable ; vérifiez votre éligibilité au fonds de prévention si votre département est préfigurateur.",
+        ],
+      },
+    ],
+    keyTakeaways: [
+      "L'arrêté du 9 janvier 2026 met à jour la carte argile de 2020 et s'applique au 1er juillet 2026.",
+      "Les zones d'exposition moyenne et forte passent de 48 % à 55 % du territoire métropolitain.",
+      "La carte concerne les ventes de terrains constructibles non bâtis et les CCMI, pas le bâti existant.",
+      "Elle ne s'applique pas rétroactivement aux ventes déjà signées.",
+      "Un fonds de prévention est expérimenté dans onze départements pour les maisons existantes exposées.",
+    ],
+    faq: [
+      {
+        question: "Quand la nouvelle carte argile entre-t-elle en vigueur ?",
+        answer:
+          "L'arrêté est daté du 9 janvier 2026 et la nouvelle carte s'applique aux promesses et actes de vente de terrains non bâtis constructibles, ainsi qu'aux contrats de construction de maison individuelle, conclus à compter du 1er juillet 2026.",
+      },
+      {
+        question: "Ma maison déjà construite est-elle concernée ?",
+        answer:
+          "Non. La nouvelle carte ne crée pas d'obligation d'étude de sol pour un logement déjà bâti. L'exposition au retrait-gonflement des argiles reste toutefois mentionnée dans l'état des risques (IAL) remis à l'acheteur ou au locataire.",
+      },
+      {
+        question:
+          "Comment savoir si ma commune change de classe d'exposition ?",
+        answer:
+          "Notre comparatif des cartes 2020 et 2026 liste les communes qui changent de classe, département par département. Pour une adresse précise, la recherche DiagAdresse affiche le niveau d'exposition à partir des données Géorisques et du BRGM. La carte reste une indication communale : l'exposition d'un terrain se confirme à la parcelle.",
+      },
+      {
+        question: "Pourquoi la carte a-t-elle été modifiée ?",
+        answer:
+          "Pour intégrer la forte sinistralité des dernières années (environ 240 000 sinistres entre 2018 et 2022) et les effets du changement climatique, dans le cadre du Plan national d'adaptation au changement climatique (PNACC-3). Les sécheresses répétées aggravent le phénomène de retrait-gonflement.",
+      },
+      {
+        question: "Qu'est-ce que le fonds de prévention RGA ?",
+        answer:
+          "C'est un dispositif expérimental de l'État pour les propriétaires de maisons individuelles existantes en zone d'exposition moyenne ou forte, déployé dans onze départements préfigurateurs. Il finance des travaux agissant sur les causes du phénomène, notamment la gestion de l'eau autour de la maison.",
+      },
+    ],
+    relatedRisks: ["argile"],
+    relatedArticles: ["ial-etat-des-risques", "comment-lire-un-dpe"],
   },
 };
 

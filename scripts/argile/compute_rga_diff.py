@@ -36,6 +36,7 @@ import unicodedata
 from pathlib import Path
 
 import geopandas as gpd
+import pandas as pd
 
 # --- Chemins (relatifs à la racine du repo) ---
 ROOT = Path(__file__).resolve().parents[2]
@@ -109,7 +110,7 @@ def load_layer(base: Path, dep: str) -> gpd.GeoDataFrame | None:
     if not candidates:
         return None
     parts = [gpd.read_file(p) for p in candidates]
-    gdf = parts[0] if len(parts) == 1 else gpd.pd.concat(parts, ignore_index=True)
+    gdf = parts[0] if len(parts) == 1 else pd.concat(parts, ignore_index=True)
     gdf = gpd.GeoDataFrame(gdf, geometry="geometry", crs=parts[0].crs)
     if gdf.crs is None:
         gdf = gdf.set_crs(LAMBERT93)

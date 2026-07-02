@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+// Prerender at build: this icon never changes, no reason to render it per
+// request (GET route handlers are dynamic by default).
+export const dynamic = "force-static";
 
 export function GET() {
   const response = new ImageResponse(

@@ -122,6 +122,7 @@ export default function RootLayout({
                       <h3 className="mb-1 text-xs font-medium">
                         <Link
                           href={`/region/${region.code}`}
+                          prefetch={false}
                           className="hover:underline"
                         >
                           {region.name}
@@ -130,8 +131,12 @@ export default function RootLayout({
                       <ul className="space-y-0.5">
                         {getDepartementsForRegion(region).map((dep) => (
                           <li key={dep.code}>
+                            {/* prefetch={false}: opening the <details> would
+                                otherwise fire ~100 segment prefetches at once,
+                                each a function invocation when uncached. */}
                             <Link
                               href={`/departement/${dep.code}`}
+                              prefetch={false}
                               className="text-muted-foreground text-xs hover:underline"
                             >
                               {dep.name} ({dep.code})

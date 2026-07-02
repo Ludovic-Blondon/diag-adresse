@@ -1,4 +1,8 @@
-import { DEPARTEMENTS, getDepartementCode } from "./departements";
+import {
+  DEPARTEMENTS,
+  getDepartementCode,
+  isActiveDepartement,
+} from "./departements";
 import { TOP_COMMUNES, type TopCommune } from "./communes";
 
 export interface Region {
@@ -158,6 +162,6 @@ export function getDepartementsForRegion(
   region: Region,
 ): { code: string; name: string }[] {
   return region.departements
-    .filter((code) => DEPARTEMENTS[code])
+    .filter((code) => isActiveDepartement(code))
     .map((code) => ({ code, name: DEPARTEMENTS[code] }));
 }

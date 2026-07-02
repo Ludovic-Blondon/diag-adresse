@@ -134,3 +134,18 @@ export function getActiveDepartements(): { code: string; name: string }[] {
     .sort()
     .map((code) => ({ code, name: DEPARTEMENTS[code] }));
 }
+
+let activeCodes: Set<string> | null = null;
+
+/**
+ * Whether a departement has its own `/departement/[code]` page. Pages are only
+ * generated for departements with at least one commune in the index
+ * (`dynamicParams = false`), so linking to any other code produces a 404 —
+ * and every viewport prefetch of that link invokes a serverless function.
+ */
+export function isActiveDepartement(code: string): boolean {
+  if (!activeCodes) {
+    activeCodes = new Set(getActiveDepartements().map((d) => d.code));
+  }
+  return activeCodes.has(code);
+}

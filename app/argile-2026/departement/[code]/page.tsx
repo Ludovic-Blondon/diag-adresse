@@ -136,6 +136,26 @@ export default async function Argile2026DepartementPage({ params }: Props) {
         </p>
       )}
 
+      <p className="text-muted-foreground text-sm">
+        Données complètes du département (toutes les communes, classes 2020 et
+        2026, part de surface exposée) :{" "}
+        <a
+          href={`/argile-2026/departement/${code}/communes.csv`}
+          className="text-primary underline-offset-4 hover:underline"
+          download
+        >
+          télécharger le CSV
+        </a>{" "}
+        — réutilisable sous Licence Ouverte, voir l&apos;
+        <Link
+          href="/argile-2026/presse"
+          className="text-primary underline-offset-4 hover:underline"
+        >
+          espace presse
+        </Link>
+        .
+      </p>
+
       <section className="flex flex-wrap gap-3">
         <Link
           href="/argile-2026"

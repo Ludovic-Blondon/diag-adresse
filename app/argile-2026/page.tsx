@@ -239,6 +239,12 @@ export default function Argile2026Page() {
         >
           Article : ce qui change au 1er juillet
         </Link>
+        <Link
+          href="/argile-2026/presse"
+          className="hover:bg-accent rounded-lg border px-4 py-2 text-sm transition-colors"
+        >
+          Espace presse : données par département (CSV)
+        </Link>
       </section>
     </main>
   );

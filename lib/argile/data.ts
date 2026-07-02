@@ -94,23 +94,30 @@ export function loadDepartementDiff(dep: string): DepartementDiff | null {
   return readJsonAtBuild<DepartementDiff>(`diff/${dep}.json`);
 }
 
-// --- Consommateur runtime (badge sur les pages commune, ISR). ---
+// --- Consommateurs runtime (badge commune ISR, export CSV). ---
 // Import dynamique : Next trace et embarque le JSON dans le bundle serverless,
 // contrairement à un fs.readFileSync(cwd) au runtime. try/catch => silencieux
 // si le département n'est pas couvert ou si le calcul n'a pas encore tourné.
+
+export async function importDepartementDiff(
+  dep: string,
+): Promise<DepartementDiff | null> {
+  try {
+    const mod = (await import(`./diff/${dep}.json`)) as {
+      default: DepartementDiff;
+    };
+    return mod.default;
+  } catch {
+    return null;
+  }
+}
 
 export async function getCommuneArgileDiff(
   codeInsee: string,
 ): Promise<{ diff: CommuneArgileDiff; dep: string } | null> {
   const insee = toHubeauCode(codeInsee); // arrondissements -> commune englobante
   const dep = getDepartementCode(insee);
-  try {
-    const mod = (await import(`./diff/${dep}.json`)) as {
-      default: DepartementDiff;
-    };
-    const diff = mod.default[insee];
-    return diff ? { diff, dep } : null;
-  } catch {
-    return null;
-  }
+  const data = await importDepartementDiff(dep);
+  const diff = data?.[insee];
+  return diff ? { diff, dep } : null;
 }

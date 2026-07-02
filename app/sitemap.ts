@@ -92,6 +92,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
     priority: 0.6,
   });
+  pages.push({
+    url: `${BASE_URL}/argile-2026/presse`,
+    lastModified: riskGuidesUpdatedAt,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  });
   for (const dep of listAvailableDepartements()) {
     pages.push({
       url: `${BASE_URL}/argile-2026/departement/${dep}`,

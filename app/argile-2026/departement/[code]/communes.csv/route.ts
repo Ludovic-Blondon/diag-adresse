@@ -20,7 +20,7 @@ export function generateStaticParams() {
 }
 
 function csvField(value: string): string {
-  return /[";\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
+  return /[";\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
 }
 
 export async function GET(_request: Request, { params }: Props) {

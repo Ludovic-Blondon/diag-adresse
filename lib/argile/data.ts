@@ -1,3 +1,4 @@
+import { cache } from "react";
 import fs from "node:fs";
 import path from "node:path";
 import { getDepartementCode } from "../departements";
@@ -12,7 +13,7 @@ export interface ArgileClassStats {
   max: number;
   /** % de la surface communale en aléa moyen+fort */
   pctMF: number;
-  /** classe majoritaire en surface */
+  /** classe majoritaire en surface — stockée pour analyses futures, non affichée */
   maj: number;
 }
 
@@ -72,9 +73,9 @@ function readJsonAtBuild<T>(relPath: string): T | null {
 }
 
 /** Synthèse nationale + par département (b1). null si le calcul n'a pas tourné. */
-export function getArgileSummary(): ArgileSummary | null {
-  return readJsonAtBuild<ArgileSummary>("summary.json");
-}
+export const getArgileSummary = cache((): ArgileSummary | null =>
+  readJsonAtBuild<ArgileSummary>("summary.json"),
+);
 
 /** Liste des départements pour lesquels un diff existe (b2 generateStaticParams). */
 export function listAvailableDepartements(): string[] {
@@ -89,10 +90,12 @@ export function listAvailableDepartements(): string[] {
   }
 }
 
-/** Diff complet d'un département, lu au build (b2). null si absent. */
-export function loadDepartementDiff(dep: string): DepartementDiff | null {
-  return readJsonAtBuild<DepartementDiff>(`diff/${dep}.json`);
-}
+/** Diff complet d'un département, lu au build (b2). null si absent.
+ * cache() : dédupliqué entre generateMetadata et la page au sein d'un render. */
+export const loadDepartementDiff = cache(
+  (dep: string): DepartementDiff | null =>
+    readJsonAtBuild<DepartementDiff>(`diff/${dep}.json`),
+);
 
 // --- Consommateurs runtime (badge commune ISR, export CSV). ---
 // Import dynamique : Next trace et embarque le JSON dans le bundle serverless,

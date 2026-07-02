@@ -40,6 +40,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: "DiagAdresse",
       url: `${BASE_URL}/argile-2026/departement/${code}`,
     },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
     alternates: { canonical: `/argile-2026/departement/${code}` },
   };
 }

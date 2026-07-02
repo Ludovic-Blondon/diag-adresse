@@ -18,7 +18,8 @@ Méthode (cf. docs/methodologie-argile-2026.md) :
   - On cale TOUJOURS les deux millésimes sur les contours COG 2026 (overlay).
   - Par commune : classe d'aléa MAX présente (seuil anti-slivers : on ignore une
     classe dont l'emprise est < 1 % de la surface communale ET < 1 ha), % de surface
-    en aléa moyen+fort, et classe majoritaire (stockée, exposée dans la méthodo).
+    en aléa moyen+fort, et classe majoritaire (stockée pour analyses futures,
+    non affichée par le site).
   - delta = a26.max - a20.max.
 
 Usage :

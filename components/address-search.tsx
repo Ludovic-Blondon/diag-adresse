@@ -83,8 +83,7 @@ export function AddressSearch({
   useEffect(() => {
     if (activeIndex >= 0 && listRef.current) {
       const el = listRef.current.children[activeIndex] as
-        | HTMLElement
-        | undefined;
+        HTMLElement | undefined;
       el?.scrollIntoView({ block: "nearest" });
     }
   }, [activeIndex]);

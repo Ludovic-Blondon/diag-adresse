@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddressSearch } from "@/components/address-search";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { LinkPendingIndicator } from "@/components/link-pending-indicator";
 import { generateDepartementMetadata } from "@/lib/seo";
 import {
   DEPARTEMENTS,
@@ -98,14 +99,17 @@ export default async function DepartementPage({ params }: Props) {
                 key={c.code}
                 href={communePath(c.code, c.nom)}
                 prefetch={false}
-                className="hover:bg-accent rounded-lg border px-4 py-3 transition-colors"
+                className="hover:bg-accent flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors"
               >
-                <span className="font-medium">{c.nom}</span>
-                {c.population != null && (
-                  <span className="text-muted-foreground ml-2 text-sm">
-                    {c.population.toLocaleString("fr-FR")} hab.
-                  </span>
-                )}
+                <span>
+                  <span className="font-medium">{c.nom}</span>
+                  {c.population != null && (
+                    <span className="text-muted-foreground ml-2 text-sm">
+                      {c.population.toLocaleString("fr-FR")} hab.
+                    </span>
+                  )}
+                </span>
+                <LinkPendingIndicator />
               </Link>
             ))}
           </div>

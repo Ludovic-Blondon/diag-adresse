@@ -54,7 +54,7 @@ const FAQ = [
   {
     question: "D'où viennent les données de ce comparatif ?",
     answer:
-      "Du croisement des cartes d'exposition RGA 2020 et 2026 publiées par Géorisques / BRGM avec les contours communaux de l'IGN (Admin Express COG). La méthodologie et les sources sont publiées et reproductibles, sous Licence Ouverte (Etalab 2.0).",
+      "Du croisement des cartes d'exposition RGA 2020 et 2026 publiées par Géorisques / BRGM avec les contours communaux de l'IGN. La méthodologie et les sources sont publiées et reproductibles, sous Licence Ouverte (Etalab 2.0).",
   },
 ];
 
@@ -182,13 +182,19 @@ export default function Argile2026Page() {
           <p className="text-muted-foreground leading-relaxed">
             Ce comparatif croise les cartes d&apos;exposition RGA 2020 et 2026
             publiées par Géorisques / BRGM avec les contours communaux de
-            l&apos;IGN (Admin Express COG). Pour chaque commune, nous retenons
-            la classe d&apos;aléa maximale présente (lecture de prudence pour
-            l&apos;acquéreur) et le pourcentage de surface en aléa moyen ou
-            fort. La carte est une indication à l&apos;échelle communale : elle
-            ne remplace pas une étude géotechnique à la parcelle. Données sous
-            Licence Ouverte (Etalab 2.0) — Source : Géorisques / BRGM, IGN.
+            l&apos;IGN. Pour chaque commune, nous retenons la classe d&apos;aléa
+            maximale présente (lecture de prudence pour l&apos;acquéreur) et le
+            pourcentage de surface en aléa moyen ou fort. La carte est une
+            indication à l&apos;échelle communale : elle ne remplace pas une
+            étude géotechnique à la parcelle. Données sous Licence Ouverte
+            (Etalab 2.0) — Source : Géorisques / BRGM, IGN.
           </p>
+          <Link
+            href="/argile-2026/methodologie"
+            className="text-primary text-sm underline-offset-4 hover:underline"
+          >
+            Sources détaillées, traitement et limites →
+          </Link>
         </section>
       </article>
 

@@ -146,6 +146,23 @@ export default async function RiskGuidePage({ params }: Props) {
         </section>
       )}
 
+      {guide.relatedLinks && guide.relatedLinks.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-lg font-semibold">À lire aussi</h2>
+          <div className="flex flex-wrap gap-3">
+            {guide.relatedLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="hover:bg-accent rounded-lg border px-4 py-2 text-sm transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section>
         <h2 className="mb-3 text-xl font-semibold">Questions fréquentes</h2>
         <div className="space-y-2">

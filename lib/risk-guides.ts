@@ -1,4 +1,4 @@
-export const RISK_GUIDES_UPDATED_AT = "2026-04-24";
+export const RISK_GUIDES_UPDATED_AT = "2026-06-24";
 
 export interface RiskKeyFigure {
   value: string;
@@ -21,6 +21,8 @@ export interface RiskGuide {
   costAndInsurance: string;
   legalObligations: string;
   relatedRisks: string[];
+  /** Liens internes additionnels (pages dossier, dossiers d'actualité…). */
+  relatedLinks?: { href: string; label: string }[];
   faq: { question: string; answer: string }[];
 }
 
@@ -223,16 +225,18 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
     description:
       "Le risque de retrait-gonflement des sols argileux : causes, conséquences sur le bâti, étude géotechnique obligatoire et mesures de prévention.",
     intro:
-      "Le retrait-gonflement des argiles est la deuxième cause d'indemnisation au titre des catastrophes naturelles en France, derrière les inondations. Aggravation par le réchauffement climatique et les épisodes de sécheresse : 48% du territoire métropolitain est désormais classé en exposition moyenne ou forte. Les fissures sur les murs porteurs sont la conséquence la plus visible.",
+      "Le retrait-gonflement des argiles est la deuxième cause d'indemnisation au titre des catastrophes naturelles en France, derrière les inondations. Aggravation par le réchauffement climatique et les épisodes de sécheresse : la carte de 2020 classait 48 % du territoire métropolitain en exposition moyenne ou forte, et l'arrêté du 9 janvier 2026 — applicable au 1er juillet 2026 — porte ce chiffre à 55 %. Les fissures sur les murs porteurs sont la conséquence la plus visible.",
     keyFigures: [
       {
-        value: "48%",
-        label: "du territoire métropolitain exposé (moyen/fort)",
+        value: "48 % → 55 %",
+        label:
+          "du territoire en exposition moyenne/forte (carte 2020 → carte 2026)",
       },
       { value: "2e", label: "poste d'indemnisation cat-nat" },
       {
         value: "G1 PGC",
-        label: "étude obligatoire à la vente en zone moyenne/forte",
+        label:
+          "étude obligatoire à la vente d'un terrain constructible non bâti (zone moyenne/forte)",
       },
       {
         value: "10 000 - 30 000 EUR",
@@ -250,7 +254,7 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
         items: [
           "Niveau 0 : absence d'argiles sensibles, aucun risque particulier.",
           "Niveau 1 (faible) : présence d'argiles peu sensibles, sinistres rares.",
-          "Niveau 2 (moyen) : exposition significative, étude G1 PGC obligatoire à la vente.",
+          "Niveau 2 (moyen) : exposition significative, étude G1 PGC obligatoire à la vente d'un terrain constructible non bâti.",
           "Niveau 3 (fort) : exposition majeure, fondations adaptées impératives.",
         ],
       },
@@ -265,6 +269,15 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
       {
         heading: "L'étude G1 / G2 rendue obligatoire par la loi ELAN",
         body: "Depuis le 1er octobre 2020, la loi ELAN (via le décret du 22 mai 2019) impose une étude géotechnique préalable de type G1 PGC (Principe Général de Construction) lors de la vente d'un terrain constructible situé en zone d'exposition moyenne ou forte. Cette étude doit être jointe à la promesse de vente. Avant la construction, le maître d'ouvrage doit réaliser une étude G2 PRO qui précise les fondations et adaptations nécessaires.",
+      },
+      {
+        heading: "Ce qui change au 1er juillet 2026",
+        body: "L'arrêté du 9 janvier 2026 met à jour la carte d'exposition de 2020 pour tenir compte de la sinistralité récente — environ 240 000 sinistres recensés entre 2018 et 2022, soit 58 % de l'ensemble des sinistres argile depuis 1989 — et des effets du changement climatique (PNACC-3). Les zones d'exposition moyenne et forte passent de 48 % à 55 % du territoire hexagonal.\n\nLa nouvelle carte s'applique aux promesses et actes de vente de terrains non bâtis constructibles, ainsi qu'aux contrats de construction de maison individuelle (CCMI), conclus à compter du 1er juillet 2026. Elle ne remet pas en cause les ventes déjà signées et ne crée pas d'obligation nouvelle sur le bâti existant. De nombreuses communes changent de classe d'exposition entre les deux millésimes : notre comparatif de la carte 2020 et de la carte 2026 permet de vérifier, commune par commune, lesquelles sont concernées.",
+      },
+      {
+        heading:
+          "Le fonds de prévention contre le retrait-gonflement des argiles",
+        body: "À titre expérimental, l'État a mis en place un fonds de prévention dédié au retrait-gonflement des argiles dans onze départements préfigurateurs. Il s'adresse aux propriétaires de maisons individuelles existantes situées en zone d'exposition moyenne ou forte et finance des mesures agissant sur les causes du phénomène — maîtrise de l'hygrométrie du sol, drainage, gestion des eaux pluviales et de la végétation — plutôt que sur la seule réparation des désordres.\n\nDépartements préfigurateurs : Allier (03), Alpes-de-Haute-Provence (04), Dordogne (24), Gers (32), Indre (36), Lot-et-Garonne (47), Meurthe-et-Moselle (54), Nord (59), Puy-de-Dôme (63), Tarn (81) et Tarn-et-Garonne (82). Les conditions précises (plafonds, travaux éligibles) sont fixées par la plateforme du dispositif et susceptibles d'évoluer au-delà de la phase d'expérimentation.",
       },
       {
         heading: "Techniques de construction adaptées",
@@ -284,7 +297,31 @@ export const RISK_GUIDES: Record<string, RiskGuide> = {
     legalObligations:
       "Loi ELAN (2018) et décret du 22 mai 2019 : étude géotechnique G1 PGC obligatoire pour toute vente de terrain constructible en zone d'aléas moyen ou fort, à joindre à la promesse de vente et à l'acte authentique. L'ERP mentionne systématiquement le niveau d'exposition argile. L'absence d'étude géotechnique peut engager la responsabilité du vendeur en cas de sinistre ultérieur.",
     relatedRisks: ["inondation", "cavites"],
+    relatedLinks: [
+      {
+        href: "/argile-2026",
+        label: "Nouvelle carte argile 2026 : ce qui change commune par commune",
+      },
+    ],
     faq: [
+      {
+        question:
+          "La carte d'exposition au retrait-gonflement des argiles change-t-elle en 2026 ?",
+        answer:
+          "Oui. L'arrêté du 9 janvier 2026 met à jour la carte de 2020 et entre en application le 1er juillet 2026. Les zones d'exposition moyenne et forte passent de 48 % à 55 % du territoire métropolitain. La nouvelle carte concerne les promesses et actes de vente de terrains non bâtis constructibles, ainsi que les contrats de construction de maison individuelle conclus à compter de cette date ; elle ne s'applique pas rétroactivement aux ventes déjà signées.",
+      },
+      {
+        question:
+          "Comment savoir si ma commune change de classe d'exposition ?",
+        answer:
+          "De nombreuses communes passent d'une classe à l'autre entre les cartes 2020 et 2026. Vous pouvez consulter le niveau d'exposition de votre adresse sur DiagAdresse, à partir des données Géorisques et du BRGM. L'exposition réelle d'un terrain se confirme toujours à la parcelle : la carte donne une indication communale, elle ne remplace pas une étude de sol.",
+      },
+      {
+        question:
+          "Qu'est-ce que le fonds de prévention contre le retrait-gonflement des argiles ?",
+        answer:
+          "C'est un dispositif expérimental de l'État destiné aux propriétaires de maisons individuelles existantes situées en zone d'exposition moyenne ou forte, dans onze départements préfigurateurs (Allier, Alpes-de-Haute-Provence, Dordogne, Gers, Indre, Lot-et-Garonne, Meurthe-et-Moselle, Nord, Puy-de-Dôme, Tarn et Tarn-et-Garonne). Il finance des travaux agissant sur les causes du phénomène — la gestion de l'eau autour de la maison — plutôt que la seule réparation des fissures.",
+      },
       {
         question:
           "Comment savoir si mon terrain est exposé au retrait-gonflement des argiles ?",

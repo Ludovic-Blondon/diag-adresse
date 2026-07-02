@@ -3,6 +3,7 @@ import { cache } from "react";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
+import { Argile2026Badge } from "@/components/argile-2026-badge";
 import { generateCommuneMetadata } from "@/lib/seo";
 import { TOP_COMMUNES } from "@/lib/communes";
 import { AddressSearch } from "@/components/address-search";
@@ -149,6 +150,8 @@ export default async function CommunePage({ params }: Props) {
         depCode={depCode}
         depName={depName}
       />
+
+      <Argile2026Badge codeInsee={codeInsee} />
 
       <AddressSearch placeholder="Affiner avec une adresse précise..." />
 

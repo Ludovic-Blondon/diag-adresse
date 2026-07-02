@@ -63,10 +63,10 @@ export const fetchRGA = cache(
       );
       if (!res.ok) throw new Error(`RGA ${res.status}`);
       const text = await res.text();
-      if (!text.trim()) return { data: [] };
-      return JSON.parse(text);
+      if (!text.trim()) return {};
+      return JSON.parse(text) as RGAData;
     } catch {
-      return { data: [] };
+      return {};
     }
   },
 );

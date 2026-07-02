@@ -25,12 +25,11 @@ export interface RadonData {
 
 // --- RGA (retrait-gonflement argile) ---
 
-export interface RGAResult {
-  exposition: 0 | 1 | 2 | 3;
-}
-
+// L'endpoint /rga renvoie un objet unique (pas un tableau `data`), ou un corps
+// vide hors couverture. Ex. : {"codeExposition":"1","exposition":"Exposition faible"}.
 export interface RGAData {
-  data: RGAResult[];
+  codeExposition?: string; // "1" faible · "2" moyenne · "3" forte
+  exposition?: string; // libellé humain, ex. "Exposition faible"
 }
 
 // --- Zone sismique ---

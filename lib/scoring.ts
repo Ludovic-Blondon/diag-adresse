@@ -58,26 +58,27 @@ export function scoreRadon(data: RadonData): ScoredRisk {
 // --- RGA (argile) ---
 
 export function scoreRGA(data: RGAData): ScoredRisk {
-  const expo = data.data?.[0]?.exposition;
-  if (expo == null) {
-    return {
-      id: "argile",
-      label: "Retrait-gonflement argile",
-      level: "negligeable",
-      description: "Hors couverture ou non concerné",
-    };
-  }
   const map: Record<number, RiskLevel> = {
     0: "negligeable",
     1: "faible",
     2: "moyen",
     3: "fort",
   };
+  const code = data.codeExposition != null ? Number(data.codeExposition) : NaN;
+  const level = map[code];
+  if (level == null || level === "negligeable") {
+    return {
+      id: "argile",
+      label: "Retrait-gonflement argile",
+      level: "negligeable",
+      description: data.exposition ?? "Hors couverture ou non concerné",
+    };
+  }
   return {
     id: "argile",
     label: "Retrait-gonflement argile",
-    level: map[expo] ?? "negligeable",
-    description: `Exposition ${expo}/3`,
+    level,
+    description: data.exposition ?? `Exposition niveau ${code}`,
   };
 }
 

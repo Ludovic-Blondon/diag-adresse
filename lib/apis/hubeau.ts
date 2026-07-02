@@ -24,7 +24,9 @@ async function fetchLastResult(
   const url = `${HUBEAU_BASE_URL}/resultats_dis?${params}`;
   const res = await fetch(url, {
     signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    next: { revalidate: 86400 },
+    // 7 days, aligned with the /commune page revalidate: a shorter value here
+    // drags the whole route's ISR window down to it (lowest fetch wins).
+    next: { revalidate: 604800 },
   });
   if (!res.ok) return null;
   const data: HubeauResponse = await res.json();

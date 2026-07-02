@@ -1,8 +1,8 @@
 import { ImageResponse } from "next/og";
 import { TOP_COMMUNES } from "@/lib/communes";
 import { parseCommuneParam } from "@/lib/commune-url";
+import { API_TIMEOUT_MS } from "@/lib/constants";
 
-export const runtime = "edge";
 export const alt = "Diagnostic commune";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -13,6 +13,10 @@ async function resolveCommuneName(codeInsee: string): Promise<string> {
   try {
     const res = await fetch(
       `https://geo.api.gouv.fr/communes/${codeInsee}?fields=nom`,
+      {
+        signal: AbortSignal.timeout(API_TIMEOUT_MS),
+        next: { revalidate: 2592000 }, // 30 days, same as lib/apis/geo-gouv.ts
+      },
     );
     if (res.ok) {
       const data: { nom: string } = await res.json();

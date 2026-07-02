@@ -1,5 +1,6 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { communePath } from "@/lib/commune-url";
+import { isActiveDepartement } from "@/lib/departements";
 import { prepositionVille, deVille } from "@/lib/commune-text";
 
 interface CommuneHeaderProps {
@@ -19,7 +20,7 @@ export function CommuneHeader({
     <div>
       <Breadcrumbs
         items={[
-          ...(depName
+          ...(depName && isActiveDepartement(depCode)
             ? [{ name: depName, href: `/departement/${depCode}` }]
             : []),
           { name, href: communePath(codeInsee, name) },

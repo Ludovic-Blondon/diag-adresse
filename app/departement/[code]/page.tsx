@@ -3,8 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddressSearch } from "@/components/address-search";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { LinkPendingIndicator } from "@/components/link-pending-indicator";
 import { generateDepartementMetadata } from "@/lib/seo";
-import { DEPARTEMENTS, getActiveDepartements } from "@/lib/departements";
+import {
+  DEPARTEMENTS,
+  getActiveDepartements,
+  isActiveDepartement,
+} from "@/lib/departements";
 import { RISK_NAV } from "@/lib/navigation";
 import { getRegionForDepartement } from "@/lib/regions";
 import { communePath } from "@/lib/commune-url";
@@ -54,7 +59,7 @@ export default async function DepartementPage({ params }: Props) {
   const region = getRegionForDepartement(code);
   const siblingDepartements = region
     ? region.departements
-        .filter((d) => d !== code && DEPARTEMENTS[d])
+        .filter((d) => d !== code && isActiveDepartement(d))
         .map((d) => ({ code: d, name: DEPARTEMENTS[d] }))
     : [];
 
@@ -86,18 +91,25 @@ export default async function DepartementPage({ params }: Props) {
             Communes principales ({communes.length})
           </h2>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {/* prefetch={false}: this grid can hold ~100 commune links;
+                scrolling it prefetches each one's segments, invoking the
+                /commune/[slug] function for every uncached entry. */}
             {communes.map((c) => (
               <Link
                 key={c.code}
                 href={communePath(c.code, c.nom)}
-                className="hover:bg-accent rounded-lg border px-4 py-3 transition-colors"
+                prefetch={false}
+                className="hover:bg-accent flex items-center justify-between gap-3 rounded-lg border px-4 py-3 transition-colors"
               >
-                <span className="font-medium">{c.nom}</span>
-                {c.population != null && (
-                  <span className="text-muted-foreground ml-2 text-sm">
-                    {c.population.toLocaleString("fr-FR")} hab.
-                  </span>
-                )}
+                <span>
+                  <span className="font-medium">{c.nom}</span>
+                  {c.population != null && (
+                    <span className="text-muted-foreground ml-2 text-sm">
+                      {c.population.toLocaleString("fr-FR")} hab.
+                    </span>
+                  )}
+                </span>
+                <LinkPendingIndicator />
               </Link>
             ))}
           </div>

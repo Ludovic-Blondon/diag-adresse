@@ -230,10 +230,13 @@ export default async function RiskGuidePage({ params }: Props) {
           Parcourir par département
         </summary>
         <div className="mt-3 flex flex-wrap gap-2">
+          {/* prefetch={false}: opening the <details> would otherwise fire
+              ~100 segment prefetches at once, same as the layout footer. */}
           {getActiveDepartements().map((dep) => (
             <Link
               key={dep.code}
               href={`/departement/${dep.code}`}
+              prefetch={false}
               className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
             >
               {dep.name}

@@ -17,7 +17,10 @@ async function geoFetch<T>(
   const url = `${GEORISQUES_BASE_URL}${path}?${qs}`;
   const res = await fetch(url, {
     signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    next: { revalidate: 86400 },
+    // 7 days: risk zonings change on regulatory timescales. Keep >= the
+    // /commune revalidate (7d) — the route re-renders at the lowest fetch
+    // revalidate it uses, so a shorter value here multiplies ISR renders.
+    next: { revalidate: 604800 },
   });
   if (!res.ok) throw new Error(`Georisques ${path} ${res.status}`);
   return res.json();
@@ -58,7 +61,7 @@ export const fetchRGA = cache(
         `${GEORISQUES_BASE_URL}/rga?latlon=${lon},${lat}`,
         {
           signal: AbortSignal.timeout(API_TIMEOUT_MS),
-          next: { revalidate: 86400 },
+          next: { revalidate: 604800 }, // 7 days, see geoFetch
         },
       );
       if (!res.ok) throw new Error(`RGA ${res.status}`);

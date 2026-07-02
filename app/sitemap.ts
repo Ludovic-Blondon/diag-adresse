@@ -10,6 +10,13 @@ import { listAvailableDepartements } from "@/lib/argile/data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
+  // Bucketed to the 1st of the month: the sitemap is generated at build time,
+  // so a raw `now` bumps lastModified on every URL at each deploy and sends
+  // crawlers re-fetching all ~2300 pages (and their OG images) — the main
+  // source of Vercel function CPU. Matches changeFrequency: "monthly".
+  const monthStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+  );
   const riskGuidesUpdatedAt = new Date(RISK_GUIDES_UPDATED_AT);
   const latestArticleUpdate =
     ALL_ARTICLES.length > 0
@@ -21,13 +28,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const pages: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
-      lastModified: now,
+      lastModified: monthStart,
       changeFrequency: "monthly",
       priority: 1,
     },
     {
       url: `${BASE_URL}/faq`,
-      lastModified: now,
+      lastModified: monthStart,
       changeFrequency: "monthly",
       priority: 0.6,
     },
@@ -53,7 +60,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const region of REGIONS) {
     pages.push({
       url: `${BASE_URL}/region/${region.code}`,
-      lastModified: now,
+      lastModified: monthStart,
       changeFrequency: "monthly",
       priority: 0.9,
     });
@@ -63,7 +70,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const dep of getActiveDepartements()) {
     pages.push({
       url: `${BASE_URL}/departement/${dep.code}`,
-      lastModified: now,
+      lastModified: monthStart,
       changeFrequency: "monthly",
       priority: 0.85,
     });
@@ -111,7 +118,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const [code, nom] of communesIndex) {
     pages.push({
       url: `${BASE_URL}${communePath(code, nom)}`,
-      lastModified: now,
+      lastModified: monthStart,
       changeFrequency: "monthly",
       priority: 0.8,
     });

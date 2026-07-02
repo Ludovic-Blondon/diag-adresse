@@ -8,7 +8,11 @@ import { DiagnosticDashboard } from "@/components/diagnostic-dashboard";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placeJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
-import { getDepartementCode, DEPARTEMENTS } from "@/lib/departements";
+import {
+  getDepartementCode,
+  DEPARTEMENTS,
+  isActiveDepartement,
+} from "@/lib/departements";
 import { communePath } from "@/lib/commune-url";
 
 interface Props {
@@ -121,7 +125,7 @@ export default async function DiagnosticPage({ params, searchParams }: Props) {
       />
       <Breadcrumbs
         items={[
-          ...(depName
+          ...(depName && isActiveDepartement(depCode)
             ? [{ name: depName, href: `/departement/${depCode}` }]
             : []),
           {

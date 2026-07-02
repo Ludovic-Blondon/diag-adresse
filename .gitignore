@@ -45,3 +45,12 @@ CLAUDE.md
 
 # planning docs (local only, not versioned)
 /docs
+
+# argile RGA — géodonnées brutes téléchargées localement (multi-Go, hors git)
+# Le README et les sorties JSON (lib/argile/) restent versionnés.
+/data/argile/raw/
+/data/argile/work/
+
+# venv local du pipeline argile (a2)
+/.venv-argile/
+/.venv/

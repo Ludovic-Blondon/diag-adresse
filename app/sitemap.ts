@@ -6,6 +6,7 @@ import { getActiveDepartements } from "@/lib/departements";
 import { REGIONS } from "@/lib/regions";
 import { ALL_ARTICLES } from "@/lib/articles";
 import { RISK_GUIDES, RISK_GUIDES_UPDATED_AT } from "@/lib/risk-guides";
+import { listAvailableDepartements } from "@/lib/argile/data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -75,6 +76,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: riskGuidesUpdatedAt,
       changeFrequency: "monthly",
       priority: 0.7,
+    });
+  }
+
+  // Dossier « Carte argile 2026 » : hub + pages département (si le diff existe)
+  pages.push({
+    url: `${BASE_URL}/argile-2026`,
+    lastModified: riskGuidesUpdatedAt,
+    changeFrequency: "monthly",
+    priority: 0.9,
+  });
+  pages.push({
+    url: `${BASE_URL}/argile-2026/methodologie`,
+    lastModified: riskGuidesUpdatedAt,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  });
+  pages.push({
+    url: `${BASE_URL}/argile-2026/presse`,
+    lastModified: riskGuidesUpdatedAt,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  });
+  for (const dep of listAvailableDepartements()) {
+    pages.push({
+      url: `${BASE_URL}/argile-2026/departement/${dep}`,
+      lastModified: riskGuidesUpdatedAt,
+      changeFrequency: "monthly",
+      priority: 0.8,
     });
   }
 

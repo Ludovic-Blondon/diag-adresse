@@ -13,7 +13,7 @@ import {
   DEPARTEMENTS,
   isActiveDepartement,
 } from "@/lib/departements";
-import { communePath } from "@/lib/commune-url";
+import { communePath, parseCommuneParam } from "@/lib/commune-url";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -25,16 +25,20 @@ const resolveAddress = cache(
     if (lon && lat && citycode) {
       const lonN = parseFloat(lon);
       const latN = parseFloat(lat);
+      // parseCommuneParam accepts Corsica codes (2A/2B) and normalises their
+      // case, unlike a bare \d{5} — otherwise Corsican addresses fall through
+      // to a needless geocoding call on every render.
+      const parsed = parseCommuneParam(citycode);
       if (
         !Number.isNaN(lonN) &&
         !Number.isNaN(latN) &&
-        /^\d{5}$/.test(citycode)
+        parsed.kind === "insee"
       ) {
         return {
           label: slugToQuery(slug),
           lon: lonN,
           lat: latN,
-          citycode,
+          citycode: parsed.insee,
           city: "",
         };
       }

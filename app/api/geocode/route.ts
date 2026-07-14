@@ -4,9 +4,18 @@ import { autocomplete } from "@/lib/apis/geocode";
 const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 60;
 const hits = new Map<string, { count: number; reset: number }>();
+let nextSweep = 0;
 
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
+  // Sweep expired entries at most once per window: without it the map grows
+  // by one entry per IP for the lifetime of the serverless instance.
+  if (now >= nextSweep) {
+    for (const [key, entry] of hits) {
+      if (now > entry.reset) hits.delete(key);
+    }
+    nextSweep = now + WINDOW_MS;
+  }
   const entry = hits.get(ip);
   if (!entry || now > entry.reset) {
     hits.set(ip, { count: 1, reset: now + WINDOW_MS });

@@ -35,6 +35,30 @@ export async function getCommuneByInseeCode(
   };
 }
 
+export interface DepartementCommune {
+  code: string;
+  nom: string;
+  population?: number;
+}
+
+/**
+ * List all communes of a departement with their population.
+ * Throws on any failure (HTTP error, timeout): the /departement pages must
+ * not ISR-cache a listing without its main content for 7 days — an error
+ * during background revalidation keeps serving the previous HTML instead.
+ */
+export async function getCommunesForDepartement(
+  depCode: string,
+): Promise<DepartementCommune[]> {
+  const url = `${GEO_GOUV_BASE_URL}/departements/${encodeURIComponent(depCode)}/communes?fields=nom,code,population`;
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+    next: { revalidate: 604800 }, // 7 days, matches the /departement revalidate
+  });
+  if (!res.ok) throw new Error(`geo.api.gouv.fr ${res.status}`);
+  return res.json();
+}
+
 export interface PostalCommune {
   code: string;
   name: string;

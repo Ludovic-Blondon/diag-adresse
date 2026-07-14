@@ -13,30 +13,13 @@ import {
 import { RISK_NAV } from "@/lib/navigation";
 import { getRegionForDepartement } from "@/lib/regions";
 import { communePath } from "@/lib/commune-url";
+import { getCommunesForDepartement } from "@/lib/apis/geo-gouv";
 
 export const revalidate = 604800; // 7 days
 export const dynamicParams = false;
 
-interface Commune {
-  code: string;
-  nom: string;
-  population?: number;
-}
-
 interface Props {
   params: Promise<{ code: string }>;
-}
-
-async function getCommunesForDepartement(depCode: string): Promise<Commune[]> {
-  const res = await fetch(
-    `https://geo.api.gouv.fr/departements/${depCode}/communes?fields=nom,code,population`,
-    { next: { revalidate: 604800 } },
-  );
-  if (!res.ok) return [];
-  const data: Commune[] = await res.json();
-  return data
-    .filter((c) => (c.population ?? 0) >= 5000)
-    .sort((a, b) => (b.population ?? 0) - (a.population ?? 0));
 }
 
 export function generateStaticParams() {
@@ -55,7 +38,9 @@ export default async function DepartementPage({ params }: Props) {
   const name = DEPARTEMENTS[code];
   if (!name) notFound();
 
-  const communes = await getCommunesForDepartement(code);
+  const communes = (await getCommunesForDepartement(code))
+    .filter((c) => (c.population ?? 0) >= 5000)
+    .sort((a, b) => (b.population ?? 0) - (a.population ?? 0));
   const region = getRegionForDepartement(code);
   const siblingDepartements = region
     ? region.departements

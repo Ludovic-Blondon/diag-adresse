@@ -18,24 +18,34 @@ export function AddressSearch({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const abortRef = useRef<AbortController>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
   const fetchSuggestions = useCallback(async (q: string) => {
+    // Abort the in-flight request: without this, a slow response for an old
+    // keystroke can arrive after (and overwrite) the fresher suggestions.
+    abortRef.current?.abort();
     if (q.length < 3) {
       setSuggestions([]);
       setOpen(false);
       return;
     }
+    const controller = new AbortController();
+    abortRef.current = controller;
     setLoading(true);
     try {
-      const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/geocode?q=${encodeURIComponent(q)}`, {
+        signal: controller.signal,
+      });
       if (!res.ok) return;
       const data: GeocodeSuggestion[] = await res.json();
       setSuggestions(data);
       setOpen(data.length > 0);
       setActiveIndex(-1);
+    } catch {
+      // Aborted by a newer keystroke, or network error: keep what's displayed.
     } finally {
-      setLoading(false);
+      if (abortRef.current === controller) setLoading(false);
     }
   }, []);
 
@@ -68,17 +78,26 @@ export function AddressSearch({
         e.preventDefault();
         setActiveIndex((i) => Math.max(i - 1, 0));
         break;
-      case "Enter":
+      case "Enter": {
         e.preventDefault();
-        if (activeIndex >= 0 && suggestions[activeIndex]) {
-          navigate(suggestions[activeIndex]);
-        }
+        // No arrow selection yet: Enter takes the first suggestion.
+        const target =
+          activeIndex >= 0 ? suggestions[activeIndex] : suggestions[0];
+        if (target) navigate(target);
         break;
+      }
       case "Escape":
         setOpen(false);
         break;
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      abortRef.current?.abort();
+    };
+  }, []);
 
   useEffect(() => {
     if (activeIndex >= 0 && listRef.current) {

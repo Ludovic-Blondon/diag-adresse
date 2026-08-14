@@ -1,11 +1,23 @@
 import { ImageResponse } from "next/og";
 import { TOP_COMMUNES } from "@/lib/communes";
-import { parseCommuneParam } from "@/lib/commune-url";
+import { communePath, parseCommuneParam } from "@/lib/commune-url";
 import { API_TIMEOUT_MS } from "@/lib/constants";
 
 export const alt = "Diagnostic commune";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+
+// Sans generateStaticParams, un segment dynamique n'est pas énumérable au build
+// et l'image part en rendu à la demande : satori la recalcule après chaque
+// déploiement, puisque Vercel purge le cache ISR à chaque deploy. Or l'image ne
+// contient que le nom de la commune — rien qui justifie de la régénérer. On
+// prérend donc la même liste que la page (voir page.tsx), qui couvre les
+// communes les plus visitées ; le reste reste à la demande, puis mis en cache.
+export function generateStaticParams() {
+  return TOP_COMMUNES.map((c) => ({
+    slug: communePath(c.code, c.name).split("/").pop()!,
+  }));
+}
 
 async function resolveCommuneName(codeInsee: string): Promise<string> {
   const known = TOP_COMMUNES.find((c) => c.code === codeInsee);

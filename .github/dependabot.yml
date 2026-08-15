@@ -15,14 +15,11 @@ updates:
       # pin @types/node on the Node LTS major (24) — v25 tracks Node Current
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
-      # maplibre-gl v6 casse deux choses dans components/risk-map.tsx :
-      # l'export `default` disparaît, et le namespace global `GeoJSON` n'est
-      # plus fourni (v5 tirait @types/geojson en dépendance). Aucun test ne
-      # couvre le rendu de la carte, donc la migration demande une vérification
-      # visuelle en local. Reporté volontairement — à rouvrir avec du temps
-      # dédié, pas au fil d'une PR Dependabot.
-      - dependency-name: "maplibre-gl"
-        update-types: ["version-update:semver-major"]
+      # Rien d'autre ici : les majeures doivent rester *proposées*, même quand
+      # on ne compte pas les merger tout de suite. Une PR majeure en échec est
+      # une information (ce qui casse, et où), et `ignore` la ferait disparaître
+      # — y compris pour les mises à jour de sécurité de ces versions.
+      # Le filet de sécurité reste `pnpm audit --prod --audit-level high` en CI.
     labels: ["dependencies"]
     commit-message:
       prefix: "chore(deps)"

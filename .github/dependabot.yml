@@ -27,6 +27,13 @@ updates:
       day: "monday"
       time: "06:00"
       timezone: "Europe/Paris"
+    # Groupé comme pour npm : une PR par semaine au lieu d'une par action.
+    # Ces bumps ne touchent que .github/, donc `ignoreCommand` (vercel.json)
+    # leur évite désormais de déclencher un déploiement — et donc une purge du
+    # cache ISR. Le groupe sert la lisibilité, pas le CPU.
+    groups:
+      github-actions:
+        patterns: ["*"]
     labels: ["dependencies", "github-actions"]
     commit-message:
       prefix: "chore(ci)"

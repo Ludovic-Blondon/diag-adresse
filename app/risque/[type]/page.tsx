@@ -8,7 +8,7 @@ import { BASE_URL } from "@/lib/constants";
 import { RISK_GUIDES } from "@/lib/risk-guides";
 import { POPULAR_CITIES } from "@/lib/navigation";
 import { TOP_COMMUNES } from "@/lib/communes";
-import { getActiveDepartements } from "@/lib/departements";
+import { REGIONS } from "@/lib/regions";
 import { communePath } from "@/lib/commune-url";
 
 interface Props {
@@ -225,25 +225,24 @@ export default async function RiskGuidePage({ params }: Props) {
         </details>
       </section>
 
-      <details>
-        <summary className="cursor-pointer text-lg font-semibold hover:underline">
-          Parcourir par département
-        </summary>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {/* prefetch={false}: opening the <details> would otherwise fire
-              ~100 segment prefetches at once, same as the layout footer. */}
-          {getActiveDepartements().map((dep) => (
+      <section>
+        <h2 className="mb-3 text-lg font-semibold">Parcourir par région</h2>
+        <div className="flex flex-wrap gap-2">
+          {/* Régions et non départements : les pages région listent leurs
+              départements, qui listent leurs communes. Même arbitrage que le
+              footer, prefetch coupé comme lui. */}
+          {REGIONS.map((region) => (
             <Link
-              key={dep.code}
-              href={`/departement/${dep.code}`}
+              key={region.code}
+              href={`/region/${region.code}`}
               prefetch={false}
               className="hover:bg-accent rounded-full border px-3 py-1 text-sm transition-colors"
             >
-              {dep.name}
+              {region.name}
             </Link>
           ))}
         </div>
-      </details>
+      </section>
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">Autres guides</h2>

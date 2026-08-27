@@ -48,6 +48,17 @@ function complianceStatus(param: WaterParam) {
   };
 }
 
+/**
+ * Bactériologie : le seuil réglementaire est l'absence (0 dans 100 mL) et le
+ * labo rapporte « <1 », sa limite de comptage — il compte des colonies
+ * entières. Afficher « < 1,00 » face à un seuil de 0 se lit comme un
+ * dépassement alors que le prélèvement est conforme ; l'ARS parle d'absence,
+ * on écrit la même chose.
+ */
+function isAbsence(param: WaterParam): boolean {
+  return param.belowLimit && param.threshold === 0;
+}
+
 const DETAIL_CATEGORIES: WaterCategory[] = [
   "physicochimie",
   "mineraux",
@@ -158,13 +169,19 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                         <tr key={p.code}>
                           <td className="py-2 pr-4">{p.label}</td>
                           <td className="py-2 text-right whitespace-nowrap tabular-nums">
-                            {p.belowLimit ? "< " : ""}
-                            {p.value != null
-                              ? formatNumberFr(p.value, 2)
-                              : "—"}{" "}
-                            <span className="text-muted-foreground">
-                              {p.unit}
-                            </span>
+                            {isAbsence(p) ? (
+                              "Absence"
+                            ) : (
+                              <>
+                                {p.belowLimit ? "< " : ""}
+                                {p.value != null
+                                  ? formatNumberFr(p.value, 2)
+                                  : "—"}{" "}
+                                <span className="text-muted-foreground">
+                                  {p.unit}
+                                </span>
+                              </>
+                            )}
                           </td>
                           <td className="text-muted-foreground py-2 text-right whitespace-nowrap tabular-nums">
                             {p.threshold != null
@@ -280,10 +297,16 @@ function ParamCard({ param }: { param: WaterParam }) {
           <>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold tabular-nums">
-                {param.belowLimit ? "< " : ""}
-                {formatNumberFr(param.value, param.value < 1 ? 2 : 1)}
+                {isAbsence(param) ? (
+                  "Absence"
+                ) : (
+                  <>
+                    {param.belowLimit ? "< " : ""}
+                    {formatNumberFr(param.value, param.value < 1 ? 2 : 1)}
+                  </>
+                )}
               </span>
-              {param.unit && (
+              {param.unit && !isAbsence(param) && (
                 <span className="text-muted-foreground text-sm">
                   {param.unit}
                 </span>

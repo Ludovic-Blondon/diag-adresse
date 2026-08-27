@@ -61,9 +61,9 @@ export const fetchRGA = cache(
       next: { revalidate: 604800 }, // 7 days, see geoFetch
     });
     if (!res.ok) throw new Error(`RGA ${res.status}`);
-    // Out of coverage, the endpoint returns 200 with an empty body: that maps
-    // to "négligeable". Real errors must reject so the dashboard drops the
-    // card instead of rendering a falsely reassuring level.
+    // Out of coverage, the endpoint returns 200 with an empty body: scoreRGA
+    // maps that to "indisponible". Real errors must reject so the dashboard
+    // drops the card instead of rendering a falsely reassuring level.
     const text = await res.text();
     if (!text.trim()) return {};
     return JSON.parse(text) as RGAData;

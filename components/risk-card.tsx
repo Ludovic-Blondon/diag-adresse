@@ -11,12 +11,12 @@ import {
 import {
   RISK_LEVEL_BADGE,
   RISK_LEVEL_LABELS,
-  type RiskLevel,
+  type DisplayRiskLevel,
 } from "@/lib/constants";
 
 interface RiskCardProps {
   title: string;
-  level: RiskLevel;
+  level: DisplayRiskLevel;
   description: string;
   details?: string;
   communeOnly?: boolean;

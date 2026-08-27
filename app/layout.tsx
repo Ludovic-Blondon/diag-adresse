@@ -9,7 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { organizationJsonLd } from "@/lib/json-ld";
 import { BASE_URL } from "@/lib/constants";
 import { RISK_NAV } from "@/lib/navigation";
-import { REGIONS, getDepartementsForRegion } from "@/lib/regions";
+import { REGIONS } from "@/lib/regions";
 import "./globals.css";
 
 const inter = Inter({
@@ -112,42 +112,25 @@ export default function RootLayout({
                   Contact / signaler un problème
                 </a>
               </nav>
-              <details className="mx-auto max-w-6xl">
-                <summary className="text-muted-foreground cursor-pointer text-center text-xs hover:underline">
-                  Tous les départements
-                </summary>
-                <div className="mt-4 columns-2 gap-4 md:columns-3 lg:columns-4">
-                  {REGIONS.map((region) => (
-                    <div key={region.code} className="mb-5 break-inside-avoid">
-                      <h3 className="mb-1 text-xs font-medium">
-                        <Link
-                          href={`/region/${region.code}`}
-                          prefetch={false}
-                          className="hover:underline"
-                        >
-                          {region.name}
-                        </Link>
-                      </h3>
-                      <ul className="space-y-0.5">
-                        {getDepartementsForRegion(region).map((dep) => (
-                          <li key={dep.code}>
-                            {/* prefetch={false}: opening the <details> would
-                                otherwise fire ~100 segment prefetches at once,
-                                each a function invocation when uncached. */}
-                            <Link
-                              href={`/departement/${dep.code}`}
-                              prefetch={false}
-                              className="text-muted-foreground text-xs hover:underline"
-                            >
-                              {dep.name} ({dep.code})
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              </details>
+              {/* Régions seulement : les ~101 liens département qui vivaient
+                  ici étaient répétés sur chaque page pour un chemin de crawl
+                  déjà assuré par les pages région. prefetch coupé (cf. PR #22),
+                  le footer étant présent partout. */}
+              <nav
+                aria-label="Régions"
+                className="mx-auto flex max-w-4xl flex-wrap justify-center gap-x-4 gap-y-1"
+              >
+                {REGIONS.map((region) => (
+                  <Link
+                    key={region.code}
+                    href={`/region/${region.code}`}
+                    prefetch={false}
+                    className="text-muted-foreground text-xs hover:underline"
+                  >
+                    {region.name}
+                  </Link>
+                ))}
+              </nav>
             </footer>
           </TooltipProvider>
         </ThemeProvider>

@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fetchWaterQuality, parseWaterValue } from "../lib/apis/hubeau";
+import {
+  fetchWaterQuality,
+  isBelowLimit,
+  isNearLimit,
+  parseWaterValue,
+} from "../lib/apis/hubeau";
 import { WATER_PARAMS } from "../lib/constants";
 
 afterEach(() => {
@@ -63,6 +68,40 @@ const row = (
   date_prelevement: date,
 });
 
+describe("isBelowLimit", () => {
+  it("reconnaît les résultats « <x » (rien de détecté)", () => {
+    expect(isBelowLimit("<0,500")).toBe(true);
+    expect(isBelowLimit("<1")).toBe(true);
+  });
+
+  it("ne confond pas avec une valeur mesurée", () => {
+    expect(isBelowLimit("0,500")).toBe(false);
+    expect(isBelowLimit("25")).toBe(false);
+    expect(isBelowLimit(undefined)).toBe(false);
+  });
+});
+
+describe("isNearLimit", () => {
+  it("signale une valeur conforme mais à moins de 10 % du seuil", () => {
+    expect(isNearLimit(0.5, 0.5)).toBe(true); // pesticides pile au seuil
+    expect(isNearLimit(0.45, 0.5)).toBe(true);
+    expect(isNearLimit(46, 50)).toBe(true); // nitrates
+  });
+
+  it("ne signale pas une valeur avec de la marge", () => {
+    expect(isNearLimit(0.44, 0.5)).toBe(false);
+    expect(isNearLimit(25, 50)).toBe(false);
+  });
+
+  it("ne signale pas un dépassement (déjà non conforme)", () => {
+    expect(isNearLimit(0.6, 0.5)).toBe(false);
+  });
+
+  it("ignore les seuils à 0, où toute valeur conforme vaut 0", () => {
+    expect(isNearLimit(0, 0)).toBe(false);
+  });
+});
+
 describe("fetchWaterQuality", () => {
   it("prend le premier résultat par paramètre du bulk (le plus récent) et complète en unitaire", async () => {
     const mock = stubHubeau(
@@ -78,14 +117,28 @@ describe("fetchWaterQuality", () => {
     const result = await fetchWaterQuality("34172");
     const byCode = new Map(result.params.map((p) => [p.code, p]));
 
-    // Nitrates : dernière valeur du bulk, conforme (25 <= 50)
-    expect(byCode.get("1340")).toMatchObject({ value: 25, compliant: true });
+    // Nitrates : dernière valeur du bulk, conforme (25 <= 50) et avec marge
+    expect(byCode.get("1340")).toMatchObject({
+      value: 25,
+      compliant: true,
+      nearLimit: false,
+    });
     // pH : pas de seuil → compliant null
     expect(byCode.get("1302")).toMatchObject({ value: 7.2, compliant: null });
-    // E. coli : 0 est une vraie valeur, conforme au seuil 0
-    expect(byCode.get("1449")).toMatchObject({ value: 0, compliant: true });
-    // Spores : absents du bulk, récupérés par le fallback unitaire
-    expect(byCode.get("1042")).toMatchObject({ value: 1, compliant: false });
+    // E. coli : 0 est une vraie valeur, conforme au seuil 0 — et le seuil nul
+    // ne doit pas la faire passer pour « à la limite »
+    expect(byCode.get("1449")).toMatchObject({
+      value: 0,
+      compliant: true,
+      nearLimit: false,
+    });
+    // Spores : absents du bulk, récupérés par le fallback unitaire. « <1 »
+    // est une non-détection, pas 1 germe : conforme malgré le seuil à 0.
+    expect(byCode.get("1042")).toMatchObject({
+      value: 1,
+      belowLimit: true,
+      compliant: true,
+    });
     // Paramètre jamais mesuré : null partout
     expect(byCode.get("1350")).toMatchObject({
       value: null,
@@ -108,6 +161,45 @@ describe("fetchWaterQuality", () => {
 
     expect(byCode.get("1340")).toMatchObject({ value: 30, compliant: true });
     expect(mock).toHaveBeenCalledTimes(1 + WATER_PARAMS.length);
+  });
+
+  it("ne signale pas « à la limite » une non-détection au niveau du seuil", async () => {
+    // Cas réel : Hub'Eau renvoie « <0,500 » pour les pesticides dans la quasi
+    // totalité des communes, pour un seuil de 0,5 µg/L.
+    stubHubeau([row("6276", "<0,500"), row("1340", "48")]);
+
+    const byCode = new Map(
+      (await fetchWaterQuality("38185")).params.map((p) => [p.code, p]),
+    );
+
+    expect(byCode.get("6276")).toMatchObject({
+      value: 0.5,
+      belowLimit: true,
+      compliant: true,
+      nearLimit: false,
+    });
+    // Nitrates réellement mesurés à 48 pour un seuil de 50 : là, on signale.
+    expect(byCode.get("1340")).toMatchObject({
+      value: 48,
+      belowLimit: false,
+      compliant: true,
+      nearLimit: true,
+    });
+  });
+
+  it("garde les vrais dépassements non conformes", async () => {
+    stubHubeau([row("1449", "12"), row("1340", "62")]);
+
+    const byCode = new Map(
+      (await fetchWaterQuality("38185")).params.map((p) => [p.code, p]),
+    );
+
+    expect(byCode.get("1449")).toMatchObject({
+      value: 12,
+      belowLimit: false,
+      compliant: false,
+    });
+    expect(byCode.get("1340")).toMatchObject({ value: 62, compliant: false });
   });
 
   it("renvoie tous les paramètres à null quand l'API est entièrement indisponible", async () => {

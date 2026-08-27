@@ -89,6 +89,26 @@ async function fetchLatestByParam(
   return latest;
 }
 
+// A value sitting just under the limit is compliant, but showing it as a
+// plain "OK" hides that it has no margin left. Zero thresholds (bacteriology)
+// are excluded: every compliant value there is 0, which would always match.
+const NEAR_LIMIT_RATIO = 0.9;
+
+export function isNearLimit(value: number, threshold: number): boolean {
+  return (
+    threshold > 0 && value <= threshold && value >= NEAR_LIMIT_RATIO * threshold
+  );
+}
+
+/**
+ * True for a "<x" result: the lab found nothing above its quantification
+ * limit. The parameter is absent, not measured at x — Hub'Eau reports "<0,500"
+ * for pesticides and "<1" for every bacteriological count in a healthy supply.
+ */
+export function isBelowLimit(raw: string | undefined): boolean {
+  return raw != null && raw.trimStart().startsWith("<");
+}
+
 /**
  * Parse a Hub'Eau alphanumeric result ("7,71", "<0,5") to a number; null when
  * absent or not numeric. "<x" (below detection limit) is treated as x.
@@ -107,9 +127,18 @@ export const fetchWaterQuality = cache(
       const dis = latest.get(entry.code);
       const value = parseWaterValue(dis?.resultat_alphanumerique);
 
+      const belowLimit = isBelowLimit(dis?.resultat_alphanumerique);
+
       let compliant: boolean | null = null;
+      let nearLimit = false;
       if (value != null && entry.threshold != null) {
-        compliant = value <= entry.threshold;
+        // "<x" borne la valeur vraie sous x. C'est conforme dès que x tient
+        // dans le seuil, et pour les seuils à zéro (bactériologie) l'absence
+        // de détection *est* le critère : "<1" ne veut pas dire 1 germe.
+        compliant =
+          belowLimit && entry.threshold === 0 ? true : value <= entry.threshold;
+        // Une non-détection n'est pas une mesure « à la limite ».
+        nearLimit = !belowLimit && isNearLimit(value, entry.threshold);
       }
 
       return {
@@ -120,6 +149,8 @@ export const fetchWaterQuality = cache(
         threshold: entry.threshold,
         date: dis?.date_prelevement ?? null,
         compliant,
+        belowLimit,
+        nearLimit,
         category: entry.category,
       };
     });

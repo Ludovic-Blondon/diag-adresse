@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { communePath } from "@/lib/commune-url";
 import { isActiveDepartement } from "@/lib/departements";
+import { getRegionForDepartement } from "@/lib/regions";
 import { prepositionVille, deVille } from "@/lib/commune-text";
 
 interface CommuneHeaderProps {
@@ -16,10 +17,17 @@ export function CommuneHeader({
   depCode,
   depName,
 }: CommuneHeaderProps) {
+  // Même chaîne d'ancêtres que la page département (accueil > région >
+  // département) : la région manquait ici, alors que c'est le seul lien
+  // contextuel des 2280 pages commune vers les 14 pages région.
+  const region = getRegionForDepartement(depCode);
   return (
     <div>
       <Breadcrumbs
         items={[
+          ...(region
+            ? [{ name: region.name, href: `/region/${region.code}` }]
+            : []),
           ...(depName && isActiveDepartement(depCode)
             ? [{ name: depName, href: `/departement/${depCode}` }]
             : []),

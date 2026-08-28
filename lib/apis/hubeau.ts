@@ -41,11 +41,16 @@ async function fetchResults(
  * response is sorted by date desc, so the first row seen for a code is its
  * most recent result. Parameters absent from the bulk page — rarely measured,
  * or total bulk failure — are fetched individually.
+ *
+ * Throws when nothing came back at all: an empty Map would read as "commune
+ * with no analysis on record", which is a different claim from "HubEau is
+ * down". Callers need to tell the two apart.
  */
 async function fetchLatestByParam(
   codeCommune: string,
 ): Promise<Map<string, HubeauResultDis>> {
   const latest = new Map<string, HubeauResultDis>();
+  let bulkFailed = false;
 
   try {
     const rows = await fetchResults(
@@ -64,6 +69,7 @@ async function fetchLatestByParam(
     }
   } catch {
     // Bulk failed: the per-parameter fallback below covers every code.
+    bulkFailed = true;
   }
 
   const missing = WATER_PARAMS.filter((p) => !latest.has(p.code));
@@ -85,6 +91,17 @@ async function fetchLatestByParam(
       latest.set(missing[i].code, result.value[0]);
     }
   });
+
+  // Not a single request went through. A commune without analyses still gets
+  // 200s with empty rows, so this can only be an outage — say so instead of
+  // rendering 22 blank parameters.
+  if (
+    bulkFailed &&
+    fallbacks.length > 0 &&
+    fallbacks.every((result) => result.status === "rejected")
+  ) {
+    throw new Error("HubEau unreachable");
+  }
 
   return latest;
 }

@@ -202,13 +202,25 @@ describe("fetchWaterQuality", () => {
     expect(byCode.get("1340")).toMatchObject({ value: 62, compliant: false });
   });
 
-  it("renvoie tous les paramètres à null quand l'API est entièrement indisponible", async () => {
+  it("lève quand l'API est entièrement indisponible", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => {
         throw new TypeError("fetch failed");
       }),
     );
+
+    // Une Map vide se lirait « commune sans analyses » : la page doit pouvoir
+    // annoncer une panne plutôt que 22 paramètres muets.
+    await expect(fetchWaterQuality("13055")).rejects.toThrow(
+      "HubEau unreachable",
+    );
+  });
+
+  it("renvoie tous les paramètres à null pour une commune sans analyses", async () => {
+    // L'API répond, elle n'a simplement rien pour cette commune : c'est une
+    // absence de données, pas une panne.
+    stubHubeau([]);
 
     const result = await fetchWaterQuality("13055");
     expect(result.params).toHaveLength(WATER_PARAMS.length);

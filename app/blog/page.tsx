@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { BASE_URL } from "@/lib/constants";
 import { ALL_ARTICLES } from "@/lib/articles";
 import { RISK_NAV } from "@/lib/navigation";
+import { formatDateFr } from "@/lib/format";
 
 const title = "Blog DiagAdresse";
 const description =
@@ -31,12 +32,6 @@ export const metadata: Metadata = {
   },
 };
 
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
-
 export default function BlogIndexPage() {
   return (
     <main className="mx-auto w-full max-w-3xl space-y-8 px-4 py-8">
@@ -55,7 +50,7 @@ export default function BlogIndexPage() {
             <Link href={`/blog/${article.slug}`} className="block space-y-2">
               <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
                 <time dateTime={article.publishedAt}>
-                  {dateFormatter.format(new Date(article.publishedAt))}
+                  {formatDateFr(article.publishedAt)}
                 </time>
                 <span aria-hidden="true">·</span>
                 <span>{article.readingMinutes} min de lecture</span>

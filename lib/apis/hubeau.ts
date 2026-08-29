@@ -41,11 +41,16 @@ async function fetchResults(
  * response is sorted by date desc, so the first row seen for a code is its
  * most recent result. Parameters absent from the bulk page — rarely measured,
  * or total bulk failure — are fetched individually.
+ *
+ * Throws when nothing came back at all: an empty Map would read as "commune
+ * with no analysis on record", which is a different claim from "HubEau is
+ * down". Callers need to tell the two apart.
  */
 async function fetchLatestByParam(
   codeCommune: string,
 ): Promise<Map<string, HubeauResultDis>> {
   const latest = new Map<string, HubeauResultDis>();
+  let bulkFailed = false;
 
   try {
     const rows = await fetchResults(
@@ -64,6 +69,7 @@ async function fetchLatestByParam(
     }
   } catch {
     // Bulk failed: the per-parameter fallback below covers every code.
+    bulkFailed = true;
   }
 
   const missing = WATER_PARAMS.filter((p) => !latest.has(p.code));
@@ -86,7 +92,38 @@ async function fetchLatestByParam(
     }
   });
 
+  // Not a single request went through. A commune without analyses still gets
+  // 200s with empty rows, so this can only be an outage — say so instead of
+  // rendering 22 blank parameters.
+  if (
+    bulkFailed &&
+    fallbacks.length > 0 &&
+    fallbacks.every((result) => result.status === "rejected")
+  ) {
+    throw new Error("HubEau unreachable");
+  }
+
   return latest;
+}
+
+// A value sitting just under the limit is compliant, but showing it as a
+// plain "OK" hides that it has no margin left. Zero thresholds (bacteriology)
+// are excluded: every compliant value there is 0, which would always match.
+const NEAR_LIMIT_RATIO = 0.9;
+
+export function isNearLimit(value: number, threshold: number): boolean {
+  return (
+    threshold > 0 && value <= threshold && value >= NEAR_LIMIT_RATIO * threshold
+  );
+}
+
+/**
+ * True for a "<x" result: the lab found nothing above its quantification
+ * limit. The parameter is absent, not measured at x — Hub'Eau reports "<0,500"
+ * for pesticides and "<1" for every bacteriological count in a healthy supply.
+ */
+export function isBelowLimit(raw: string | undefined): boolean {
+  return raw != null && raw.trimStart().startsWith("<");
 }
 
 /**
@@ -107,9 +144,18 @@ export const fetchWaterQuality = cache(
       const dis = latest.get(entry.code);
       const value = parseWaterValue(dis?.resultat_alphanumerique);
 
+      const belowLimit = isBelowLimit(dis?.resultat_alphanumerique);
+
       let compliant: boolean | null = null;
+      let nearLimit = false;
       if (value != null && entry.threshold != null) {
-        compliant = value <= entry.threshold;
+        // "<x" borne la valeur vraie sous x. C'est conforme dès que x tient
+        // dans le seuil, et pour les seuils à zéro (bactériologie) l'absence
+        // de détection *est* le critère : "<1" ne veut pas dire 1 germe.
+        compliant =
+          belowLimit && entry.threshold === 0 ? true : value <= entry.threshold;
+        // Une non-détection n'est pas une mesure « à la limite ».
+        nearLimit = !belowLimit && isNearLimit(value, entry.threshold);
       }
 
       return {
@@ -120,6 +166,8 @@ export const fetchWaterQuality = cache(
         threshold: entry.threshold,
         date: dis?.date_prelevement ?? null,
         compliant,
+        belowLimit,
+        nearLimit,
         category: entry.category,
       };
     });

@@ -55,11 +55,17 @@ export const fetchDPEStats = cache(
       }),
     ]);
 
+    // The distribution carries totalDPE, and EnergyCard reads totalDPE === 0
+    // as "no DPE on record here". A failed request must not produce that
+    // claim, so it becomes an outage the caller can report as such. The two
+    // averages only enrich the card and degrade to null on their own.
+    if (distResult.status === "rejected") {
+      throw new Error("ADEME DPE unreachable", { cause: distResult.reason });
+    }
+
     // Build distribution
-    const buckets =
-      distResult.status === "fulfilled" ? distResult.value.aggs : [];
-    const totalDPE =
-      distResult.status === "fulfilled" ? distResult.value.total : 0;
+    const buckets = distResult.value.aggs;
+    const totalDPE = distResult.value.total;
 
     const distribution: DPEDistribution[] = DPE_LABELS.map((label) => {
       const bucket = buckets.find((b) => b.value.toUpperCase() === label);

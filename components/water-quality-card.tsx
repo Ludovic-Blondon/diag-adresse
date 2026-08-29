@@ -9,10 +9,54 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { WATER_CATEGORY_LABELS, type WaterCategory } from "@/lib/constants";
+import { formatDateFr, formatNumberFr } from "@/lib/format";
 import type { WaterQualityResult, WaterParam } from "@/lib/types/hubeau";
 
 interface WaterQualityCardProps {
   data: WaterQualityResult;
+}
+
+/**
+ * Statut d'affichage d'un paramètre. Le cas « conforme mais à la limite du
+ * seuil » a sa propre couleur : un pesticide à 0,50 µg/L pour un seuil de
+ * 0,5 est réglementairement conforme, l'afficher comme un simple « OK » le
+ * présente à tort comme sans enjeu.
+ */
+function complianceStatus(param: WaterParam) {
+  if (param.compliant == null) return null;
+  if (!param.compliant) {
+    return {
+      label: "Non conforme",
+      short: "Dépassement",
+      text: "text-red-600 dark:text-red-400",
+      bar: "bg-red-500",
+    };
+  }
+  if (param.nearLimit) {
+    return {
+      label: "Conforme — à la limite du seuil",
+      short: "Limite",
+      text: "text-amber-600 dark:text-amber-400",
+      bar: "bg-amber-500",
+    };
+  }
+  return {
+    label: "Conforme",
+    short: "OK",
+    text: "text-green-600 dark:text-green-400",
+    bar: "bg-green-500",
+  };
+}
+
+/**
+ * Bactériologie : le seuil réglementaire est l'absence (0 dans 100 mL) et le
+ * labo rapporte « <1 », sa limite de comptage — il compte des colonies
+ * entières. Afficher « < 1,00 » face à un seuil de 0 se lit comme un
+ * dépassement alors que le prélèvement est conforme ; l'ARS parle d'absence,
+ * on écrit la même chose.
+ */
+function isAbsence(param: WaterParam): boolean {
+  return param.belowLimit && param.threshold === 0;
 }
 
 const DETAIL_CATEGORIES: WaterCategory[] = [
@@ -69,6 +113,12 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
           const allCompliant = catParams.every(
             (p) => p.compliant == null || p.compliant,
           );
+          const anyNearLimit = catParams.some((p) => p.nearLimit);
+          const dotColor = !allCompliant
+            ? "bg-red-500"
+            : anyNearLimit
+              ? "bg-amber-500"
+              : "bg-green-500";
 
           return (
             <div key={cat} className="overflow-hidden rounded-lg border">
@@ -85,9 +135,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                 </span>
                 <span className="flex items-center gap-2">
                   <span
-                    className={`inline-block h-2 w-2 rounded-full ${
-                      allCompliant ? "bg-green-500" : "bg-red-500"
-                    }`}
+                    className={`inline-block h-2 w-2 rounded-full ${dotColor}`}
                   />
                   <svg
                     className={`text-muted-foreground h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -121,32 +169,27 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                         <tr key={p.code}>
                           <td className="py-2 pr-4">{p.label}</td>
                           <td className="py-2 text-right whitespace-nowrap tabular-nums">
-                            {p.value?.toFixed(2)}{" "}
-                            <span className="text-muted-foreground">
-                              {p.unit}
-                            </span>
+                            {isAbsence(p) ? (
+                              "Absence"
+                            ) : (
+                              <>
+                                {p.belowLimit ? "< " : ""}
+                                {p.value != null
+                                  ? formatNumberFr(p.value, 2)
+                                  : "—"}{" "}
+                                <span className="text-muted-foreground">
+                                  {p.unit}
+                                </span>
+                              </>
+                            )}
                           </td>
                           <td className="text-muted-foreground py-2 text-right whitespace-nowrap tabular-nums">
                             {p.threshold != null
-                              ? `${p.threshold} ${p.unit}`
+                              ? `${formatNumberFr(p.threshold)} ${p.unit}`
                               : "—"}
                           </td>
                           <td className="py-2 text-right">
-                            {p.compliant != null ? (
-                              <span
-                                className={`text-xs font-semibold ${
-                                  p.compliant
-                                    ? "text-green-600 dark:text-green-400"
-                                    : "text-red-600 dark:text-red-400"
-                                }`}
-                              >
-                                {p.compliant ? "OK" : "Dépassement"}
-                              </span>
-                            ) : (
-                              <span className="text-muted-foreground text-xs">
-                                —
-                              </span>
-                            )}
+                            <ParamStatus param={p} />
                           </td>
                         </tr>
                       ))}
@@ -154,7 +197,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                   </table>
                   {catParams[0]?.date && (
                     <p className="text-muted-foreground mt-2 text-xs">
-                      Dernier prélèvement : {catParams[0].date}
+                      Dernier prélèvement : {formatDateFr(catParams[0].date)}
                     </p>
                   )}
                 </div>
@@ -220,7 +263,18 @@ function HardnessHelp({ value }: { value: number }) {
   );
 }
 
+function ParamStatus({ param }: { param: WaterParam }) {
+  const status = complianceStatus(param);
+  if (!status) return <span className="text-muted-foreground text-xs">—</span>;
+  return (
+    <span className={`text-xs font-semibold ${status.text}`}>
+      {status.short}
+    </span>
+  );
+}
+
 function ParamCard({ param }: { param: WaterParam }) {
+  const status = complianceStatus(param);
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -231,15 +285,9 @@ function ParamCard({ param }: { param: WaterParam }) {
               <HardnessHelp value={param.value} />
             )}
           </span>
-          {param.compliant != null && (
-            <span
-              className={`text-xs font-semibold ${
-                param.compliant
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-red-600 dark:text-red-400"
-              }`}
-            >
-              {param.compliant ? "Conforme" : "Non conforme"}
+          {status && (
+            <span className={`text-right text-xs font-semibold ${status.text}`}>
+              {status.label}
             </span>
           )}
         </CardTitle>
@@ -249,9 +297,16 @@ function ParamCard({ param }: { param: WaterParam }) {
           <>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold tabular-nums">
-                {param.value.toFixed(param.value < 1 ? 2 : 1)}
+                {isAbsence(param) ? (
+                  "Absence"
+                ) : (
+                  <>
+                    {param.belowLimit ? "< " : ""}
+                    {formatNumberFr(param.value, param.value < 1 ? 2 : 1)}
+                  </>
+                )}
               </span>
-              {param.unit && (
+              {param.unit && !isAbsence(param) && (
                 <span className="text-muted-foreground text-sm">
                   {param.unit}
                 </span>
@@ -259,18 +314,23 @@ function ParamCard({ param }: { param: WaterParam }) {
             </div>
             {param.threshold != null && (
               <>
-                <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      param.compliant ? "bg-green-500" : "bg-red-500"
-                    }`}
-                    style={{
-                      width: `${Math.min((param.value / param.threshold) * 100, 100)}%`,
-                    }}
-                  />
-                </div>
+                {/* Pas de jauge sur une non-détection : « <0,5 » pour un seuil
+                    de 0,5 dessinerait une barre pleine, soit l'inverse de ce
+                    que dit la mesure. */}
+                {!param.belowLimit && (
+                  <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        status?.bar ?? "bg-muted-foreground"
+                      }`}
+                      style={{
+                        width: `${Math.min((param.value / param.threshold) * 100, 100)}%`,
+                      }}
+                    />
+                  </div>
+                )}
                 <p className="text-muted-foreground text-xs">
-                  Seuil : {param.threshold} {param.unit}
+                  Seuil : {formatNumberFr(param.threshold)} {param.unit}
                 </p>
               </>
             )}
@@ -280,7 +340,7 @@ function ParamCard({ param }: { param: WaterParam }) {
         )}
         {param.date && (
           <p className="text-muted-foreground text-xs">
-            Prélèvement : {param.date}
+            Prélèvement : {formatDateFr(param.date)}
           </p>
         )}
       </CardContent>

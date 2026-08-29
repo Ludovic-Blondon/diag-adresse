@@ -27,6 +27,7 @@ import {
 } from "@/lib/scoring";
 import { toHubeauCode } from "@/lib/paris";
 import { prepositionVille } from "@/lib/commune-text";
+import type { DisplayRiskLevel } from "@/lib/constants";
 
 interface DashboardProps {
   lon: number;
@@ -141,7 +142,14 @@ async function RiskSection({
     fetchCavites(citycode, lon, lat),
   ]);
 
-  const levelOrder = { fort: 0, moyen: 1, faible: 2, negligeable: 3 };
+  // Les données manquantes ferment la liste : badges gris en fin de synthèse.
+  const levelOrder: Record<DisplayRiskLevel, number> = {
+    fort: 0,
+    moyen: 1,
+    faible: 2,
+    negligeable: 3,
+    indisponible: 4,
+  };
   const risks: ScoredRisk[] = [];
 
   if (seismicResult.status === "fulfilled") {
@@ -230,6 +238,9 @@ async function WaterSection({
   heading: string;
 }) {
   const hubeauCode = toHubeauCode(citycode);
+  // Un jeu vide n'arrive pas ici : fetchWaterQuality renvoie toujours des
+  // paramètres et WaterQualityCard affiche elle-même « aucune donnée ». Un
+  // data null signifie donc que l'appel a échoué.
   let data = null;
   try {
     data = await fetchWaterQuality(hubeauCode);
@@ -244,7 +255,8 @@ async function WaterSection({
         <WaterQualityCard data={data} />
       ) : (
         <p className="text-muted-foreground text-sm">
-          Données indisponibles pour cette commune.
+          Les données Hub&apos;Eau sont temporairement indisponibles. Veuillez
+          réessayer plus tard.
         </p>
       )}
     </section>
@@ -258,6 +270,7 @@ async function EnergySection({
   citycode: string;
   heading: string;
 }) {
+  // Idem : EnergyCard gère le cas « 0 DPE », un data null est une panne.
   let data = null;
   try {
     data = await fetchDPEStats(citycode);
@@ -272,7 +285,8 @@ async function EnergySection({
         <EnergyCard data={data} />
       ) : (
         <p className="text-muted-foreground text-sm">
-          Aucun DPE disponible pour ce secteur.
+          Les données ADEME sont temporairement indisponibles. Veuillez
+          réessayer plus tard.
         </p>
       )}
     </section>

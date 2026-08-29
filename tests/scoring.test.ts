@@ -51,10 +51,12 @@ describe("scoreSeismic", () => {
     expect(scoreSeismic({ data: [{ code_zone: 5 }] }).level).toBe("fort");
   });
 
-  it("retombe en zone 1 quand la donnée est absente", () => {
+  it("marque la donnée indisponible plutôt que de retomber en zone 1", () => {
     const scored = scoreSeismic({ data: [] });
-    expect(scored.level).toBe("negligeable");
-    expect(scored.description).toBe("Zone de sismicité 1/5");
+    expect(scored.level).toBe("indisponible");
+    expect(scored.description).toBe(
+      "Zonage sismique non disponible pour cette commune",
+    );
   });
 });
 
@@ -74,8 +76,12 @@ describe("scoreRadon", () => {
     ).toBe("fort");
   });
 
-  it("retombe en classe 1 quand la donnée est absente", () => {
-    expect(scoreRadon({ data: [] }).level).toBe("faible");
+  it("marque la donnée indisponible plutôt que de retomber en classe 1", () => {
+    const scored = scoreRadon({ data: [] });
+    expect(scored.level).toBe("indisponible");
+    expect(scored.description).toBe(
+      "Potentiel radon non disponible pour cette commune",
+    );
   });
 });
 
@@ -100,14 +106,18 @@ describe("scoreRGA", () => {
     expect(scored.description).toBe("Exposition moyenne");
   });
 
-  it("traite un corps vide (hors couverture) comme négligeable", () => {
+  it("traite un corps vide (hors couverture) comme indisponible", () => {
     const scored = scoreRGA({});
-    expect(scored.level).toBe("negligeable");
-    expect(scored.description).toBe("Hors couverture ou non concerné");
+    expect(scored.level).toBe("indisponible");
+    expect(scored.description).toBe(
+      "Hors de la zone cartographiée par Géorisques",
+    );
   });
 
-  it("traite le code 0 comme négligeable", () => {
-    expect(scoreRGA({ codeExposition: "0" }).level).toBe("negligeable");
+  it("distingue le code 0 (exposition nulle) du hors couverture", () => {
+    const scored = scoreRGA({ codeExposition: "0" });
+    expect(scored.level).toBe("negligeable");
+    expect(scored.description).toBe("Aucune exposition identifiée");
   });
 });
 

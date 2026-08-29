@@ -1,4 +1,4 @@
-import type { RiskLevel } from "./constants";
+import type { DisplayRiskLevel, RiskLevel } from "./constants";
 import type {
   RiskReport,
   RadonData,
@@ -13,7 +13,8 @@ export type RiskSource = "adresse" | "commune";
 export interface ScoredRisk {
   id: string;
   label: string;
-  level: RiskLevel;
+  /** `indisponible` = la source n'a pas répondu pour ce point, pas un risque nul */
+  level: DisplayRiskLevel;
   description: string;
   details?: string;
   source?: RiskSource;
@@ -22,7 +23,6 @@ export interface ScoredRisk {
 // --- Séisme ---
 
 export function scoreSeismic(data: SeismicData): ScoredRisk {
-  const zone = Number(data.data?.[0]?.code_zone) || 1;
   const map: Record<number, RiskLevel> = {
     1: "negligeable",
     2: "faible",
@@ -30,10 +30,22 @@ export function scoreSeismic(data: SeismicData): ScoredRisk {
     4: "fort",
     5: "fort",
   };
+  const zone = Number(data.data?.[0]?.code_zone);
+  const level = map[zone];
+  // Réponse vide : ne pas retomber sur la zone 1, qui afficherait un badge
+  // vert « sismicité très faible » pour une donnée qu'on n'a pas.
+  if (level == null) {
+    return {
+      id: "seisme",
+      label: "Séisme",
+      level: "indisponible",
+      description: "Zonage sismique non disponible pour cette commune",
+    };
+  }
   return {
     id: "seisme",
     label: "Séisme",
-    level: map[zone] ?? "negligeable",
+    level,
     description: `Zone de sismicité ${zone}/5`,
   };
 }
@@ -41,16 +53,25 @@ export function scoreSeismic(data: SeismicData): ScoredRisk {
 // --- Radon ---
 
 export function scoreRadon(data: RadonData): ScoredRisk {
-  const classe = Number(data.data?.[0]?.classe_potentiel) || 1;
   const map: Record<number, RiskLevel> = {
     1: "faible",
     2: "moyen",
     3: "fort",
   };
+  const classe = Number(data.data?.[0]?.classe_potentiel);
+  const level = map[classe];
+  if (level == null) {
+    return {
+      id: "radon",
+      label: "Radon",
+      level: "indisponible",
+      description: "Potentiel radon non disponible pour cette commune",
+    };
+  }
   return {
     id: "radon",
     label: "Radon",
-    level: map[classe] ?? "faible",
+    level,
     description: `Potentiel radon classe ${classe}/3`,
   };
 }
@@ -66,19 +87,25 @@ export function scoreRGA(data: RGAData): ScoredRisk {
   };
   const code = data.codeExposition != null ? Number(data.codeExposition) : NaN;
   const level = map[code];
-  if (level == null || level === "negligeable") {
+  // Corps vide = point hors de la carte RGA. Distinct du code 0 (« aucune
+  // exposition »), qui est bien une réponse de l'API.
+  if (level == null) {
     return {
       id: "argile",
       label: "Retrait-gonflement argile",
-      level: "negligeable",
-      description: data.exposition ?? "Hors couverture ou non concerné",
+      level: "indisponible",
+      description: "Hors de la zone cartographiée par Géorisques",
     };
   }
   return {
     id: "argile",
     label: "Retrait-gonflement argile",
     level,
-    description: data.exposition ?? `Exposition niveau ${code}`,
+    description:
+      data.exposition ??
+      (code === 0
+        ? "Aucune exposition identifiée"
+        : `Exposition niveau ${code}`),
   };
 }
 

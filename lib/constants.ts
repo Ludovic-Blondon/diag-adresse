@@ -33,7 +33,11 @@ export const GEO_GOUV_BASE_URL =
 export const RISK_LEVELS = ["negligeable", "faible", "moyen", "fort"] as const;
 export type RiskLevel = (typeof RISK_LEVELS)[number];
 
-export const RISK_LEVEL_BADGE: Record<RiskLevel, string> = {
+// Une donnée manquante n'est pas un risque faible : elle a son propre niveau
+// d'affichage, gris, exclu des décomptes de la synthèse.
+export type DisplayRiskLevel = RiskLevel | "indisponible";
+
+export const RISK_LEVEL_BADGE: Record<DisplayRiskLevel, string> = {
   negligeable:
     "bg-green-100 text-green-800 border-green-300 dark:bg-green-950 dark:text-green-300 dark:border-green-800",
   faible:
@@ -41,13 +45,16 @@ export const RISK_LEVEL_BADGE: Record<RiskLevel, string> = {
   moyen:
     "bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800",
   fort: "bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
+  indisponible:
+    "bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-700",
 };
 
-export const RISK_LEVEL_LABELS: Record<RiskLevel, string> = {
+export const RISK_LEVEL_LABELS: Record<DisplayRiskLevel, string> = {
   negligeable: "Négligeable",
   faible: "Faible",
   moyen: "Moyen",
   fort: "Fort",
+  indisponible: "Donnée indisponible",
 };
 
 // --- Water quality thresholds ---

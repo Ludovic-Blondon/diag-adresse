@@ -12,6 +12,7 @@ import {
 } from "@/lib/articles";
 import { RISK_GUIDES } from "@/lib/risk-guides";
 import { articleJsonLd, faqPageJsonLd } from "@/lib/json-ld";
+import { formatDateFr } from "@/lib/format";
 
 export const dynamicParams = false;
 
@@ -52,12 +53,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 }
-
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
 
 export default async function BlogArticlePage({ params }: Props) {
   const { slug } = await params;
@@ -105,14 +100,13 @@ export default async function BlogArticlePage({ params }: Props) {
         <h1 className="text-3xl font-bold">{article.title}</h1>
         <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
           <time dateTime={article.publishedAt}>
-            Publié le {dateFormatter.format(new Date(article.publishedAt))}
+            Publié le {formatDateFr(article.publishedAt)}
           </time>
           {article.updatedAt !== article.publishedAt && (
             <>
               <span aria-hidden="true">·</span>
               <time dateTime={article.updatedAt}>
-                Mis à jour le{" "}
-                {dateFormatter.format(new Date(article.updatedAt))}
+                Mis à jour le {formatDateFr(article.updatedAt)}
               </time>
             </>
           )}

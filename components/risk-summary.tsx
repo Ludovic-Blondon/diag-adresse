@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { RISK_LEVEL_BADGE, type RiskLevel } from "@/lib/constants";
+import { RISK_LEVEL_BADGE } from "@/lib/constants";
 import type { ScoredRisk } from "@/lib/scoring";
 
 interface RiskSummaryProps {
@@ -7,17 +7,27 @@ interface RiskSummaryProps {
 }
 
 export function RiskSummary({ risks }: RiskSummaryProps) {
-  const identified = risks.filter((r) => r.level !== "negligeable");
+  // Une source muette ne compte ni comme risque identifié ni comme risque
+  // écarté : elle est signalée à part pour que le décompte reste vrai.
+  const unavailable = risks.filter((r) => r.level === "indisponible").length;
+  const identified = risks.filter(
+    (r) => r.level !== "negligeable" && r.level !== "indisponible",
+  );
   const fort = identified.filter((r) => r.level === "fort").length;
 
   let summary: string;
-  if (identified.length === 0) {
+  if (risks.length > 0 && unavailable === risks.length) {
+    summary = "Aucune donnée de risque disponible pour ce point";
+  } else if (identified.length === 0) {
     summary = "Aucun risque significatif identifié";
   } else {
     summary = `${identified.length} risque${identified.length > 1 ? "s" : ""} identifié${identified.length > 1 ? "s" : ""}`;
     if (fort > 0) {
       summary += ` dont ${fort} important${fort > 1 ? "s" : ""}`;
     }
+  }
+  if (unavailable > 0 && unavailable < risks.length) {
+    summary += ` · ${unavailable} donnée${unavailable > 1 ? "s" : ""} indisponible${unavailable > 1 ? "s" : ""}`;
   }
 
   return (
@@ -28,7 +38,7 @@ export function RiskSummary({ risks }: RiskSummaryProps) {
           <Badge
             key={risk.id}
             variant="outline"
-            className={`${RISK_LEVEL_BADGE[risk.level as RiskLevel]} text-xs font-semibold`}
+            className={`${RISK_LEVEL_BADGE[risk.level]} text-xs font-semibold`}
           >
             {risk.label}
           </Badge>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import type { Feature, Polygon } from "geojson";
+import type { MapLibreMap } from "maplibre-gl";
 import type { ICPEResult } from "@/lib/types/georisques";
 
 interface RiskMapProps {
@@ -16,7 +18,7 @@ const SEVESO_COLORS: Record<string, string> = {
 
 export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<unknown>(null);
+  const mapRef = useRef<MapLibreMap | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -24,14 +26,19 @@ export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
     let cancelled = false;
 
     async function initMap() {
-      const [maplibregl] = await Promise.all([
+      const [ml] = await Promise.all([
         import("maplibre-gl"),
         import("maplibre-gl/dist/maplibre-gl.css"),
       ]);
 
       if (cancelled || !containerRef.current) return;
 
-      const ml = maplibregl.default ?? maplibregl;
+      // v6 charge son worker depuis un fichier séparé et laisse le soin à
+      // l'appli d'en donner l'URL : sans ça le worker meurt en silence et les
+      // sources geojson (ici le cercle de 5 km) ne chargent jamais, alors que
+      // les tuiles raster continuent de s'afficher. Les deux fichiers du worker
+      // sont copiés dans public/maplibre/ par scripts/copy-maplibre-worker.mjs.
+      ml.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
 
       const map = new ml.Map({
         container: containerRef.current,
@@ -120,7 +127,7 @@ export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
     return () => {
       cancelled = true;
       if (mapRef.current) {
-        (mapRef.current as { remove: () => void }).remove();
+        mapRef.current.remove();
         mapRef.current = null;
       }
     };
@@ -140,7 +147,7 @@ function createCircle(
   lat: number,
   radiusMeters: number,
   steps = 64,
-): GeoJSON.Feature<GeoJSON.Polygon> {
+): Feature<Polygon> {
   const coords: [number, number][] = [];
   const km = radiusMeters / 1000;
   for (let i = 0; i <= steps; i++) {

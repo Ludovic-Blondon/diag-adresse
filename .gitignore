@@ -54,3 +54,6 @@ CLAUDE.md
 # venv local du pipeline argile (a2)
 /.venv-argile/
 /.venv/
+
+# worker MapLibre copié depuis node_modules par scripts/copy-maplibre-worker.mjs
+/public/maplibre

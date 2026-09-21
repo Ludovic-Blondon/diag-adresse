@@ -84,11 +84,7 @@ export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
 
         new ml.Marker({ color })
           .setLngLat([icpe.longitude, icpe.latitude])
-          .setPopup(
-            new ml.Popup().setHTML(
-              `<strong>${icpe.raisonSociale ?? "ICPE"}</strong><br/>${icpe.statutSeveso ?? "Non Seveso"}`,
-            ),
-          )
+          .setPopup(new ml.Popup().setDOMContent(createIcpePopupContent(icpe)))
           .addTo(map);
       }
 
@@ -139,6 +135,25 @@ export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
       className="h-80 w-full overflow-hidden rounded-lg border"
     />
   );
+}
+
+/**
+ * Contenu de la popup d'une ICPE, construit en DOM plutôt qu'en HTML : la
+ * raison sociale vient de l'API Géorisques et finissait interpolée dans un
+ * `setHTML()`, où le moindre chevron dans le nom était interprété comme du
+ * balisage. `setDOMContent()` garde le rendu sur deux lignes que `setText()`
+ * aplatirait (un `\n` dans un nœud texte se replie en espace).
+ */
+function createIcpePopupContent(icpe: ICPEResult): HTMLElement {
+  const contenu = document.createElement("div");
+  const nom = document.createElement("strong");
+  nom.textContent = icpe.raisonSociale ?? "ICPE";
+  contenu.append(
+    nom,
+    document.createElement("br"),
+    icpe.statutSeveso ?? "Non Seveso",
+  );
+  return contenu;
 }
 
 /** Create a GeoJSON circle polygon */

@@ -1,4 +1,5 @@
-import { GEO_GOUV_BASE_URL, API_TIMEOUT_MS } from "../constants";
+import { GEO_GOUV_BASE_URL } from "../constants";
+import { apiFetch } from "./api-fetch";
 
 interface GeoGouvCommune {
   code: string;
@@ -20,8 +21,7 @@ export async function getCommuneByInseeCode(
   code: string,
 ): Promise<CommuneLookup | null> {
   const url = `${GEO_GOUV_BASE_URL}/communes/${encodeURIComponent(code)}?fields=nom,centre&format=json&geometry=centre`;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+  const res = await apiFetch(url, {
     next: { revalidate: 2592000 }, // 30 days — INSEE data is effectively static
   });
   if (res.status === 404) return null;
@@ -51,8 +51,7 @@ export async function getCommunesForDepartement(
   depCode: string,
 ): Promise<DepartementCommune[]> {
   const url = `${GEO_GOUV_BASE_URL}/departements/${encodeURIComponent(depCode)}/communes?fields=nom,code,population`;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+  const res = await apiFetch(url, {
     next: { revalidate: 604800 }, // 7 days, matches the /departement revalidate
   });
   if (!res.ok) throw new Error(`geo.api.gouv.fr ${res.status}`);
@@ -74,8 +73,7 @@ export async function getCommunesByPostalCode(
 ): Promise<PostalCommune[]> {
   const url = `${GEO_GOUV_BASE_URL}/communes?codePostal=${encodeURIComponent(postalCode)}&fields=code,nom&format=json`;
   try {
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
+    const res = await apiFetch(url, {
       next: { revalidate: 2592000 }, // 30 days
     });
     if (!res.ok) return [];

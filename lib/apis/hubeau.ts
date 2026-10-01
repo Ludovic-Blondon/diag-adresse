@@ -1,5 +1,7 @@
 import { cache } from "react";
-import { HUBEAU_BASE_URL, API_TIMEOUT_MS, WATER_PARAMS } from "../constants";
+import { unstable_cache } from "next/cache";
+import { HUBEAU_BASE_URL, WATER_PARAMS } from "../constants";
+import { apiFetch, markPageDegraded } from "./api-fetch";
 import type { WaterQualityResult, WaterParam } from "../types/hubeau";
 
 interface HubeauResultDis {
@@ -20,27 +22,58 @@ const RESULT_FIELDS = "code_parametre,resultat_alphanumerique,date_prelevement";
 // page) get an individual fallback request in fetchLatestByParam.
 const BULK_SIZE = "200";
 
+// Hub'Eau rejects (400) a code_parametre list of more than 20 values, so the
+// bulk request is split into balanced groups (22 codes → 2 × 11).
+const MAX_CODES_PER_REQUEST = 20;
+
+function splitCodes(codes: string[]): string[][] {
+  const groups = Math.ceil(codes.length / MAX_CODES_PER_REQUEST);
+  const size = Math.ceil(codes.length / groups);
+  return Array.from({ length: groups }, (_, i) =>
+    codes.slice(i * size, (i + 1) * size),
+  );
+}
+
+// A result we can display: a number, or a "<x" / "<SEUIL" non-detection. Lab
+// codes such as "ILLISIBL" (unreadable sample) are skipped in favour of the
+// latest readable result, instead of showing the parameter as never measured.
+function isReadable(row: HubeauResultDis): boolean {
+  const raw = row.resultat_alphanumerique;
+  return parseWaterValue(raw) != null || isBelowLimit(raw);
+}
+
+// Rows per individual fallback: enough to step over an unreadable latest one.
+const FALLBACK_SIZE = "5";
+
+// Hub'Eau answered with an error status, as opposed to a timeout or a network
+// failure where it did not answer at all.
+class HubeauHttpError extends Error {}
+
 async function fetchResults(
   params: URLSearchParams,
 ): Promise<HubeauResultDis[]> {
   const url = `${HUBEAU_BASE_URL}/resultats_dis?${params}`;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+  const res = await apiFetch(url, {
     // 7 days, aligned with the /commune page revalidate: a shorter value here
     // drags the whole route's ISR window down to it (lowest fetch wins).
     next: { revalidate: 604800 },
   });
-  if (!res.ok) throw new Error(`HubEau ${res.status}`);
+  if (!res.ok) throw new HubeauHttpError(`HubEau ${res.status}`);
   const data: HubeauResponse = await res.json();
   return data.data ?? [];
 }
 
 /**
- * Latest result per parameter code, in one bulk request for the common case
- * (instead of one request per parameter — 22 calls per commune render). The
- * response is sorted by date desc, so the first row seen for a code is its
- * most recent result. Parameters absent from the bulk page — rarely measured,
- * or total bulk failure — are fetched individually.
+ * Latest result per parameter code, in a couple of bulk requests for the
+ * common case (instead of one request per parameter — 22 calls per commune
+ * render). Responses are sorted by date desc, so the first row seen for a code
+ * is its most recent result. Parameters absent from the bulk pages — rarely
+ * measured, or bulk rejected with an HTTP error — are fetched individually.
+ *
+ * A bulk request that times out or fails at the network level means Hub'Eau
+ * is hanging or unreachable: per-parameter fallbacks would send 22 more
+ * requests into the same hole, each waiting out its own timeout. That case
+ * throws straight away.
  *
  * Throws when nothing came back at all: an empty Map would read as "commune
  * with no analysis on record", which is a different claim from "HubEau is
@@ -50,27 +83,38 @@ async function fetchLatestByParam(
   codeCommune: string,
 ): Promise<Map<string, HubeauResultDis>> {
   const latest = new Map<string, HubeauResultDis>();
-  let bulkFailed = false;
 
-  try {
-    const rows = await fetchResults(
-      new URLSearchParams({
-        code_commune: codeCommune,
-        code_parametre: WATER_PARAMS.map((p) => p.code).join(","),
-        fields: RESULT_FIELDS,
-        sort: "desc",
-        size: BULK_SIZE,
-      }),
-    );
-    for (const row of rows) {
-      if (row.code_parametre && !latest.has(row.code_parametre)) {
+  const bulks = await Promise.allSettled(
+    splitCodes(WATER_PARAMS.map((p) => p.code)).map((codes) =>
+      fetchResults(
+        new URLSearchParams({
+          code_commune: codeCommune,
+          code_parametre: codes.join(","),
+          fields: RESULT_FIELDS,
+          sort: "desc",
+          size: BULK_SIZE,
+        }),
+      ),
+    ),
+  );
+  for (const bulk of bulks) {
+    if (bulk.status === "rejected") {
+      if (!(bulk.reason instanceof HubeauHttpError)) {
+        throw new Error("HubEau unreachable", { cause: bulk.reason });
+      }
+      continue;
+    }
+    for (const row of bulk.value) {
+      if (
+        row.code_parametre &&
+        !latest.has(row.code_parametre) &&
+        isReadable(row)
+      ) {
         latest.set(row.code_parametre, row);
       }
     }
-  } catch {
-    // Bulk failed: the per-parameter fallback below covers every code.
-    bulkFailed = true;
   }
+  const bulkFailed = bulks.every((bulk) => bulk.status === "rejected");
 
   const missing = WATER_PARAMS.filter((p) => !latest.has(p.code));
   const fallbacks = await Promise.allSettled(
@@ -81,15 +125,15 @@ async function fetchLatestByParam(
           code_parametre: p.code,
           fields: RESULT_FIELDS,
           sort: "desc",
-          size: "1",
+          size: FALLBACK_SIZE,
         }),
       ),
     ),
   );
   fallbacks.forEach((result, i) => {
-    if (result.status === "fulfilled" && result.value[0]) {
-      latest.set(missing[i].code, result.value[0]);
-    }
+    const row =
+      result.status === "fulfilled" ? result.value.find(isReadable) : undefined;
+    if (row) latest.set(missing[i].code, row);
   });
 
   // Not a single request went through. A commune without analyses still gets
@@ -102,9 +146,27 @@ async function fetchLatestByParam(
   ) {
     throw new Error("HubEau unreachable");
   }
+  // A failed fallback would leave its parameter blank, shown as « Non mesuré »
+  // and kept for a week by the cache below: fail the whole lookup instead.
+  if (fallbacks.some((result) => result.status === "rejected")) {
+    throw new Error("HubEau incomplete");
+  }
 
   return latest;
 }
+
+/**
+ * fetchLatestByParam, cached 7 days by Next. Hub'Eau answers 206 (paginated)
+ * and the Data Cache only stores 200s, so its requests are never cached by
+ * fetch itself. Caching the computed result also brings stale-if-error: when a
+ * refresh fails during an ISR render, unstable_cache serves the previous value.
+ * Entries are [code, row] pairs: a Map does not survive the JSON round trip.
+ */
+const cachedLatestByParam = unstable_cache(
+  async (codeCommune: string) => [...(await fetchLatestByParam(codeCommune))],
+  ["hubeau-latest-by-param"],
+  { revalidate: 604800 }, // 7 days, aligned with the /commune page revalidate
+);
 
 // A value sitting just under the limit is compliant, but showing it as a
 // plain "OK" hides that it has no margin left. Zero thresholds (bacteriology)
@@ -138,7 +200,14 @@ export function parseWaterValue(raw: string | undefined): number | null {
 
 export const fetchWaterQuality = cache(
   async (codeCommune: string): Promise<WaterQualityResult> => {
-    const latest = await fetchLatestByParam(codeCommune);
+    let latest: Map<string, HubeauResultDis>;
+    try {
+      latest = new Map(await cachedLatestByParam(codeCommune));
+    } catch (err) {
+      // Inside unstable_cache, apiFetch cannot shorten the page's ISR window.
+      await markPageDegraded();
+      throw err;
+    }
 
     const params: WaterParam[] = WATER_PARAMS.map((entry) => {
       const dis = latest.get(entry.code);
@@ -156,6 +225,11 @@ export const fetchWaterQuality = cache(
           belowLimit && entry.threshold === 0 ? true : value <= entry.threshold;
         // Une non-détection n'est pas une mesure « à la limite ».
         nearLimit = !belowLimit && isNearLimit(value, entry.threshold);
+      } else if (belowLimit && entry.threshold != null) {
+        // « <SEUIL » : rien de quantifié, sans la limite chiffrée. Les limites
+        // de quantification imposées aux laboratoires sont inférieures aux
+        // limites de qualité : la non-détection vaut conformité.
+        compliant = true;
       }
 
       return {

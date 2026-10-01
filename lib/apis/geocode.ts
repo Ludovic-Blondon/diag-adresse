@@ -1,9 +1,6 @@
-import {
-  GEOCODE_URL,
-  GEOCODE_FALLBACK_URL,
-  API_TIMEOUT_MS,
-} from "../constants";
+import { GEOCODE_URL, GEOCODE_FALLBACK_URL } from "../constants";
 import type { GeocodeResponse, GeocodeSuggestion } from "../types/geocode";
+import { apiFetch } from "./api-fetch";
 
 function toSuggestion(
   feature: GeocodeResponse["features"][number],
@@ -26,9 +23,7 @@ async function fetchGeocode(
   params: URLSearchParams,
 ): Promise<GeocodeResponse> {
   const url = `${baseUrl}/search?${params}`;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(API_TIMEOUT_MS),
-  });
+  const res = await apiFetch(url);
   if (!res.ok) throw new Error(`Geocode ${res.status}`);
   return res.json();
 }
@@ -65,9 +60,7 @@ export async function reverseGeocode(
 
   const tryReverse = async (baseUrl: string) => {
     const url = `${baseUrl}/reverse?${params}`;
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    });
+    const res = await apiFetch(url);
     if (!res.ok) throw new Error(`Reverse geocode ${res.status}`);
     const data: GeocodeResponse = await res.json();
     return data.features.length > 0 ? toSuggestion(data.features[0]) : null;

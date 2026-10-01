@@ -189,6 +189,27 @@ describe("scoreInondation", () => {
   });
 });
 
+describe("radon et sismicité par arrondissement", () => {
+  it("affiche le maximum et précise l'écart entre arrondissements", () => {
+    // Lyon : classe 3 dans le 9e seulement, classe 1 ailleurs.
+    const scored = scoreRadon({
+      data: [
+        { code_insee: "69389", classe_potentiel: 3 },
+        { code_insee: "69381", classe_potentiel: 1 },
+      ],
+    });
+    expect(scored.level).toBe("fort");
+    expect(scored.details).toBe("Classe 1 à 3 selon l'arrondissement");
+  });
+
+  it("n'ajoute rien quand toute la ville a le même niveau", () => {
+    expect(
+      scoreSeismic({ data: [{ code_zone: 1 }, { code_zone: 1 }] }).details,
+    ).toBeUndefined();
+    expect(scoreSeismic({ data: [{ code_zone: 2 }] }).details).toBeUndefined();
+  });
+});
+
 describe("scoreICPE", () => {
   it("est négligeable sans site à proximité", () => {
     expect(scoreICPE({ data: [] }).level).toBe("negligeable");
@@ -218,6 +239,33 @@ describe("scoreICPE", () => {
     expect(scored.level).toBe("fort");
     expect(scored.details).toBe("Au moins un site Seveso seuil haut");
   });
+
+  it("compte le total de l'API et non la première page", () => {
+    const scored = scoreICPE({
+      data: Array(10).fill(icpe()),
+      results: 1371,
+      seveso: { haut: 0, bas: 0 },
+    });
+    expect(scored.description).toBe("1371 sites dans un rayon de 5 km");
+  });
+
+  it("détecte un Seveso seuil haut absent de la première page", () => {
+    const scored = scoreICPE({
+      data: Array(10).fill(icpe()),
+      results: 207,
+      seveso: { haut: 10, bas: 4 },
+    });
+    expect(scored.level).toBe("fort");
+  });
+
+  it("reste faible quand les comptages Seveso sont nuls", () => {
+    const scored = scoreICPE({
+      data: [icpe({ statutSeveso: "Seveso seuil haut" })],
+      results: 1,
+      seveso: { haut: 0, bas: 0 },
+    });
+    expect(scored.level).toBe("faible");
+  });
 });
 
 describe("scoreCavites", () => {
@@ -227,6 +275,11 @@ describe("scoreCavites", () => {
     expect(scoreCavites({ data: [] }).level).toBe("negligeable");
     expect(scoreCavites({ data: [cavite, cavite] }).level).toBe("faible");
     expect(scoreCavites({ data: Array(5).fill(cavite) }).level).toBe("moyen");
+  });
+
+  it("compte le total de l'API et non la première page", () => {
+    const scored = scoreCavites({ data: Array(10).fill(cavite), results: 42 });
+    expect(scored.description).toBe("42 cavités à proximité");
   });
 });
 

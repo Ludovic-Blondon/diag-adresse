@@ -22,6 +22,23 @@ export interface ScoredRisk {
 
 // --- Séisme ---
 
+/**
+ * Paris, Lyon, Marseille : une page commune reçoit une ligne par
+ * arrondissement, la plus élevée en tête. Le niveau affiché est ce maximum ;
+ * le détail dit qu'il ne vaut pas pour toute la ville.
+ */
+function arrondissementSpread(
+  values: number[],
+  noun: string,
+): string | undefined {
+  const known = values.filter((v) => !Number.isNaN(v));
+  const min = Math.min(...known);
+  const max = Math.max(...known);
+  return known.length > 1 && min !== max
+    ? `${noun} ${min} à ${max} selon l'arrondissement`
+    : undefined;
+}
+
 export function scoreSeismic(data: SeismicData): ScoredRisk {
   const map: Record<number, RiskLevel> = {
     1: "negligeable",
@@ -47,6 +64,10 @@ export function scoreSeismic(data: SeismicData): ScoredRisk {
     label: "Séisme",
     level,
     description: `Zone de sismicité ${zone}/5`,
+    details: arrondissementSpread(
+      (data.data ?? []).map((d) => Number(d.code_zone)),
+      "Zone",
+    ),
   };
 }
 
@@ -73,6 +94,10 @@ export function scoreRadon(data: RadonData): ScoredRisk {
     label: "Radon",
     level,
     description: `Potentiel radon classe ${classe}/3`,
+    details: arrondissementSpread(
+      (data.data ?? []).map((d) => Number(d.classe_potentiel)),
+      "Classe",
+    ),
   };
 }
 
@@ -176,7 +201,8 @@ export function scoreInondation(report: RiskReport): ScoredRisk | null {
 
 export function scoreICPE(data: ICPEData): ScoredRisk {
   const items = data.data ?? [];
-  if (items.length === 0) {
+  const count = data.results ?? items.length;
+  if (count === 0) {
     return {
       id: "icpe",
       label: "Sites industriels (ICPE)",
@@ -184,14 +210,13 @@ export function scoreICPE(data: ICPEData): ScoredRisk {
       description: "Aucun site industriel à proximité",
     };
   }
-  const sevesoHaut = items.some((i) =>
-    i.statutSeveso?.toLowerCase().includes("seuil haut"),
-  );
-  const sevesoBas = items.some((i) =>
-    i.statutSeveso?.toLowerCase().includes("seuil bas"),
-  );
+  const sevesoHaut = data.seveso
+    ? data.seveso.haut > 0
+    : items.some((i) => i.statutSeveso?.toLowerCase().includes("seuil haut"));
+  const sevesoBas = data.seveso
+    ? data.seveso.bas > 0
+    : items.some((i) => i.statutSeveso?.toLowerCase().includes("seuil bas"));
   const level: RiskLevel = sevesoHaut ? "fort" : sevesoBas ? "moyen" : "faible";
-  const count = items.length;
   return {
     id: "icpe",
     label: "Sites industriels (ICPE)",
@@ -208,7 +233,7 @@ export function scoreICPE(data: ICPEData): ScoredRisk {
 // --- Cavités ---
 
 export function scoreCavites(data: CaviteData): ScoredRisk {
-  const count = data.data?.length ?? 0;
+  const count = data.results ?? data.data?.length ?? 0;
   if (count === 0) {
     return {
       id: "cavites",

@@ -23,10 +23,13 @@ import {
 
 export const revalidate = 604800; // 7 days
 
+// Aucun prérendu au build : Géorisques ne répond qu'aux IP françaises et le
+// build Vercel tourne hors de France, si bien que les pages prérendues
+// figeaient « données de risques indisponibles » pour 7 jours. Le tableau vide
+// garde l'ISR : chaque commune est rendue à la première visite, par une
+// fonction en cdg1 (vercel.json).
 export function generateStaticParams() {
-  return TOP_COMMUNES.map((c) => ({
-    slug: communePath(c.code, c.name).split("/").pop()!,
-  }));
+  return [];
 }
 
 interface Props {

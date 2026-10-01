@@ -1,5 +1,6 @@
 import { cache } from "react";
-import { ADEME_DPE_BASE_URL, API_TIMEOUT_MS, DPE_LABELS } from "../constants";
+import { ADEME_DPE_BASE_URL, DPE_LABELS } from "../constants";
+import { apiFetch } from "./api-fetch";
 import type { DPEStats, DPEDistribution } from "../types/dpe";
 import type { DPELabel } from "../constants";
 
@@ -24,8 +25,7 @@ async function ademeFetch<T>(
 ): Promise<T> {
   const qs = new URLSearchParams(params);
   const url = `${ADEME_DPE_BASE_URL}${path}?${qs}`;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+  const res = await apiFetch(url, {
     next: { revalidate: 604800 }, // 7 days
   });
   if (!res.ok) throw new Error(`ADEME DPE ${path} ${res.status}`);

@@ -1,4 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+// Hors de Next, unstable_cache n'a pas de cache incrémental : on exécute la
+// fonction directement.
+vi.mock("next/cache", () => ({
+  unstable_cache: <T>(fn: T) => fn,
+}));
 import {
   fetchWaterQuality,
   isBelowLimit,
@@ -37,9 +43,10 @@ interface StubRow {
 }
 
 /**
- * Stub fetch Hub'Eau : `bulk` répond à la requête groupée (code_parametre
- * multi), `single` répond aux fallbacks unitaires par code. Renvoie le mock
- * pour compter les appels.
+ * Stub fetch Hub'Eau : `bulk` répond aux requêtes groupées (code_parametre
+ * multi, filtré sur les codes demandés), `single` aux fallbacks unitaires par
+ * code. Comme la vraie API, rejette en 400 une liste de plus de 20 codes.
+ * Renvoie le mock pour compter les appels.
  */
 function stubHubeau(
   bulk: StubRow[] | "error",
@@ -48,9 +55,13 @@ function stubHubeau(
   const mock = vi.fn(async (input: string | URL) => {
     const url = new URL(String(input));
     const codes = url.searchParams.get("code_parametre") ?? "";
-    if (codes.includes(",")) {
+    const requested = codes.split(",");
+    if (requested.length > 20) return new Response("size", { status: 400 });
+    if (requested.length > 1) {
       if (bulk === "error") return new Response("oops", { status: 500 });
-      return Response.json({ data: bulk });
+      return Response.json({
+        data: bulk.filter((r) => requested.includes(r.code_parametre)),
+      });
     }
     return Response.json({ data: single[codes] ?? [] });
   });
@@ -102,7 +113,23 @@ describe("isNearLimit", () => {
   });
 });
 
+// Requêtes groupées par rendu : Hub'Eau plafonne code_parametre à 20 codes.
+const BULK_REQUESTS = Math.ceil(WATER_PARAMS.length / 20);
+
 describe("fetchWaterQuality", () => {
+  it("découpe la requête groupée en listes de 20 codes au plus", async () => {
+    const mock = stubHubeau([]);
+    await fetchWaterQuality("34173");
+
+    const lists = mock.mock.calls
+      .map(([input]) => new URL(String(input)).searchParams)
+      .map((p) => (p.get("code_parametre") ?? "").split(","))
+      .filter((codes) => codes.length > 1);
+    expect(lists).toHaveLength(BULK_REQUESTS);
+    expect(lists.every((codes) => codes.length <= 20)).toBe(true);
+    expect(lists.flat().sort()).toEqual(WATER_PARAMS.map((p) => p.code).sort());
+  });
+
   it("prend le premier résultat par paramètre du bulk (le plus récent) et complète en unitaire", async () => {
     const mock = stubHubeau(
       [
@@ -146,12 +173,12 @@ describe("fetchWaterQuality", () => {
       date: null,
     });
 
-    // 1 requête bulk + 1 fallback par paramètre absent du bulk
+    // Requêtes groupées + 1 fallback par paramètre absent du bulk
     const missingCount = WATER_PARAMS.length - 3;
-    expect(mock).toHaveBeenCalledTimes(1 + missingCount);
+    expect(mock).toHaveBeenCalledTimes(BULK_REQUESTS + missingCount);
   });
 
-  it("retombe sur les requêtes unitaires pour tout quand le bulk échoue", async () => {
+  it("retombe sur les requêtes unitaires quand le bulk répond une erreur HTTP", async () => {
     const mock = stubHubeau("error", {
       "1340": [row("1340", "30")],
     });
@@ -160,7 +187,7 @@ describe("fetchWaterQuality", () => {
     const byCode = new Map(result.params.map((p) => [p.code, p]));
 
     expect(byCode.get("1340")).toMatchObject({ value: 30, compliant: true });
-    expect(mock).toHaveBeenCalledTimes(1 + WATER_PARAMS.length);
+    expect(mock).toHaveBeenCalledTimes(BULK_REQUESTS + WATER_PARAMS.length);
   });
 
   it("ne signale pas « à la limite » une non-détection au niveau du seuil", async () => {
@@ -214,6 +241,90 @@ describe("fetchWaterQuality", () => {
     // annoncer une panne plutôt que 22 paramètres muets.
     await expect(fetchWaterQuality("13055")).rejects.toThrow(
       "HubEau unreachable",
+    );
+  });
+
+  it("lève sans fallback quand le bulk expire", async () => {
+    // Hub'Eau qui ne répond plus : 22 fallbacks attendraient chacun leur
+    // propre timeout pour le même résultat.
+    const mock = vi.fn(async (input: string | URL) => {
+      const codes = new URL(String(input)).searchParams.get("code_parametre");
+      if (codes?.includes(",")) {
+        throw new DOMException("The operation timed out.", "TimeoutError");
+      }
+      return Response.json({ data: [] });
+    });
+    vi.stubGlobal("fetch", mock);
+
+    await expect(fetchWaterQuality("33063")).rejects.toThrow(
+      "HubEau unreachable",
+    );
+    expect(mock).toHaveBeenCalledTimes(BULK_REQUESTS);
+  });
+
+  it("traite « <SEUIL » comme une non-détection conforme", async () => {
+    // Cas réel : pesticides totaux à Bordeaux, sans limite chiffrée.
+    stubHubeau([row("6276", "<SEUIL", "2026-06-22T09:30:00Z")]);
+
+    const byCode = new Map(
+      (await fetchWaterQuality("33063")).params.map((p) => [p.code, p]),
+    );
+
+    expect(byCode.get("6276")).toMatchObject({
+      value: null,
+      belowLimit: true,
+      compliant: true,
+      nearLimit: false,
+      date: "2026-06-22T09:30:00Z",
+    });
+  });
+
+  it("saute un résultat illisible pour le dernier lisible", async () => {
+    stubHubeau(
+      [
+        row("1449", "ILLISIBL", "2026-02-10T08:00:00Z"),
+        row("1449", "<1", "2026-01-12T08:00:00Z"),
+      ],
+      {
+        "1447": [
+          row("1447", "ILLISIBL", "2026-02-10T08:00:00Z"),
+          row("1447", "3", "2026-01-12T08:00:00Z"),
+        ],
+      },
+    );
+
+    const byCode = new Map(
+      (await fetchWaterQuality("33064")).params.map((p) => [p.code, p]),
+    );
+
+    // Dans la requête groupée…
+    expect(byCode.get("1449")).toMatchObject({
+      belowLimit: true,
+      compliant: true,
+      date: "2026-01-12T08:00:00Z",
+    });
+    // …comme dans le repli unitaire.
+    expect(byCode.get("1447")).toMatchObject({
+      value: 3,
+      date: "2026-01-12T08:00:00Z",
+    });
+  });
+
+  it("lève plutôt que de laisser un paramètre vide quand un repli échoue", async () => {
+    // Un paramètre manquant se lirait « Non mesuré », gardé une semaine en
+    // cache : mieux vaut la donnée précédente, ou « indisponible ».
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL) => {
+        const codes = new URL(String(input)).searchParams.get("code_parametre");
+        if (codes?.includes(",")) return Response.json({ data: [] });
+        if (codes === "1340") throw new TypeError("fetch failed");
+        return Response.json({ data: [] });
+      }),
+    );
+
+    await expect(fetchWaterQuality("33065")).rejects.toThrow(
+      "HubEau incomplete",
     );
   });
 

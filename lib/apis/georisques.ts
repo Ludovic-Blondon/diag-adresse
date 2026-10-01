@@ -1,5 +1,6 @@
 import { cache } from "react";
-import { GEORISQUES_BASE_URL, API_TIMEOUT_MS } from "../constants";
+import { GEORISQUES_BASE_URL } from "../constants";
+import { apiFetch } from "./api-fetch";
 import type {
   RiskReport,
   RadonData,
@@ -15,8 +16,7 @@ async function geoFetch<T>(
 ): Promise<T> {
   const qs = new URLSearchParams(params);
   const url = `${GEORISQUES_BASE_URL}${path}?${qs}`;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+  const res = await apiFetch(url, {
     // 7 days: risk zonings change on regulatory timescales. Keep >= the
     // /commune revalidate (7d) — the route re-renders at the lowest fetch
     // revalidate it uses, so a shorter value here multiplies ISR renders.
@@ -56,10 +56,12 @@ export const fetchRadon = cache(
 
 export const fetchRGA = cache(
   async (lon: number, lat: number): Promise<RGAData> => {
-    const res = await fetch(`${GEORISQUES_BASE_URL}/rga?latlon=${lon},${lat}`, {
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-      next: { revalidate: 604800 }, // 7 days, see geoFetch
-    });
+    const res = await apiFetch(
+      `${GEORISQUES_BASE_URL}/rga?latlon=${lon},${lat}`,
+      {
+        next: { revalidate: 604800 }, // 7 days, see geoFetch
+      },
+    );
     if (!res.ok) throw new Error(`RGA ${res.status}`);
     // Out of coverage, the endpoint returns 200 with an empty body: scoreRGA
     // maps that to "indisponible". Real errors must reject so the dashboard

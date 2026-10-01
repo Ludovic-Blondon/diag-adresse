@@ -1,5 +1,6 @@
 import { cache } from "react";
-import { HUBEAU_BASE_URL, API_TIMEOUT_MS, WATER_PARAMS } from "../constants";
+import { HUBEAU_BASE_URL, WATER_PARAMS } from "../constants";
+import { apiFetch } from "./api-fetch";
 import type { WaterQualityResult, WaterParam } from "../types/hubeau";
 
 interface HubeauResultDis {
@@ -40,8 +41,7 @@ async function fetchResults(
   params: URLSearchParams,
 ): Promise<HubeauResultDis[]> {
   const url = `${HUBEAU_BASE_URL}/resultats_dis?${params}`;
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+  const res = await apiFetch(url, {
     // 7 days, aligned with the /commune page revalidate: a shorter value here
     // drags the whole route's ISR window down to it (lowest fetch wins).
     next: { revalidate: 604800 },

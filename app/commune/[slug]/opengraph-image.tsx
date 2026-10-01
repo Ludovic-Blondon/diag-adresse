@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import communesIndex from "@/lib/communes-index.json";
 import { communePath, parseCommuneParam } from "@/lib/commune-url";
-import { API_TIMEOUT_MS } from "@/lib/constants";
+import { apiFetch } from "@/lib/apis/api-fetch";
 
 export const alt = "Diagnostic commune";
 export const size = { width: 1200, height: 630 };
@@ -29,10 +29,9 @@ async function resolveCommuneName(codeInsee: string): Promise<string> {
   if (indexed) return indexed;
   // Hors index (communes < 5000 hab.) : repli sur l'API, mis en cache 30 j.
   try {
-    const res = await fetch(
+    const res = await apiFetch(
       `https://geo.api.gouv.fr/communes/${codeInsee}?fields=nom`,
       {
-        signal: AbortSignal.timeout(API_TIMEOUT_MS),
         next: { revalidate: 2592000 }, // 30 days, same as lib/apis/geo-gouv.ts
       },
     );

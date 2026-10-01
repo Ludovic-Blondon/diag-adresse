@@ -20,6 +20,22 @@ const RESULT_FIELDS = "code_parametre,resultat_alphanumerique,date_prelevement";
 // page) get an individual fallback request in fetchLatestByParam.
 const BULK_SIZE = "200";
 
+// Hub'Eau rejects (400) a code_parametre list of more than 20 values, so the
+// bulk request is split into balanced groups (22 codes → 2 × 11).
+const MAX_CODES_PER_REQUEST = 20;
+
+function splitCodes(codes: string[]): string[][] {
+  const groups = Math.ceil(codes.length / MAX_CODES_PER_REQUEST);
+  const size = Math.ceil(codes.length / groups);
+  return Array.from({ length: groups }, (_, i) =>
+    codes.slice(i * size, (i + 1) * size),
+  );
+}
+
+// Hub'Eau answered with an error status, as opposed to a timeout or a network
+// failure where it did not answer at all.
+class HubeauHttpError extends Error {}
+
 async function fetchResults(
   params: URLSearchParams,
 ): Promise<HubeauResultDis[]> {
@@ -30,17 +46,22 @@ async function fetchResults(
     // drags the whole route's ISR window down to it (lowest fetch wins).
     next: { revalidate: 604800 },
   });
-  if (!res.ok) throw new Error(`HubEau ${res.status}`);
+  if (!res.ok) throw new HubeauHttpError(`HubEau ${res.status}`);
   const data: HubeauResponse = await res.json();
   return data.data ?? [];
 }
 
 /**
- * Latest result per parameter code, in one bulk request for the common case
- * (instead of one request per parameter — 22 calls per commune render). The
- * response is sorted by date desc, so the first row seen for a code is its
- * most recent result. Parameters absent from the bulk page — rarely measured,
- * or total bulk failure — are fetched individually.
+ * Latest result per parameter code, in a couple of bulk requests for the
+ * common case (instead of one request per parameter — 22 calls per commune
+ * render). Responses are sorted by date desc, so the first row seen for a code
+ * is its most recent result. Parameters absent from the bulk pages — rarely
+ * measured, or bulk rejected with an HTTP error — are fetched individually.
+ *
+ * A bulk request that times out or fails at the network level means Hub'Eau
+ * is hanging or unreachable: per-parameter fallbacks would send 22 more
+ * requests into the same hole, each waiting out its own timeout. That case
+ * throws straight away.
  *
  * Throws when nothing came back at all: an empty Map would read as "commune
  * with no analysis on record", which is a different claim from "HubEau is
@@ -50,27 +71,34 @@ async function fetchLatestByParam(
   codeCommune: string,
 ): Promise<Map<string, HubeauResultDis>> {
   const latest = new Map<string, HubeauResultDis>();
-  let bulkFailed = false;
 
-  try {
-    const rows = await fetchResults(
-      new URLSearchParams({
-        code_commune: codeCommune,
-        code_parametre: WATER_PARAMS.map((p) => p.code).join(","),
-        fields: RESULT_FIELDS,
-        sort: "desc",
-        size: BULK_SIZE,
-      }),
-    );
-    for (const row of rows) {
+  const bulks = await Promise.allSettled(
+    splitCodes(WATER_PARAMS.map((p) => p.code)).map((codes) =>
+      fetchResults(
+        new URLSearchParams({
+          code_commune: codeCommune,
+          code_parametre: codes.join(","),
+          fields: RESULT_FIELDS,
+          sort: "desc",
+          size: BULK_SIZE,
+        }),
+      ),
+    ),
+  );
+  for (const bulk of bulks) {
+    if (bulk.status === "rejected") {
+      if (!(bulk.reason instanceof HubeauHttpError)) {
+        throw new Error("HubEau unreachable", { cause: bulk.reason });
+      }
+      continue;
+    }
+    for (const row of bulk.value) {
       if (row.code_parametre && !latest.has(row.code_parametre)) {
         latest.set(row.code_parametre, row);
       }
     }
-  } catch {
-    // Bulk failed: the per-parameter fallback below covers every code.
-    bulkFailed = true;
   }
+  const bulkFailed = bulks.every((bulk) => bulk.status === "rejected");
 
   const missing = WATER_PARAMS.filter((p) => !latest.has(p.code));
   const fallbacks = await Promise.allSettled(

@@ -57,8 +57,12 @@ export interface ICPEResult {
 }
 
 export interface ICPEData {
+  // Première page seulement : l'API pagine par 10.
   data: ICPEResult[];
-  totalElements?: number;
+  // Total réel dans le rayon, toutes pages confondues.
+  results?: number;
+  // Comptages filtrés côté API, la première page ne suffisant pas à les déduire.
+  seveso?: { haut: number; bas: number };
 }
 
 // --- Cavites ---
@@ -72,6 +76,8 @@ export interface CaviteResult {
 }
 
 export interface CaviteData {
+  // Première page seulement : l'API pagine par 10.
   data: CaviteResult[];
-  totalElements?: number;
+  // Total réel dans le rayon, toutes pages confondues.
+  results?: number;
 }

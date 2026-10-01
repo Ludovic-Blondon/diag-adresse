@@ -76,6 +76,21 @@ export const fetchSeismicZone = cache(
   },
 );
 
+// Géorisques rejette en 500 une requête qui combine code_insee et latlon/rayon
+// (« deux types de recherche différentes ») : avec des coordonnées, on cherche
+// au rayon seul.
+function locationQuery(
+  codeInsee: string,
+  lon?: number,
+  lat?: number,
+  rayon?: number,
+): Record<string, string> {
+  if (lon != null && lat != null) {
+    return { latlon: `${lon},${lat}`, rayon: String(rayon ?? 5000) };
+  }
+  return { code_insee: codeInsee };
+}
+
 export const fetchICPE = cache(
   async (
     codeInsee: string,
@@ -83,12 +98,24 @@ export const fetchICPE = cache(
     lat?: number,
     rayon?: number,
   ): Promise<ICPEData> => {
-    const query: Record<string, string> = { code_insee: codeInsee };
-    if (lon != null && lat != null) {
-      query.latlon = `${lon},${lat}`;
-      query.rayon = String(rayon ?? 5000);
-    }
-    return geoFetch<ICPEData>("/installations_classees", query);
+    const query = locationQuery(codeInsee, lon, lat, rayon);
+    // `data` n'est que la première page (10 sites) : le statut Seveso se compte
+    // par des requêtes filtrées, sinon un site seuil haut hors de cette page
+    // passerait inaperçu.
+    const countSeveso = async (statutSeveso: string) => {
+      const res = await geoFetch<ICPEData>("/installations_classees", {
+        ...query,
+        statutSeveso,
+        page_size: "1",
+      });
+      return res.results ?? res.data.length;
+    };
+    const [page, haut, bas] = await Promise.all([
+      geoFetch<ICPEData>("/installations_classees", query),
+      countSeveso("SEUIL_HAUT"),
+      countSeveso("SEUIL_BAS"),
+    ]);
+    return { data: page.data, results: page.results, seveso: { haut, bas } };
   },
 );
 
@@ -99,11 +126,9 @@ export const fetchCavites = cache(
     lat?: number,
     rayon?: number,
   ): Promise<CaviteData> => {
-    const query: Record<string, string> = { code_insee: codeInsee };
-    if (lon != null && lat != null) {
-      query.latlon = `${lon},${lat}`;
-      query.rayon = String(rayon ?? 5000);
-    }
-    return geoFetch<CaviteData>("/cavites", query);
+    return geoFetch<CaviteData>(
+      "/cavites",
+      locationQuery(codeInsee, lon, lat, rayon),
+    );
   },
 );

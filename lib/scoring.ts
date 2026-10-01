@@ -176,7 +176,8 @@ export function scoreInondation(report: RiskReport): ScoredRisk | null {
 
 export function scoreICPE(data: ICPEData): ScoredRisk {
   const items = data.data ?? [];
-  if (items.length === 0) {
+  const count = data.results ?? items.length;
+  if (count === 0) {
     return {
       id: "icpe",
       label: "Sites industriels (ICPE)",
@@ -184,14 +185,13 @@ export function scoreICPE(data: ICPEData): ScoredRisk {
       description: "Aucun site industriel à proximité",
     };
   }
-  const sevesoHaut = items.some((i) =>
-    i.statutSeveso?.toLowerCase().includes("seuil haut"),
-  );
-  const sevesoBas = items.some((i) =>
-    i.statutSeveso?.toLowerCase().includes("seuil bas"),
-  );
+  const sevesoHaut = data.seveso
+    ? data.seveso.haut > 0
+    : items.some((i) => i.statutSeveso?.toLowerCase().includes("seuil haut"));
+  const sevesoBas = data.seveso
+    ? data.seveso.bas > 0
+    : items.some((i) => i.statutSeveso?.toLowerCase().includes("seuil bas"));
   const level: RiskLevel = sevesoHaut ? "fort" : sevesoBas ? "moyen" : "faible";
-  const count = items.length;
   return {
     id: "icpe",
     label: "Sites industriels (ICPE)",
@@ -208,7 +208,7 @@ export function scoreICPE(data: ICPEData): ScoredRisk {
 // --- Cavités ---
 
 export function scoreCavites(data: CaviteData): ScoredRisk {
-  const count = data.data?.length ?? 0;
+  const count = data.results ?? data.data?.length ?? 0;
   if (count === 0) {
     return {
       id: "cavites",

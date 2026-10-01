@@ -59,6 +59,18 @@ function isAbsence(param: WaterParam): boolean {
   return param.belowLimit && param.threshold === 0;
 }
 
+/**
+ * « <SEUIL » : non-détection sans limite chiffrée. Pas de nombre à afficher,
+ * mais pas « Non mesuré » non plus : l'analyse a bien eu lieu.
+ */
+function isUndetected(param: WaterParam): boolean {
+  return param.belowLimit && param.value == null;
+}
+
+function undetectedLabel(param: WaterParam): string {
+  return isAbsence(param) ? "Absence" : "Non détecté";
+}
+
 const DETAIL_CATEGORIES: WaterCategory[] = [
   "physicochimie",
   "mineraux",
@@ -75,7 +87,7 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
     (p) => p.category === "indicateurs_cles",
   );
 
-  if (data.params.every((p) => p.value == null)) {
+  if (data.params.every((p) => p.value == null && !p.belowLimit)) {
     return (
       <p className="text-muted-foreground text-sm">
         Aucune donnée disponible pour cette commune.
@@ -169,8 +181,8 @@ export function WaterQualityCard({ data }: WaterQualityCardProps) {
                         <tr key={p.code}>
                           <td className="py-2 pr-4">{p.label}</td>
                           <td className="py-2 text-right whitespace-nowrap tabular-nums">
-                            {isAbsence(p) ? (
-                              "Absence"
+                            {isAbsence(p) || isUndetected(p) ? (
+                              undetectedLabel(p)
                             ) : (
                               <>
                                 {p.belowLimit ? "< " : ""}
@@ -333,6 +345,15 @@ function ParamCard({ param }: { param: WaterParam }) {
                   Seuil : {formatNumberFr(param.threshold)} {param.unit}
                 </p>
               </>
+            )}
+          </>
+        ) : isUndetected(param) ? (
+          <>
+            <div className="text-2xl font-bold">{undetectedLabel(param)}</div>
+            {param.threshold != null && (
+              <p className="text-muted-foreground text-xs">
+                Seuil : {formatNumberFr(param.threshold)} {param.unit}
+              </p>
             )}
           </>
         ) : (

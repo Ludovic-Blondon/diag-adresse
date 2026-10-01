@@ -33,6 +33,17 @@ function splitCodes(codes: string[]): string[][] {
   );
 }
 
+// A result we can display: a number, or a "<x" / "<SEUIL" non-detection. Lab
+// codes such as "ILLISIBL" (unreadable sample) are skipped in favour of the
+// latest readable result, instead of showing the parameter as never measured.
+function isReadable(row: HubeauResultDis): boolean {
+  const raw = row.resultat_alphanumerique;
+  return parseWaterValue(raw) != null || isBelowLimit(raw);
+}
+
+// Rows per individual fallback: enough to step over an unreadable latest one.
+const FALLBACK_SIZE = "5";
+
 // Hub'Eau answered with an error status, as opposed to a timeout or a network
 // failure where it did not answer at all.
 class HubeauHttpError extends Error {}
@@ -93,7 +104,11 @@ async function fetchLatestByParam(
       continue;
     }
     for (const row of bulk.value) {
-      if (row.code_parametre && !latest.has(row.code_parametre)) {
+      if (
+        row.code_parametre &&
+        !latest.has(row.code_parametre) &&
+        isReadable(row)
+      ) {
         latest.set(row.code_parametre, row);
       }
     }
@@ -109,15 +124,15 @@ async function fetchLatestByParam(
           code_parametre: p.code,
           fields: RESULT_FIELDS,
           sort: "desc",
-          size: "1",
+          size: FALLBACK_SIZE,
         }),
       ),
     ),
   );
   fallbacks.forEach((result, i) => {
-    if (result.status === "fulfilled" && result.value[0]) {
-      latest.set(missing[i].code, result.value[0]);
-    }
+    const row =
+      result.status === "fulfilled" ? result.value.find(isReadable) : undefined;
+    if (row) latest.set(missing[i].code, row);
   });
 
   // Not a single request went through. A commune without analyses still gets
@@ -184,6 +199,11 @@ export const fetchWaterQuality = cache(
           belowLimit && entry.threshold === 0 ? true : value <= entry.threshold;
         // Une non-détection n'est pas une mesure « à la limite ».
         nearLimit = !belowLimit && isNearLimit(value, entry.threshold);
+      } else if (belowLimit && entry.threshold != null) {
+        // « <SEUIL » : rien de quantifié, sans la limite chiffrée. Les limites
+        // de quantification imposées aux laboratoires sont inférieures aux
+        // limites de qualité : la non-détection vaut conformité.
+        compliant = true;
       }
 
       return {

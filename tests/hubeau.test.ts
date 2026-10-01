@@ -256,6 +256,54 @@ describe("fetchWaterQuality", () => {
     expect(mock).toHaveBeenCalledTimes(BULK_REQUESTS);
   });
 
+  it("traite « <SEUIL » comme une non-détection conforme", async () => {
+    // Cas réel : pesticides totaux à Bordeaux, sans limite chiffrée.
+    stubHubeau([row("6276", "<SEUIL", "2026-06-22T09:30:00Z")]);
+
+    const byCode = new Map(
+      (await fetchWaterQuality("33063")).params.map((p) => [p.code, p]),
+    );
+
+    expect(byCode.get("6276")).toMatchObject({
+      value: null,
+      belowLimit: true,
+      compliant: true,
+      nearLimit: false,
+      date: "2026-06-22T09:30:00Z",
+    });
+  });
+
+  it("saute un résultat illisible pour le dernier lisible", async () => {
+    stubHubeau(
+      [
+        row("1449", "ILLISIBL", "2026-02-10T08:00:00Z"),
+        row("1449", "<1", "2026-01-12T08:00:00Z"),
+      ],
+      {
+        "1447": [
+          row("1447", "ILLISIBL", "2026-02-10T08:00:00Z"),
+          row("1447", "3", "2026-01-12T08:00:00Z"),
+        ],
+      },
+    );
+
+    const byCode = new Map(
+      (await fetchWaterQuality("33064")).params.map((p) => [p.code, p]),
+    );
+
+    // Dans la requête groupée…
+    expect(byCode.get("1449")).toMatchObject({
+      belowLimit: true,
+      compliant: true,
+      date: "2026-01-12T08:00:00Z",
+    });
+    // …comme dans le repli unitaire.
+    expect(byCode.get("1447")).toMatchObject({
+      value: 3,
+      date: "2026-01-12T08:00:00Z",
+    });
+  });
+
   it("renvoie tous les paramètres à null pour une commune sans analyses", async () => {
     // L'API répond, elle n'a simplement rien pour cette commune : c'est une
     // absence de données, pas une panne.

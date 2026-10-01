@@ -9,14 +9,35 @@ interface RiskMapProps {
   lon: number;
   lat: number;
   icpeList?: ICPEResult[];
+  // Libellé du point central : l'adresse, ou le centre d'une commune.
+  centerLabel?: string;
 }
 
-const SEVESO_COLORS: Record<string, string> = {
-  "seuil haut": "#dc2626",
-  "seuil bas": "#f97316",
-};
+const CENTER_COLOR = "#2563eb";
 
-export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
+const ICPE_STYLES = {
+  haut: { color: "#dc2626", label: "Seveso seuil haut" },
+  bas: { color: "#f97316", label: "Seveso seuil bas" },
+  autre: { color: "#6b7280", label: "Autre installation classée" },
+} as const;
+
+type IcpeCategory = keyof typeof ICPE_STYLES;
+
+// L'API renvoie « Seveso seuil haut », « Seveso seuil bas », « Non Seveso » ou
+// null : on cherche le seuil dans le libellé plutôt qu'une clé exacte.
+function icpeCategory(statut: string | null): IcpeCategory {
+  const s = statut?.toLowerCase() ?? "";
+  if (s.includes("seuil haut")) return "haut";
+  if (s.includes("seuil bas")) return "bas";
+  return "autre";
+}
+
+export function RiskMap({
+  lon,
+  lat,
+  icpeList = [],
+  centerLabel = "Adresse recherchée",
+}: RiskMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
 
@@ -70,17 +91,16 @@ export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
 
       map.addControl(new ml.NavigationControl(), "top-right");
 
-      // Address marker
-      new ml.Marker({ color: "#2563eb" })
+      // Point central : adresse, ou centre de la commune
+      new ml.Marker({ color: CENTER_COLOR })
         .setLngLat([lon, lat])
-        .setPopup(new ml.Popup().setText("Adresse recherchée"))
+        .setPopup(new ml.Popup().setText(centerLabel))
         .addTo(map);
 
       // ICPE markers
       for (const icpe of icpeList) {
         if (icpe.latitude == null || icpe.longitude == null) continue;
-        const seveso = icpe.statutSeveso?.toLowerCase() ?? "";
-        const color = SEVESO_COLORS[seveso] ?? (seveso ? "#f59e0b" : "#6b7280");
+        const { color } = ICPE_STYLES[icpeCategory(icpe.statutSeveso)];
 
         new ml.Marker({ color })
           .setLngLat([icpe.longitude, icpe.latitude])
@@ -127,13 +147,43 @@ export function RiskMap({ lon, lat, icpeList = [] }: RiskMapProps) {
         mapRef.current = null;
       }
     };
-  }, [lon, lat, icpeList]);
+  }, [lon, lat, icpeList, centerLabel]);
+
+  // Légende limitée aux catégories présentes sur la carte.
+  const categories = (Object.keys(ICPE_STYLES) as IcpeCategory[]).filter(
+    (cat) => icpeList.some((icpe) => icpeCategory(icpe.statutSeveso) === cat),
+  );
 
   return (
-    <div
-      ref={containerRef}
-      className="h-80 w-full overflow-hidden rounded-lg border"
-    />
+    <div className="space-y-2">
+      <div
+        ref={containerRef}
+        className="h-80 w-full overflow-hidden rounded-lg border"
+      />
+      <ul className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
+        <LegendItem color={CENTER_COLOR} label={centerLabel} />
+        {categories.map((cat) => (
+          <LegendItem
+            key={cat}
+            color={ICPE_STYLES[cat].color}
+            label={ICPE_STYLES[cat].label}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function LegendItem({ color, label }: { color: string; label: string }) {
+  return (
+    <li className="flex items-center gap-1.5">
+      <span
+        aria-hidden
+        className="inline-block h-2.5 w-2.5 rounded-full"
+        style={{ backgroundColor: color }}
+      />
+      {label}
+    </li>
   );
 }
 
@@ -148,10 +198,11 @@ function createIcpePopupContent(icpe: ICPEResult): HTMLElement {
   const contenu = document.createElement("div");
   const nom = document.createElement("strong");
   nom.textContent = icpe.raisonSociale ?? "ICPE";
+  // null n'est pas « Non Seveso » : l'API n'a simplement pas de statut.
   contenu.append(
     nom,
     document.createElement("br"),
-    icpe.statutSeveso ?? "Non Seveso",
+    icpe.statutSeveso ?? "Statut Seveso non renseigné",
   );
   return contenu;
 }

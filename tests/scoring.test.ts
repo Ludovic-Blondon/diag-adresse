@@ -189,6 +189,27 @@ describe("scoreInondation", () => {
   });
 });
 
+describe("radon et sismicité par arrondissement", () => {
+  it("affiche le maximum et précise l'écart entre arrondissements", () => {
+    // Lyon : classe 3 dans le 9e seulement, classe 1 ailleurs.
+    const scored = scoreRadon({
+      data: [
+        { code_insee: "69389", classe_potentiel: 3 },
+        { code_insee: "69381", classe_potentiel: 1 },
+      ],
+    });
+    expect(scored.level).toBe("fort");
+    expect(scored.details).toBe("Classe 1 à 3 selon l'arrondissement");
+  });
+
+  it("n'ajoute rien quand toute la ville a le même niveau", () => {
+    expect(
+      scoreSeismic({ data: [{ code_zone: 1 }, { code_zone: 1 }] }).details,
+    ).toBeUndefined();
+    expect(scoreSeismic({ data: [{ code_zone: 2 }] }).details).toBeUndefined();
+  });
+});
+
 describe("scoreICPE", () => {
   it("est négligeable sans site à proximité", () => {
     expect(scoreICPE({ data: [] }).level).toBe("negligeable");

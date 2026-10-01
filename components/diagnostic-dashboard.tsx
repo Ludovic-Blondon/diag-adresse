@@ -12,6 +12,7 @@ import {
   fetchSeismicZone,
   fetchICPE,
   fetchCavites,
+  ICPE_MARKER_LIMIT,
 } from "@/lib/apis/georisques";
 import { fetchWaterQuality } from "@/lib/apis/hubeau";
 import { fetchDPEStats } from "@/lib/apis/ademe-dpe";
@@ -134,7 +135,7 @@ async function RiskSection({
     icpeResult,
     cavitesResult,
   ] = await Promise.allSettled([
-    fetchRiskReport(lon, lat),
+    fetchRiskReport(lon, lat, citycode),
     fetchRadon(citycode),
     fetchRGA(lon, lat),
     fetchSeismicZone(citycode),
@@ -218,16 +219,34 @@ async function RiskSection({
   );
 }
 
+// La carte ne montre pas toutes les installations du rayon (Paris en compte
+// plus de mille) : la légende dit lesquelles.
+function icpeCaption(nearbyTotal: number | undefined): string {
+  const near =
+    nearbyTotal != null && nearbyTotal > ICPE_MARKER_LIMIT
+      ? `${ICPE_MARKER_LIMIT} des ${nearbyTotal} installations classées`
+      : "les installations classées";
+  return `Sur la carte : les sites Seveso dans un rayon de 5 km et ${near} à moins de 1 km.`;
+}
+
 async function MapSection({ lon, lat, citycode }: DashboardProps) {
-  let icpeList: Awaited<ReturnType<typeof fetchICPE>>["data"] = [];
+  let icpe: Awaited<ReturnType<typeof fetchICPE>> | null = null;
   try {
-    const result = await fetchICPE(citycode, lon, lat);
-    icpeList = result.data;
+    icpe = await fetchICPE(citycode, lon, lat);
   } catch {
     // Map still works without ICPE markers
   }
 
-  return <RiskMap lon={lon} lat={lat} icpeList={icpeList} />;
+  return (
+    <>
+      <RiskMap lon={lon} lat={lat} icpeList={icpe?.data ?? []} />
+      {icpe && (
+        <p className="text-muted-foreground mt-2 text-xs">
+          {icpeCaption(icpe.nearbyTotal)}
+        </p>
+      )}
+    </>
+  );
 }
 
 async function WaterSection({

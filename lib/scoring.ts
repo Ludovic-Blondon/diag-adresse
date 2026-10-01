@@ -22,6 +22,23 @@ export interface ScoredRisk {
 
 // --- Séisme ---
 
+/**
+ * Paris, Lyon, Marseille : une page commune reçoit une ligne par
+ * arrondissement, la plus élevée en tête. Le niveau affiché est ce maximum ;
+ * le détail dit qu'il ne vaut pas pour toute la ville.
+ */
+function arrondissementSpread(
+  values: number[],
+  noun: string,
+): string | undefined {
+  const known = values.filter((v) => !Number.isNaN(v));
+  const min = Math.min(...known);
+  const max = Math.max(...known);
+  return known.length > 1 && min !== max
+    ? `${noun} ${min} à ${max} selon l'arrondissement`
+    : undefined;
+}
+
 export function scoreSeismic(data: SeismicData): ScoredRisk {
   const map: Record<number, RiskLevel> = {
     1: "negligeable",
@@ -47,6 +64,10 @@ export function scoreSeismic(data: SeismicData): ScoredRisk {
     label: "Séisme",
     level,
     description: `Zone de sismicité ${zone}/5`,
+    details: arrondissementSpread(
+      (data.data ?? []).map((d) => Number(d.code_zone)),
+      "Zone",
+    ),
   };
 }
 
@@ -73,6 +94,10 @@ export function scoreRadon(data: RadonData): ScoredRisk {
     label: "Radon",
     level,
     description: `Potentiel radon classe ${classe}/3`,
+    details: arrondissementSpread(
+      (data.data ?? []).map((d) => Number(d.classe_potentiel)),
+      "Classe",
+    ),
   };
 }
 

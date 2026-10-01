@@ -45,6 +45,7 @@ export interface SeismicData {
 // --- ICPE ---
 
 export interface ICPEResult {
+  codeAIOT?: string;
   raisonSociale?: string;
   adresse1?: string;
   codePostal?: string;
@@ -57,12 +58,15 @@ export interface ICPEResult {
 }
 
 export interface ICPEData {
-  // Première page seulement : l'API pagine par 10.
+  // fetchICPE : les sites à placer sur la carte (tous les Seveso du rayon, plus
+  // les installations à moins de 1 km). Réponse brute : la page demandée.
   data: ICPEResult[];
   // Total réel dans le rayon, toutes pages confondues.
   results?: number;
   // Comptages filtrés côté API, la première page ne suffisant pas à les déduire.
   seveso?: { haut: number; bas: number };
+  // Installations à moins de 1 km, toutes pages confondues.
+  nearbyTotal?: number;
 }
 
 // --- Cavites ---

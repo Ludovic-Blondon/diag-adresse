@@ -1,7 +1,9 @@
 import { cache } from "react";
 import { GEORISQUES_BASE_URL } from "../constants";
 import { apiFetch } from "./api-fetch";
+import { arrondissementCodes, toHubeauCode } from "../paris";
 import type {
+  ICPEResult,
   RiskReport,
   RadonData,
   RGAData,
@@ -28,30 +30,98 @@ async function geoFetch<T>(
 
 // --- Public API ---
 
-export const fetchRiskReport = cache(
-  async (lon: number, lat: number): Promise<RiskReport> => {
-    const raw = await geoFetch<Record<string, unknown>>(
-      "/resultats_rapport_risque",
-      { latlon: `${lon},${lat}` },
-    );
+// Codes GASPAR dont le rapport donne le statut communal « Risque Existant »
+// (comparaison avec le rapport de Feyzin, Lille et Bordeaux, oct. 2026).
+const GASPAR_REPORT_RISKS: Record<string, string> = {
+  "11": "Inondation",
+  "116": "Remontée de nappe",
+  "12": "Mouvements de terrain",
+};
 
+/**
+ * Équivalent communal du rapport, tiré de GASPAR (/gaspar/risques). Le rapport
+ * coupe la plupart des connexions (oct. 2026) alors que GASPAR répond. Les
+ * cartes obtenues n'ont qu'un statut communal, signalé comme tel à l'écran.
+ * GASPAR indexe le code commune global, comme Hub'Eau, pas les arrondissements.
+ */
+async function fetchGasparReport(codeInsee: string): Promise<RiskReport> {
+  const raw = await geoFetch<{
+    data: { risques_detail?: { num_risque: string }[] }[];
+  }>("/gaspar/risques", { code_insee: toHubeauCode(codeInsee) });
+  const codes = new Set(
+    raw.data.flatMap((d) => d.risques_detail ?? []).map((r) => r.num_risque),
+  );
+  return {
+    risquesNaturels: Object.entries(GASPAR_REPORT_RISKS)
+      .filter(([code]) => codes.has(code))
+      .map(([, libelle]) => ({
+        present: true,
+        libelle,
+        libelleStatutCommune: "Risque Existant",
+      })),
+    risquesTechnologiques: [],
+  };
+}
+
+export const fetchRiskReport = cache(
+  async (lon: number, lat: number, codeInsee?: string): Promise<RiskReport> => {
     const toArray = (obj: unknown) => {
       if (Array.isArray(obj)) return obj;
       if (obj && typeof obj === "object") return Object.values(obj);
       return [];
     };
 
-    return {
-      risquesNaturels: toArray(raw.risquesNaturels),
-      risquesTechnologiques: toArray(raw.risquesTechnologiques),
-    };
+    try {
+      const raw = await geoFetch<Record<string, unknown>>(
+        "/resultats_rapport_risque",
+        { latlon: `${lon},${lat}` },
+      );
+      return {
+        risquesNaturels: toArray(raw.risquesNaturels),
+        risquesTechnologiques: toArray(raw.risquesTechnologiques),
+      };
+    } catch (err) {
+      if (!codeInsee) throw err;
+      return fetchGasparReport(codeInsee);
+    }
   },
 );
 
-export const fetchRadon = cache(
-  async (codeInsee: string): Promise<RadonData> => {
-    return geoFetch<RadonData>("/radon", { code_insee: codeInsee });
-  },
+// Paris, Lyon et Marseille : Géorisques ne classe le radon (et la sismicité de
+// Paris) que par arrondissement. Une page commune interroge la commune et ses
+// arrondissements, et garde la valeur la plus élevée en tête. L'API accepte au
+// plus 20 codes INSEE par requête (500 au-delà) : Paris, avec 21 codes, en fait
+// deux.
+const MAX_INSEE_CODES = 20;
+
+async function fetchWithArrondissements<T>(
+  path: string,
+  codeInsee: string,
+  value: (item: T) => number,
+): Promise<{ data: T[] }> {
+  const codes = [codeInsee, ...arrondissementCodes(codeInsee)];
+  const groups = Array.from(
+    { length: Math.ceil(codes.length / MAX_INSEE_CODES) },
+    (_, i) => codes.slice(i * MAX_INSEE_CODES, (i + 1) * MAX_INSEE_CODES),
+  );
+  const pages = await Promise.all(
+    groups.map((group) =>
+      geoFetch<{ data?: T[] }>(path, {
+        code_insee: group.join(","),
+        page_size: "50",
+      }),
+    ),
+  );
+  const data = pages.flatMap((page) => page.data ?? []);
+  return { data: data.sort((a, b) => value(b) - value(a)) };
+}
+
+export const fetchRadon = cache(async (codeInsee: string): Promise<RadonData> =>
+  fetchWithArrondissements(
+    "/radon",
+    codeInsee,
+    (r: RadonData["data"][number]) => Number(r.classe_potentiel),
+  ),
 );
 
 export const fetchRGA = cache(
@@ -73,9 +143,12 @@ export const fetchRGA = cache(
 );
 
 export const fetchSeismicZone = cache(
-  async (codeInsee: string): Promise<SeismicData> => {
-    return geoFetch<SeismicData>("/zonage_sismique", { code_insee: codeInsee });
-  },
+  async (codeInsee: string): Promise<SeismicData> =>
+    fetchWithArrondissements(
+      "/zonage_sismique",
+      codeInsee,
+      (z: SeismicData["data"][number]) => Number(z.code_zone),
+    ),
 );
 
 // Géorisques rejette en 500 une requête qui combine code_insee et latlon/rayon
@@ -93,6 +166,26 @@ function locationQuery(
   return { code_insee: codeInsee };
 }
 
+// Marqueurs de la carte (ouverte à ~1–2 km du point) : tous les sites Seveso du
+// rayon, plus les installations à moins de ICPE_MARKER_RADIUS. Le reste du
+// rayon est seulement compté : Paris compte 1 371 installations à 5 km.
+export const ICPE_MARKER_RADIUS = 1000;
+export const ICPE_MARKER_LIMIT = 100;
+
+// Les fiches ICPE embarquent inspections, documents et rubriques : la carte,
+// rendue côté client, n'a besoin que de quoi placer et nommer chaque site.
+function toMarker(site: ICPEResult): ICPEResult {
+  return {
+    codeAIOT: site.codeAIOT,
+    raisonSociale: site.raisonSociale,
+    statutSeveso: site.statutSeveso,
+    regime: site.regime,
+    etatActivite: site.etatActivite,
+    longitude: site.longitude,
+    latitude: site.latitude,
+  };
+}
+
 export const fetchICPE = cache(
   async (
     codeInsee: string,
@@ -101,23 +194,46 @@ export const fetchICPE = cache(
     rayon?: number,
   ): Promise<ICPEData> => {
     const query = locationQuery(codeInsee, lon, lat, rayon);
-    // `data` n'est que la première page (10 sites) : le statut Seveso se compte
-    // par des requêtes filtrées, sinon un site seuil haut hors de cette page
-    // passerait inaperçu.
-    const countSeveso = async (statutSeveso: string) => {
-      const res = await geoFetch<ICPEData>("/installations_classees", {
-        ...query,
-        statutSeveso,
-        page_size: "1",
+    // Sans coordonnées, les marqueurs sont la première page de la commune.
+    const nearQuery =
+      lon != null && lat != null
+        ? locationQuery(codeInsee, lon, lat, ICPE_MARKER_RADIUS)
+        : query;
+    const list = (params: Record<string, string>) =>
+      geoFetch<ICPEData>("/installations_classees", {
+        ...params,
+        page_size: String(ICPE_MARKER_LIMIT),
       });
-      return res.results ?? res.data.length;
-    };
-    const [page, haut, bas] = await Promise.all([
-      geoFetch<ICPEData>("/installations_classees", query),
-      countSeveso("SEUIL_HAUT"),
-      countSeveso("SEUIL_BAS"),
+    // L'API pagine : le total vient de `results`, et le statut Seveso de
+    // requêtes filtrées, sinon un site seuil haut hors de la page passerait
+    // inaperçu.
+    const [total, haut, bas, nearby] = await Promise.all([
+      geoFetch<ICPEData>("/installations_classees", {
+        ...query,
+        page_size: "1",
+      }),
+      list({ ...query, statutSeveso: "SEUIL_HAUT" }),
+      list({ ...query, statutSeveso: "SEUIL_BAS" }),
+      list(nearQuery),
     ]);
-    return { data: page.data, results: page.results, seveso: { haut, bas } };
+
+    const markers = new Map<string, ICPEResult>();
+    for (const site of [...haut.data, ...bas.data, ...nearby.data]) {
+      const key =
+        site.codeAIOT ??
+        `${site.raisonSociale}|${site.longitude}|${site.latitude}`;
+      if (!markers.has(key)) markers.set(key, toMarker(site));
+    }
+
+    return {
+      data: [...markers.values()],
+      results: total.results ?? total.data.length,
+      seveso: {
+        haut: haut.results ?? haut.data.length,
+        bas: bas.results ?? bas.data.length,
+      },
+      nearbyTotal: nearby.results ?? nearby.data.length,
+    };
   },
 );
 

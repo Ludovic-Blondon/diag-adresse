@@ -204,6 +204,17 @@ describe("fetchRiskReport", () => {
     expect(urls[1].searchParams.get("code_insee")).toBe("75056");
   });
 
+  it("ne tente pas GASPAR quand le rapport expire", async () => {
+    const mock = vi.fn(async () => {
+      throw new DOMException("The operation timed out.", "TimeoutError");
+    });
+    vi.stubGlobal("fetch", mock);
+    await expect(fetchRiskReport(2.7, 48.7, "75104")).rejects.toThrow(
+      "timed out",
+    );
+    expect(mock).toHaveBeenCalledTimes(1);
+  });
+
   it("rejette sans code commune pour se replier", async () => {
     vi.stubGlobal(
       "fetch",

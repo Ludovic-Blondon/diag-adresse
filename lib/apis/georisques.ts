@@ -81,7 +81,11 @@ export const fetchRiskReport = cache(
         risquesTechnologiques: toArray(raw.risquesTechnologiques),
       };
     } catch (err) {
-      if (!codeInsee) throw err;
+      // Un timeout veut dire que Géorisques ne répond plus du tout : GASPAR,
+      // sur le même serveur, ne ferait que doubler l'attente. Le repli vise
+      // les connexions coupées net du rapport.
+      const timedOut = err instanceof Error && err.name === "TimeoutError";
+      if (!codeInsee || timedOut) throw err;
       return fetchGasparReport(codeInsee);
     }
   },

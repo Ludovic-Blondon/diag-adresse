@@ -4,6 +4,7 @@ import { websiteJsonLd } from "@/lib/json-ld";
 import { POPULAR_CITIES } from "@/lib/navigation";
 import { TOP_COMMUNES } from "@/lib/communes";
 import { communePath } from "@/lib/commune-url";
+import { LinkPendingLabel } from "@/components/link-pending-indicator";
 
 export default function Home() {
   return (
@@ -34,9 +35,9 @@ export default function Home() {
               <Link
                 key={city.code}
                 href={communePath(city.code, city.name)}
-                className="hover:bg-accent rounded-full border px-4 py-1.5 text-sm transition-colors"
+                className="hover:bg-accent relative rounded-full border px-4 py-1.5 text-sm transition-colors"
               >
-                {city.name}
+                <LinkPendingLabel>{city.name}</LinkPendingLabel>
               </Link>
             ))}
           </div>
@@ -51,9 +52,9 @@ export default function Home() {
                 <Link
                   key={city.code}
                   href={communePath(city.code, city.name)}
-                  className="hover:bg-accent rounded-full border px-4 py-1.5 text-sm transition-colors"
+                  className="hover:bg-accent relative rounded-full border px-4 py-1.5 text-sm transition-colors"
                 >
-                  {city.name}
+                  <LinkPendingLabel>{city.name}</LinkPendingLabel>
                 </Link>
               ))}
             </div>

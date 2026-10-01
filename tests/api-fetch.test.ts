@@ -88,6 +88,39 @@ describe("apiFetch", () => {
     }
   });
 
+  it("sert la dernière réponse en cache quand le rafraîchissement échoue", async () => {
+    // Le cache de Next est simulé : seule la relecture avec revalidate: false
+    // (clé identique, jamais périmée) y trouve l'entrée.
+    const reads: unknown[] = [];
+    const mock = Object.assign(
+      vi.fn(async (input: string, init?: RequestInit) => {
+        if (input.startsWith("data:")) return new Response("");
+        reads.push(init?.next?.revalidate);
+        if (init?.next?.revalidate === false)
+          return Response.json({ v: "ancien" });
+        throw new TypeError("fetch failed");
+      }),
+      { __nextPatched: true },
+    );
+    vi.stubGlobal("fetch", mock);
+
+    const res = await apiFetch("https://api.test/d", {
+      next: { revalidate: 604800 },
+    });
+    await expect(res.json()).resolves.toEqual({ v: "ancien" });
+    expect(reads).toEqual([604800, false]);
+  });
+
+  it("propage l'échec quand aucune entrée en cache ne répond", async () => {
+    const { shortened } = stubFetch(async () => {
+      throw new TypeError("fetch failed");
+    });
+    await expect(
+      apiFetch("https://api.test/e", { next: { revalidate: 604800 } }),
+    ).rejects.toThrow("fetch failed");
+    expect(shortened).toHaveLength(1);
+  });
+
   it("ne fait rien de plus hors de Next", async () => {
     const { mock } = stubFetch(async () => {
       throw new TypeError("fetch failed");

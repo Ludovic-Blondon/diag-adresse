@@ -1,6 +1,7 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { HUBEAU_BASE_URL, WATER_PARAMS } from "../constants";
-import { apiFetch } from "./api-fetch";
+import { apiFetch, markPageDegraded } from "./api-fetch";
 import type { WaterQualityResult, WaterParam } from "../types/hubeau";
 
 interface HubeauResultDis {
@@ -145,9 +146,27 @@ async function fetchLatestByParam(
   ) {
     throw new Error("HubEau unreachable");
   }
+  // A failed fallback would leave its parameter blank, shown as « Non mesuré »
+  // and kept for a week by the cache below: fail the whole lookup instead.
+  if (fallbacks.some((result) => result.status === "rejected")) {
+    throw new Error("HubEau incomplete");
+  }
 
   return latest;
 }
+
+/**
+ * fetchLatestByParam, cached 7 days by Next. Hub'Eau answers 206 (paginated)
+ * and the Data Cache only stores 200s, so its requests are never cached by
+ * fetch itself. Caching the computed result also brings stale-if-error: when a
+ * refresh fails during an ISR render, unstable_cache serves the previous value.
+ * Entries are [code, row] pairs: a Map does not survive the JSON round trip.
+ */
+const cachedLatestByParam = unstable_cache(
+  async (codeCommune: string) => [...(await fetchLatestByParam(codeCommune))],
+  ["hubeau-latest-by-param"],
+  { revalidate: 604800 }, // 7 days, aligned with the /commune page revalidate
+);
 
 // A value sitting just under the limit is compliant, but showing it as a
 // plain "OK" hides that it has no margin left. Zero thresholds (bacteriology)
@@ -181,7 +200,14 @@ export function parseWaterValue(raw: string | undefined): number | null {
 
 export const fetchWaterQuality = cache(
   async (codeCommune: string): Promise<WaterQualityResult> => {
-    const latest = await fetchLatestByParam(codeCommune);
+    let latest: Map<string, HubeauResultDis>;
+    try {
+      latest = new Map(await cachedLatestByParam(codeCommune));
+    } catch (err) {
+      // Inside unstable_cache, apiFetch cannot shorten the page's ISR window.
+      await markPageDegraded();
+      throw err;
+    }
 
     const params: WaterParam[] = WATER_PARAMS.map((entry) => {
       const dis = latest.get(entry.code);

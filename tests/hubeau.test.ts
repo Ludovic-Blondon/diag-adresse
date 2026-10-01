@@ -1,4 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+// Hors de Next, unstable_cache n'a pas de cache incrémental : on exécute la
+// fonction directement.
+vi.mock("next/cache", () => ({
+  unstable_cache: <T>(fn: T) => fn,
+}));
 import {
   fetchWaterQuality,
   isBelowLimit,
@@ -302,6 +308,24 @@ describe("fetchWaterQuality", () => {
       value: 3,
       date: "2026-01-12T08:00:00Z",
     });
+  });
+
+  it("lève plutôt que de laisser un paramètre vide quand un repli échoue", async () => {
+    // Un paramètre manquant se lirait « Non mesuré », gardé une semaine en
+    // cache : mieux vaut la donnée précédente, ou « indisponible ».
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string | URL) => {
+        const codes = new URL(String(input)).searchParams.get("code_parametre");
+        if (codes?.includes(",")) return Response.json({ data: [] });
+        if (codes === "1340") throw new TypeError("fetch failed");
+        return Response.json({ data: [] });
+      }),
+    );
+
+    await expect(fetchWaterQuality("33065")).rejects.toThrow(
+      "HubEau incomplete",
+    );
   });
 
   it("renvoie tous les paramètres à null pour une commune sans analyses", async () => {

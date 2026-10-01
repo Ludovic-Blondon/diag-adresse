@@ -128,3 +128,30 @@
     @apply font-sans;
   }
 }
+
+/* Popups MapLibre : sa feuille de style les veut blanches, mais leur texte
+   hérite du thème, blanc sur blanc en mode sombre. Le préfixe .maplibregl-map
+   l'emporte sur la feuille de la lib, chargée après celle-ci. */
+.maplibregl-map .maplibregl-popup-content {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+.maplibregl-map .maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.maplibregl-map .maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-map .maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: var(--popover);
+}
+.maplibregl-map .maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.maplibregl-map .maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-map .maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: var(--popover);
+}
+.maplibregl-map .maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--popover);
+}
+.maplibregl-map .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--popover);
+}
+.maplibregl-map .maplibregl-popup-close-button {
+  color: inherit;
+}

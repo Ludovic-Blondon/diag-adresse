@@ -101,7 +101,12 @@ export function DiagnosticDashboard({
             <div className="bg-muted h-80 w-full animate-pulse rounded-lg border" />
           }
         >
-          <MapSection lon={lon} lat={lat} citycode={citycode} />
+          <MapSection
+            lon={lon}
+            lat={lat}
+            citycode={citycode}
+            communeName={communeName}
+          />
         </Suspense>
       </section>
 
@@ -229,7 +234,7 @@ function icpeCaption(nearbyTotal: number | undefined): string {
   return `Sur la carte : les sites Seveso dans un rayon de 5 km et ${near} à moins de 1 km.`;
 }
 
-async function MapSection({ lon, lat, citycode }: DashboardProps) {
+async function MapSection({ lon, lat, citycode, communeName }: DashboardProps) {
   let icpe: Awaited<ReturnType<typeof fetchICPE>> | null = null;
   try {
     icpe = await fetchICPE(citycode, lon, lat);
@@ -239,7 +244,12 @@ async function MapSection({ lon, lat, citycode }: DashboardProps) {
 
   return (
     <>
-      <RiskMap lon={lon} lat={lat} icpeList={icpe?.data ?? []} />
+      <RiskMap
+        lon={lon}
+        lat={lat}
+        icpeList={icpe?.data ?? []}
+        centerLabel={communeName ? "Centre de la commune" : undefined}
+      />
       {icpe && (
         <p className="text-muted-foreground mt-2 text-xs">
           {icpeCaption(icpe.nearbyTotal)}
